@@ -1,0 +1,198 @@
+{
+  "columns": [
+    {
+      "name": "Shoulders/Arms",
+      "muscle_group": "arms",
+      "exercises": [
+        {
+          "name": "Shoulder Press (cable)",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Tricep Machine Extension",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Dumbbell Preacher Curl",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Preacher Curl Machine",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Overhead Tricep Extension (machine)",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Bicep Curl",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Forearm Curl",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Straight Bar Tricep Extension (machine)",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Rope Tricep Extension",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Lateral Raise (machine)",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Reverse Bar Curl",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Rope Hammer Curl",
+          "last_weight_lb": null,
+          "last_reps": null
+        },
+        {
+          "name": "Seated Lateral Raise (padded machine)",
+          "last_weight_lb": null,
+          "last_reps": null
+        }
+      ]
+    },
+    {
+      "name": "Legs/Core",
+      "muscle_group": "legs",
+      "exercises": [
+        {
+          "name": "Squat (curved rack)"
+        },
+        {
+          "name": "Calf Raise (seated)"
+        },
+        {
+          "name": "Quad Extension"
+        },
+        {
+          "name": "Hamstring Curl (seated)"
+        },
+        {
+          "name": "Ab Crunch Machine"
+        },
+        {
+          "name": "Low Back Extension"
+        },
+        {
+          "name": "Hip Abduction (Smith)"
+        },
+        {
+          "name": "Back Squat"
+        },
+        {
+          "name": "Leg Press"
+        },
+        {
+          "name": "Hip Abduction"
+        }
+      ]
+    },
+    {
+      "name": "Chest/Back",
+      "muscle_group": "chest",
+      "exercises": [
+        {
+          "name": "Lat Pulldown"
+        },
+        {
+          "name": "Seated Row Machine"
+        },
+        {
+          "name": "Trap Row"
+        },
+        {
+          "name": "Lower Lat Row"
+        },
+        {
+          "name": "Low Back Extension"
+        },
+        {
+          "name": "Cable Chest Fly"
+        }
+      ]
+    },
+    {
+      "name": "Old Gym",
+      "muscle_group": "full-body",
+      "exercises": [
+        {
+          "name": "Low Row"
+        },
+        {
+          "name": "Incline Press"
+        },
+        {
+          "name": "Incline Machine Bench"
+        },
+        {
+          "name": "Low Back Raise"
+        },
+        {
+          "name": "Abs"
+        },
+        {
+          "name": "Shoulder Press (Old Gym)"
+        },
+        {
+          "name": "Squat Press / Hack Squat"
+        },
+        {
+          "name": "Knee Extension"
+        }
+      ]
+    }
+  ],
+  "goals": [
+    {
+      "name": "Bench 235 lb",
+      "target_value": 235,
+      "target_unit": "lb"
+    },
+    {
+      "name": "Deadlift PR",
+      "target_unit": "lb"
+    },
+    {
+      "name": "Dunk basketball",
+      "target_unit": "flexibility"
+    },
+    {
+      "name": "25 pull-ups in a row",
+      "target_value": 25,
+      "target_unit": "reps"
+    },
+    {
+      "name": "One-arm muscle-up",
+      "target_unit": "reps"
+    },
+    {
+      "name": "Become fully flexible",
+      "target_unit": "flexibility"
+    },
+    {
+      "name": "60 push-ups in a row",
+      "target_value": 60,
+      "target_unit": "reps"
+    }
+  ]
+}
