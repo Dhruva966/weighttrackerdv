@@ -14,11 +14,14 @@ export function MealConfirm() {
   );
 
   return (
-    <div className="grid gap-6">
+    <div className="grid animate-rise gap-7">
       <div>
         <p className="text-sm text-fgMuted">{draft.source}</p>
-        <h1 className="page-title mt-1">Does this look right?</h1>
+        <h1 className="page-title mt-1">Does this feel right?</h1>
         <p className="mt-3 text-editorial text-fgMuted">“{draft.raw}”</p>
+        <p className="mt-2 text-sm leading-relaxed text-fgMuted">
+          Tweak anything you’d like — then save when you’re ready.
+        </p>
       </div>
 
       <section className="grid gap-2">
@@ -46,8 +49,8 @@ export function MealConfirm() {
         ))}
       </section>
 
-      <section className="rounded-lg border border-border bg-surface px-4 py-4">
-        <p className="text-sm text-fgMuted">Meal total</p>
+      <section className="rounded-2xl border border-border/80 bg-mist/40 px-5 py-5">
+        <p className="text-sm text-fgMuted">About this meal</p>
         <p className="tabular mt-1 text-3xl font-medium text-fg">{totals.calories} kcal</p>
         <p className="tabular mt-2 text-sm text-fgMuted">
           Protein {totals.proteinG}g · Carbs {totals.carbsG}g · Fat {totals.fatG}g
@@ -56,10 +59,10 @@ export function MealConfirm() {
 
       <div className="grid gap-2">
         <Link className="button-primary" to="/">
-          Save meal
+          Save to today
         </Link>
         <Link className="button-secondary" to="/log?type=meal">
-          Back
+          Go back
         </Link>
       </div>
     </div>

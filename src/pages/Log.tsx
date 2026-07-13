@@ -7,31 +7,35 @@ export function Log() {
   const capture = params.get('capture') === 'photo';
 
   return (
-    <div className="grid gap-6">
+    <div className="grid animate-rise gap-7">
       <div>
-        <h1 className="page-title">Log</h1>
-        <p className="mt-2 text-sm text-fgMuted">
-          Meals first. Describe thali, dabba, or chai in plain words — or snap the plate.
+        <h1 className="page-title">Log something kind</h1>
+        <p className="page-lead mt-3">
+          Start with food. Describe a thali, dabba, or cutting chai — or take a soft photo of the plate.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         <Link
-          className={`flex min-h-12 items-center justify-center gap-2 rounded-md border text-sm font-medium ${
-            type === 'meal' ? 'border-fg bg-fg text-bg' : 'border-border bg-bg text-fgMuted'
+          className={`flex min-h-12 items-center justify-center gap-2 rounded-2xl border text-sm font-medium transition ${
+            type === 'meal'
+              ? 'border-accent/25 bg-accentSoft text-fg'
+              : 'border-border/80 bg-surface/80 text-fgMuted hover:bg-mist/70'
           }`}
           to="/log?type=meal"
         >
-          <Utensils size={16} />
+          <Utensils size={16} strokeWidth={1.5} />
           Meal
         </Link>
         <Link
-          className={`flex min-h-12 items-center justify-center gap-2 rounded-md border text-sm font-medium ${
-            type === 'workout' ? 'border-fg bg-fg text-bg' : 'border-border bg-bg text-fgMuted'
+          className={`flex min-h-12 items-center justify-center gap-2 rounded-2xl border text-sm font-medium transition ${
+            type === 'workout'
+              ? 'border-accent/25 bg-accentSoft text-fg'
+              : 'border-border/80 bg-surface/80 text-fgMuted hover:bg-mist/70'
           }`}
           to="/log?type=workout"
         >
-          <Dumbbell size={16} />
+          <Dumbbell size={16} strokeWidth={1.5} />
           Workout
         </Link>
       </div>
@@ -56,13 +60,13 @@ export function Log() {
 
           {capture ? (
             <div className="app-card grid place-items-center gap-3 py-16 text-center">
-              <Camera size={28} className="text-fgMuted" />
-              <p className="font-medium text-fg">Photo of your plate</p>
-              <p className="max-w-xs text-sm text-fgMuted">
-                UI placeholder — camera wiring comes later. Tap continue to see the confirm screen.
+              <Camera size={28} className="text-fgMuted" strokeWidth={1.5} />
+              <p className="font-medium text-fg">A soft photo of your plate</p>
+              <p className="max-w-xs text-sm leading-relaxed text-fgMuted">
+                Camera comes later. For now, continue to see how confirm looks.
               </p>
               <Link className="button-primary mt-2" to="/log/meal/confirm">
-                Continue with sample plate
+                Continue with a sample plate
               </Link>
             </div>
           ) : (
@@ -75,11 +79,11 @@ export function Log() {
                   placeholder="e.g. 2 idli, sambar, coconut chutney"
                 />
               </label>
-              <p className="text-xs text-fgMuted">
-                Tip: katori, roti count, dabba, plate — all fine. We’ll estimate macros on confirm.
+              <p className="text-xs leading-relaxed text-fgMuted">
+                Katori, roti count, dabba, plate — all welcome. We’ll estimate macros when you review.
               </p>
               <Link className="button-primary" to="/log/meal/confirm">
-                Review macros
+                Review gently
               </Link>
             </div>
           )}
@@ -87,12 +91,12 @@ export function Log() {
       ) : (
         <section className="app-card grid gap-4">
           <div>
-            <h2 className="text-lg font-medium text-fg">Workout</h2>
-            <p className="mt-1 text-sm text-fgMuted">
-              Secondary for this redesign. Pick exercises, then log sets in plain English.
+            <h2 className="text-lg font-medium text-fg">Workout, when you’re ready</h2>
+            <p className="mt-1 text-sm leading-relaxed text-fgMuted">
+              Optional. Pick exercises, then jot sets in plain English.
             </p>
           </div>
-          <div className="rounded-lg border border-border bg-bg px-4 py-3 text-sm text-fgMuted">
+          <div className="rounded-2xl border border-border/70 bg-mist/50 px-4 py-3 text-sm leading-relaxed text-fgMuted">
             Example: “preacher curl 115 for 8 7 7, last rep helped”
           </div>
           <Link className="button-secondary" to="/session/new">

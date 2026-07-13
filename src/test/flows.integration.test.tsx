@@ -56,19 +56,23 @@ describe('app shell', () => {
 
   it('renders mom-first Today with weight and meals', () => {
     renderApp('/');
-    expect(screen.getByRole('heading', { name: /keep it simple today/i })).toBeInTheDocument();
-    expect(screen.getByText('Weight')).toBeInTheDocument();
-    expect(screen.getByText(/today’s food/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/ask anything/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /a calm place for today/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /morning weight/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /what’s on your plate/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/ask gently/i)).toBeInTheDocument();
   });
 
   it('navigates Log and History tabs', async () => {
     renderApp('/');
     clickBottomNav(/^log$/i);
-    await waitFor(() => expect(screen.getByRole('heading', { name: /^log$/i })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /log something kind/i })).toBeInTheDocument(),
+    );
 
     clickBottomNav(/^history$/i);
-    await waitFor(() => expect(screen.getByRole('heading', { name: /^history$/i })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /your days, gathered/i })).toBeInTheDocument(),
+    );
   });
 });
 

@@ -20,20 +20,20 @@ import { WorkoutHistory } from './pages/WorkoutHistory';
 
 function Header() {
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-bg/95 px-5 py-4 backdrop-blur-sm">
+    <header className="sticky top-0 z-30 border-b border-border/70 bg-bg/85 px-5 py-4 backdrop-blur-md">
       <div className="mx-auto flex max-w-xl items-center justify-between">
-        <Link to="/" className="page-title text-[1.5rem]">
+        <Link to="/" className="page-title text-[1.55rem] tracking-[-0.02em]">
           Lift
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <Link className="icon-button" to="/exercises" aria-label="Exercises">
-            <BookOpen size={18} />
+            <BookOpen size={18} strokeWidth={1.5} />
           </Link>
           <Link className="icon-button" to="/goals" aria-label="Goals">
-            <Target size={18} />
+            <Target size={18} strokeWidth={1.5} />
           </Link>
           <Link className="icon-button" to="/settings" aria-label="Settings">
-            <Settings size={18} />
+            <Settings size={18} strokeWidth={1.5} />
           </Link>
         </div>
       </div>
@@ -68,10 +68,10 @@ export function App() {
   useSupabaseBootstrap();
 
   return (
-    <div className="min-h-screen bg-bg font-serif text-fg antialiased">
+    <div className="min-h-screen font-serif text-fg antialiased">
       <Header />
       <AskBar />
-      <main className="mx-auto min-h-[calc(100vh-180px)] max-w-xl overflow-x-hidden px-5 pb-28 pt-6">
+      <main className="mx-auto min-h-[calc(100vh-180px)] max-w-xl overflow-x-hidden px-5 pb-28 pt-7">
         <AppRoutes />
       </main>
       <Nav

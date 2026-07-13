@@ -11,11 +11,11 @@ export function WorkoutHistory() {
   const completeSessions = sessions.filter((session) => session.endedAt);
 
   return (
-    <div className="grid gap-4">
+    <div className="grid animate-rise gap-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="page-title">Workout recaps</h1>
-          <p className="mt-1 text-sm text-fgMuted">Completed lifting sessions only.</p>
+          <h1 className="page-title">Sessions you’ve finished</h1>
+          <p className="page-lead mt-3">Only when you want them — no pressure to fill this list.</p>
         </div>
         {completeSessions.length > 0 || sets.length > 0 ? (
           <button
@@ -39,16 +39,21 @@ export function WorkoutHistory() {
             return (
               <Link
                 key={session.id}
-                className="grid gap-3 rounded-lg border border-border bg-surface p-4 hover:border-fg/30"
+                className="grid gap-3 rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-card transition hover:border-fg/20"
                 to={`/history/${session.id}`}
               >
-                <p className="font-bold text-fg">{formatDateTime(session.startedAt)}</p>
+                <p className="font-medium text-fg">{formatDateTime(session.startedAt)}</p>
                 <SessionSummary sets={sessionSets} />
               </Link>
             );
           })
         ) : (
-          <p className="app-card text-fgMuted">No completed workouts yet.</p>
+          <div className="app-card text-center">
+            <p className="font-medium text-fg">A quiet start</p>
+            <p className="mt-2 text-sm leading-relaxed text-fgMuted">
+              Finished workouts will land here — whenever you’re ready.
+            </p>
+          </div>
         )}
       </div>
 

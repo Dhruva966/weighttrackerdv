@@ -2,17 +2,17 @@ import { Link } from 'react-router-dom';
 import { uiMock } from '../data/uiMock';
 
 const kindStyles = {
-  weight: 'bg-accentSoft text-fg',
-  meal: 'bg-surface text-fg',
-  workout: 'bg-bg text-fgMuted',
+  weight: 'border-accent/15 bg-accentSoft text-fg',
+  meal: 'border-border/70 bg-surface/90 text-fg',
+  workout: 'border-border/60 bg-mist/50 text-fgMuted',
 } as const;
 
 export function History() {
   return (
-    <div className="grid gap-6">
+    <div className="grid animate-rise gap-7">
       <div>
-        <h1 className="page-title">History</h1>
-        <p className="mt-2 text-sm text-fgMuted">Weight, meals, and workouts in one place.</p>
+        <h1 className="page-title">Your days, gathered</h1>
+        <p className="page-lead mt-3">Weight, meals, and the rare workout — one calm timeline.</p>
       </div>
 
       <section className="app-card">
@@ -31,7 +31,7 @@ export function History() {
             return (
               <div
                 key={index}
-                className={`relative grid aspect-square place-items-center rounded-md text-sm ${
+                className={`relative grid aspect-square place-items-center rounded-xl text-sm ${
                   !inMonth
                     ? 'text-transparent'
                     : marked
@@ -40,42 +40,46 @@ export function History() {
                 }`}
               >
                 {inMonth ? day : '·'}
-                {overload ? <span className="absolute right-1 top-0.5 text-[10px] font-bold text-accent">+</span> : null}
+                {overload ? (
+                  <span className="absolute right-1 top-0.5 text-[10px] font-medium text-accent/80">+</span>
+                ) : null}
               </div>
             );
           })}
         </div>
         <div className="mt-3 flex flex-wrap gap-4 text-xs text-fgMuted">
-          <span>Filled = logged day</span>
+          <span>Soft fill = a day you logged</span>
           <span>
-            <span className="font-bold text-accent">+</span> = gym PR day
+            <span className="font-medium text-accent">+</span> = a gym PR day
           </span>
         </div>
       </section>
 
-      <section className="grid gap-4">
+      <section className="grid gap-5">
         {uiMock.historyDays.map((group) => (
           <div key={group.dateLabel} className="grid gap-2">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-fgMuted">{group.dateLabel}</h2>
+            <h2 className="text-xs font-medium uppercase tracking-[0.12em] text-fgMuted">
+              {group.dateLabel}
+            </h2>
             {group.items.map((item) => (
               <article
                 key={`${group.dateLabel}-${item.label}-${item.detail}`}
-                className={`rounded-lg border border-border px-4 py-3 ${kindStyles[item.kind]}`}
+                className={`rounded-2xl border px-4 py-3.5 ${kindStyles[item.kind]}`}
               >
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="font-medium capitalize">{item.kind}</p>
                   <p className="text-sm">{item.label}</p>
                 </div>
-                <p className="mt-1 text-sm opacity-80">{item.detail}</p>
+                <p className="mt-1 text-sm leading-relaxed opacity-80">{item.detail}</p>
               </article>
             ))}
           </div>
         ))}
       </section>
 
-      <p className="text-center text-sm text-fgMuted">
-        Older gym sessions stay available in{' '}
-        <Link className="underline decoration-border underline-offset-2 hover:text-fg" to="/history/sessions">
+      <p className="text-center text-sm leading-relaxed text-fgMuted">
+        Gym sessions live quietly in{' '}
+        <Link className="text-link" to="/history/sessions">
           workout recaps
         </Link>
         .

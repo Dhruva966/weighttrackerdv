@@ -12,18 +12,21 @@ export function AskBar() {
       return;
     }
 
-    // UI-only: show a sample answer card. Wiring comes later.
     setAnswer(uiMock.askDemo.answer);
   }
 
   return (
-    <section className="sticky top-[4.5rem] z-20 border-b border-border bg-bg/95 px-5 py-3 backdrop-blur-sm">
+    <section className="sticky top-[4.5rem] z-20 border-b border-border/70 bg-bg/90 px-5 py-3.5 backdrop-blur-md">
       <form className="mx-auto max-w-xl" onSubmit={handleSubmit}>
         <label className="relative block">
           <span className="sr-only">Ask anything</span>
-          <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fgMuted" size={18} />
+          <Search
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fgMuted"
+            size={18}
+            strokeWidth={1.5}
+          />
           <input
-            className="field pl-11 text-base"
+            className="field border-border/60 bg-surface/90 pl-11 text-base shadow-card"
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);
@@ -31,18 +34,18 @@ export function AskBar() {
                 setAnswer(null);
               }
             }}
-            placeholder="Ask anything — weight, meals, lifts…"
+            placeholder="Ask gently — weight, meals, lifts…"
           />
         </label>
       </form>
 
       {!answer ? (
-        <div className="mx-auto mt-2 flex max-w-xl gap-2 overflow-x-auto pb-1">
+        <div className="mx-auto mt-2.5 flex max-w-xl gap-2 overflow-x-auto pb-1">
           {uiMock.askExamples.map((example) => (
             <button
               key={example}
               type="button"
-              className="shrink-0 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-fgMuted hover:border-fg/20 hover:text-fg"
+              className="quiet-chip"
               onClick={() => {
                 setQuery(example);
                 setAnswer(uiMock.askDemo.answer);
@@ -53,9 +56,9 @@ export function AskBar() {
           ))}
         </div>
       ) : (
-        <div className="mx-auto mt-3 max-w-xl rounded-lg border border-border bg-surface px-4 py-3">
-          <p className="text-xs uppercase tracking-wide text-fgMuted">Answer</p>
-          <p className="mt-1 text-editorial text-fg">{answer}</p>
+        <div className="mx-auto mt-3 max-w-xl rounded-2xl border border-border/70 bg-surface/95 px-4 py-3.5 shadow-card">
+          <p className="text-xs tracking-wide text-fgMuted">A quiet answer</p>
+          <p className="mt-1.5 text-editorial text-fg">{answer}</p>
           <button className="text-link mt-2" type="button" onClick={() => setAnswer(null)}>
             Clear
           </button>

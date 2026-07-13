@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: light;
-  background: #ffffff;
+  background: #faf8f5;
   font-family: 'EB Garamond', Georgia, Cambria, 'Times New Roman', serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -17,7 +17,7 @@
 }
 
 html {
-  background: #ffffff;
+  background: #faf8f5;
   overflow-x: hidden;
   scroll-behavior: smooth;
 }
@@ -27,8 +27,11 @@ body {
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
-  background: #ffffff;
-  color: #4a3b2a;
+  color: #3f3428;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, rgba(92, 74, 56, 0.07), transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 20%, rgba(237, 232, 225, 0.9), transparent 45%),
+    #faf8f5;
 }
 
 button,
@@ -43,24 +46,28 @@ button {
 }
 
 @layer components {
+  .app-shell {
+    @apply relative min-h-screen;
+  }
+
   .app-card {
-    @apply rounded-lg border border-border bg-surface p-4 shadow-card;
+    @apply rounded-2xl border border-border/80 bg-surface/90 p-5 shadow-card backdrop-blur-[2px];
   }
 
   .button-primary {
-    @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-md border border-fg bg-fg px-5 py-3 font-medium text-bg transition hover:bg-fg/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-accent/90 bg-accent px-5 py-3 font-medium text-bg shadow-card transition hover:bg-accent/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .button-secondary {
-    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-border bg-bg px-4 py-2 font-medium text-fg transition hover:border-fg/30 hover:bg-surfaceAlt focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg;
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-border/80 bg-surface/90 px-4 py-2 font-medium text-fg transition hover:border-fg/15 hover:bg-mist/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg;
   }
 
   .icon-button {
-    @apply grid h-11 w-11 place-items-center rounded-md border border-border bg-bg text-fgMuted transition hover:border-fg/20 hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg;
+    @apply grid h-11 w-11 place-items-center rounded-full border border-border/80 bg-surface/80 text-fgMuted transition hover:border-fg/15 hover:bg-mist hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg;
   }
 
   .field {
-    @apply min-h-14 w-full rounded-md border border-border bg-bg px-4 text-fg outline-none transition placeholder:text-fgMuted focus:border-fg/40;
+    @apply min-h-14 w-full rounded-2xl border border-border/80 bg-surface px-4 text-fg outline-none transition placeholder:text-fgMuted/80 focus:border-accent/35 focus:bg-surface;
   }
 
   .label {
@@ -73,18 +80,22 @@ button {
   }
 
   .page-title {
-    @apply text-display font-medium leading-tight text-fg;
+    @apply text-display font-medium leading-tight tracking-[-0.02em] text-fg;
   }
 
   .page-lead {
-    @apply text-editorial text-fg;
+    @apply text-editorial text-fgMuted;
   }
 
   .section-rule {
-    @apply my-8 w-6 border-t border-divider;
+    @apply my-2 w-8 border-t border-divider/80;
   }
 
   .text-link {
-    @apply text-xs text-fgMuted transition-colors hover:text-fg;
+    @apply text-sm text-fgMuted underline decoration-border underline-offset-4 transition-colors hover:text-fg hover:decoration-fg/30;
+  }
+
+  .quiet-chip {
+    @apply shrink-0 rounded-full border border-border/70 bg-surface/70 px-3 py-1.5 text-xs text-fgMuted transition hover:border-fg/15 hover:bg-mist hover:text-fg;
   }
 }

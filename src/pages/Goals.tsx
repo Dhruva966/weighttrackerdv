@@ -6,23 +6,33 @@ export function Goals() {
   const toggleGoal = useWorkoutStore((state) => state.toggleGoal);
 
   return (
-    <div className="grid gap-4">
+    <div className="grid animate-rise gap-6">
       <div>
-        <h1 className="page-title">Goals</h1>
-        <p className="mt-1 text-sm text-fgMuted">Small daily intentions — weigh-in, home cooking, walks, lifts.</p>
+        <h1 className="page-title">Little intentions</h1>
+        <p className="page-lead mt-3">
+          Small daily nudges — weigh-in, home cooking, walks, lifts. Check them off gently.
+        </p>
       </div>
       <div className="grid gap-2">
         {goals.map((goal) => (
           <button
             key={goal.id}
-            className="flex min-h-16 items-center gap-3 rounded-lg border border-border bg-surface px-4 text-left hover:border-fg/30"
+            className={`flex min-h-14 items-center gap-3 rounded-2xl border px-4 text-left transition ${
+              goal.achieved
+                ? 'border-accent/15 bg-accentSoft'
+                : 'border-border/70 bg-surface/80 hover:border-fg/15 hover:bg-mist/60'
+            }`}
             type="button"
             onClick={() => toggleGoal(goal.id)}
           >
-            <span className={`grid h-8 w-8 place-items-center rounded-lg border ${goal.achieved ? 'border-accent bg-accent text-bg' : 'border-border text-transparent'}`}>
-              <Check size={18} />
+            <span
+              className={`grid h-7 w-7 place-items-center rounded-full border text-[10px] ${
+                goal.achieved ? 'border-accent bg-accent text-bg' : 'border-border text-transparent'
+              }`}
+            >
+              <Check size={14} strokeWidth={2} />
             </span>
-            <span className={goal.achieved ? 'font-medium text-fgMuted line-through' : 'font-medium text-fg'}>{goal.name}</span>
+            <span className={goal.achieved ? 'text-fg' : 'text-fgMuted'}>{goal.name}</span>
           </button>
         ))}
       </div>
