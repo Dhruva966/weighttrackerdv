@@ -2,12 +2,16 @@ import { db, type PendingWrite } from './db';
 import { getSupabase } from './supabase';
 
 export async function enqueueWrite(write: Omit<PendingWrite, 'ts'>): Promise<void> {
+  if (typeof indexedDB === 'undefined') {
+    return;
+  }
+
   await db.pending.add({ ...write, ts: Date.now() });
 }
 
 export async function drainQueue(): Promise<number> {
   const supabase = getSupabase();
-  if (!supabase || !navigator.onLine) {
+  if (!supabase || !navigator.onLine || typeof indexedDB === 'undefined') {
     return 0;
   }
 

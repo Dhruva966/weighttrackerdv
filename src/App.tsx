@@ -5,6 +5,7 @@ import { Nav } from './components/Nav';
 import { PRConfetti } from './components/PRConfetti';
 import { SessionLauncher } from './components/SessionLauncher';
 import { Toaster } from './components/Toaster';
+import { useSupabaseBootstrap } from './hooks/useSupabaseBootstrap';
 import { ExerciseCreate } from './pages/ExerciseCreate';
 import { ExerciseDetail } from './pages/ExerciseDetail';
 import { ExerciseLibrary } from './pages/ExerciseLibrary';
@@ -78,6 +79,8 @@ function AnimatedRoutes() {
 }
 
 export function App() {
+  useSupabaseBootstrap();
+
   return (
     <div className="min-h-screen bg-bg font-serif text-fg antialiased">
       <Header />

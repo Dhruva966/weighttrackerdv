@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "seed": "tsx scripts/seed-user-board.ts",
-    "backfill:images": "tsx scripts/backfill-images.ts"
+    "backfill:images": "tsx scripts/backfill-images.ts",
+    "check:supabase": "tsx scripts/check-supabase.ts"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

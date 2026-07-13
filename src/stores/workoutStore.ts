@@ -4,6 +4,7 @@ import { starterExercises, starterGoals, starterSessions, starterSets } from '..
 import { slugify } from '../lib/fmt';
 import { parseLiftBrainDump } from '../lib/liftImport';
 import { isPersonalRecord } from '../lib/pr';
+import { syncExercise, syncGoal, syncSession, syncSet } from '../lib/supabase-sync';
 import { USER_ID } from '../lib/user';
 import type { EquipmentKind, Exercise, Goal, LoggedSet, MuscleGroup, WorkoutSession } from '../types';
 import { usePrStore } from './prStore';
@@ -29,8 +30,8 @@ type WorkoutState = {
   toggleGoal: (goalId: string) => void;
 };
 
-function id(prefix: string): string {
-  return `${prefix}-${crypto.randomUUID()}`;
+function newId(): string {
+  return crypto.randomUUID();
 }
 
 function mergeById<T extends { id: string }>(required: T[], persisted: T[] | undefined): T[] {
@@ -87,19 +88,25 @@ export const useWorkoutStore = create<WorkoutState>()(
       sets: starterSets,
       createSession: () => {
         const session: WorkoutSession = {
-          id: id('session'),
+          id: newId(),
           userId: USER_ID,
           startedAt: new Date().toISOString(),
         };
         set((state) => ({ sessions: [session, ...state.sessions] }));
+        void syncSession(session);
         return session;
       },
       endSession: (sessionId) => {
+        const endedAt = new Date().toISOString();
         set((state) => ({
           sessions: state.sessions.map((session) =>
-            session.id === sessionId ? { ...session, endedAt: new Date().toISOString() } : session,
+            session.id === sessionId ? { ...session, endedAt } : session,
           ),
         }));
+        const session = get().sessions.find((item) => item.id === sessionId);
+        if (session) {
+          void syncSession({ ...session, endedAt });
+        }
       },
       addSet: (input) => {
         const state = get();
@@ -115,12 +122,13 @@ export const useWorkoutStore = create<WorkoutState>()(
           }));
         const loggedSet: LoggedSet = {
           ...input,
-          id: id('set'),
+          id: newId(),
           setNumber,
           isPr: isPersonalRecord(input, history),
           createdAt: new Date().toISOString(),
         };
         set({ sets: [...state.sets, loggedSet] });
+        void syncSet(loggedSet);
 
         if (loggedSet.isPr) {
           const exercise = state.exercises.find((item) => item.id === input.exerciseId);
@@ -137,7 +145,7 @@ export const useWorkoutStore = create<WorkoutState>()(
       addExercise: (input) => {
         const slug = slugify(input.name);
         const exercise: Exercise = {
-          id: id('exercise'),
+          id: newId(),
           slug,
           name: input.name,
           muscleGroup: input.muscleGroup,
@@ -150,6 +158,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           source: 'user-created',
         };
         set((state) => ({ exercises: [exercise, ...state.exercises] }));
+        void syncExercise(exercise);
         return exercise;
       },
       importLiftDump: (text) => {
@@ -160,7 +169,7 @@ export const useWorkoutStore = create<WorkoutState>()(
 
         const state = get();
         const importSession: WorkoutSession = {
-          id: id('session-import'),
+          id: newId(),
           userId: USER_ID,
           startedAt: new Date().toISOString(),
           endedAt: new Date().toISOString(),
@@ -175,7 +184,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           if (!exercise) {
             const slug = slugify(entry.exerciseName);
             exercise = {
-              id: id('exercise'),
+              id: newId(),
               slug,
               name: entry.exerciseName,
               muscleGroup: 'full-body',
@@ -200,7 +209,7 @@ export const useWorkoutStore = create<WorkoutState>()(
             isWarmup: setItem.isWarmup,
           }));
           nextSets.push({
-            id: id('set-import'),
+            id: newId(),
             sessionId: importSession.id,
             exerciseId: exercise.id,
             setNumber: exerciseSets.length + 1,
@@ -218,20 +227,32 @@ export const useWorkoutStore = create<WorkoutState>()(
           sets: nextSets,
         });
 
+        void syncSession(importSession);
+        for (const exerciseItem of exercises.filter((item) => !state.exercises.some((existing) => existing.id === item.id))) {
+          void syncExercise(exerciseItem);
+        }
+        for (const setItem of nextSets.slice(state.sets.length)) {
+          void syncSet(setItem);
+        }
+
         return { imported: nextSets.length - state.sets.length, skipped };
       },
       toggleGoal: (goalId) => {
+        const current = get().goals.find((goal) => goal.id === goalId);
+        if (!current) {
+          return;
+        }
+
+        const updated: Goal = {
+          ...current,
+          achieved: !current.achieved,
+          achievedAt: current.achieved ? undefined : new Date().toISOString().slice(0, 10),
+        };
+
         set((state) => ({
-          goals: state.goals.map((goal) =>
-            goal.id === goalId
-              ? {
-                  ...goal,
-                  achieved: !goal.achieved,
-                  achievedAt: goal.achieved ? undefined : new Date().toISOString().slice(0, 10),
-                }
-              : goal,
-          ),
+          goals: state.goals.map((goal) => (goal.id === goalId ? updated : goal)),
         }));
+        void syncGoal(updated);
       },
     }),
     {
