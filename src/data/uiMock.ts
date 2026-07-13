@@ -9,15 +9,28 @@ export const uiMock = {
     fatG: 38,
     calorieTarget: 1800,
   },
+  motivation: {
+    title: 'A little energy for Aloo',
+    body: 'Hungry and tired is a real combination — stress can make the night feel long. You don’t have to fix everything. One soft next step is enough: note the plate, or just breathe and drink water.',
+    nudge: 'You’re allowed to start imperfect. Execution gets easier when the first tap is tiny.',
+  },
   askExamples: [
+    'I need a little motivation',
     'How am I doing on protein?',
-    'Did I keep a steady weigh-in?',
-    'What’s going well this week?',
+    'I ate when I was tired — is that okay?',
   ],
+  askAnswers: {
+    motivation:
+      'You’re not lazy — you’re tired and thinking a lot. Pick one small thing: jot the meal in a sentence, or say it out loud privately on this device. Doing one tiny thing counts as execution.',
+    protein:
+      'About 62 g so far — mostly from dal and the rice plate. That’s solid. Dinner can be gentle; you don’t need to “catch up” perfectly.',
+    tiredEating:
+      'Eating a lot when you’re exhausted is human, not a failure. Notice it kindly. Hydrate, rest when you can, and log the plate without scolding yourself — stress was in the story too.',
+  },
   askDemo: {
-    question: 'How am I doing on protein?',
+    question: 'I need a little motivation',
     answer:
-      'About 62 g so far — mostly from moong dal and paneer at lunch. That’s solid for afternoon. A little more at dinner and you’ll land right where you hoped.',
+      'You’re not lazy — you’re tired and thinking a lot. Pick one small thing: jot the meal in a sentence, or say it out loud privately on this device. Doing one tiny thing counts as execution.',
   },
   meals: [
     {
@@ -34,11 +47,11 @@ export const uiMock = {
       id: 'meal-2',
       time: '1:20 PM',
       title: 'Lunch',
-      summary: '1 katori moong dal · 2 roti · bhindi · curd',
+      summary: 'Bhagara rice · sarakha kura',
       calories: 520,
-      proteinG: 28,
-      carbsG: 62,
-      fatG: 16,
+      proteinG: 18,
+      carbsG: 72,
+      fatG: 14,
     },
     {
       id: 'meal-3',
@@ -52,25 +65,24 @@ export const uiMock = {
     },
   ],
   mealDraft: {
-    source: 'Described aloud',
-    raw: '1 plate lemon rice with peanut chutney and cucumber salad',
+    source: 'Private voice on this device',
+    raw: 'I had nice bhagara rice with sarakha kura — I was so hungry and tired',
     items: [
-      { name: 'Lemon rice', portion: '1 plate', calories: 380, proteinG: 8, carbsG: 68, fatG: 9 },
-      { name: 'Peanut chutney', portion: '2 tbsp', calories: 90, proteinG: 4, carbsG: 4, fatG: 7 },
-      { name: 'Cucumber salad', portion: '1 katori', calories: 35, proteinG: 1, carbsG: 6, fatG: 0 },
+      { name: 'Bhagara rice', portion: '1 plate', calories: 420, proteinG: 9, carbsG: 74, fatG: 10 },
+      { name: 'Sarakha kura', portion: '1 katori', calories: 110, proteinG: 4, carbsG: 12, fatG: 5 },
     ],
   },
   goals: [
     { id: 'g1', name: 'Morning weigh-in', done: true },
     { id: 'g2', name: 'Home-cooked dinner', done: false },
-    { id: 'g3', name: 'Walk 20 minutes', done: false },
+    { id: 'g3', name: 'One tiny kind action', done: false },
   ],
   historyDays: [
     {
       dateLabel: 'Today',
       items: [
         { kind: 'weight' as const, label: '142.4 lb', detail: 'Morning weigh-in' },
-        { kind: 'meal' as const, label: 'Lunch', detail: 'Dal · roti · bhindi' },
+        { kind: 'meal' as const, label: 'Lunch', detail: 'Bhagara rice · sarakha kura' },
       ],
     },
     {

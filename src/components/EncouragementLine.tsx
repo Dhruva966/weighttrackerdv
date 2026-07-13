@@ -2,10 +2,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 const lines = [
-  'Showing up today already counts.',
-  'One honest note is enough.',
-  'Home cooking is a quiet win.',
-  'You’re building a kinder rhythm.',
+  'Tired is real — one tiny step still counts.',
+  'Motivation grows after you start, not before.',
+  'Thinking a lot is okay. Execution can be small.',
+  'You’re building a kinder rhythm, Aloo.',
 ];
 
 export function EncouragementLine() {

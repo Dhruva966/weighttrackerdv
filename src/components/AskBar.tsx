@@ -2,6 +2,20 @@ import { Search } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { uiMock } from '../data/uiMock';
 
+function answerFor(query: string) {
+  const q = query.toLowerCase();
+  if (q.includes('motivat') || q.includes('energy') || q.includes('tired')) {
+    return uiMock.askAnswers.motivation;
+  }
+  if (q.includes('ate') || q.includes('hungry') || q.includes('stress')) {
+    return uiMock.askAnswers.tiredEating;
+  }
+  if (q.includes('protein')) {
+    return uiMock.askAnswers.protein;
+  }
+  return uiMock.askDemo.answer;
+}
+
 export function AskBar() {
   const [query, setQuery] = useState('');
   const [answer, setAnswer] = useState<string | null>(null);
@@ -12,7 +26,7 @@ export function AskBar() {
       return;
     }
 
-    setAnswer(uiMock.askDemo.answer);
+    setAnswer(answerFor(query));
   }
 
   return (
@@ -34,7 +48,7 @@ export function AskBar() {
                 setAnswer(null);
               }
             }}
-            placeholder="Ask how you’re doing — weight, meals, lifts…"
+            placeholder="Need motivation? Ask how you’re doing…"
           />
         </label>
       </form>
@@ -48,7 +62,7 @@ export function AskBar() {
               className="quiet-chip"
               onClick={() => {
                 setQuery(example);
-                setAnswer(uiMock.askDemo.answer);
+                setAnswer(answerFor(example));
               }}
             >
               {example}

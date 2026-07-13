@@ -1,18 +1,20 @@
-import { Camera, Dumbbell, Utensils } from 'lucide-react';
+import { Camera, Dumbbell, Mic, Utensils } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { PrivateVoiceCapture } from '../components/PrivateVoiceCapture';
+import { uiMock } from '../data/uiMock';
 
 export function Log() {
   const [params] = useSearchParams();
   const type = params.get('type') === 'workout' ? 'workout' : 'meal';
-  const capture = params.get('capture') === 'photo';
+  const capture = params.get('capture');
+  const mode = capture === 'photo' ? 'photo' : capture === 'voice' ? 'voice' : 'describe';
 
   return (
     <div className="grid animate-rise gap-7">
       <div>
         <h1 className="page-title">You’re doing something kind</h1>
         <p className="page-lead mt-3">
-          Every note helps. Describe a thali, dabba, or cutting chai — or take a soft photo of the plate.
-          No perfect wording needed.
+          Every note helps. Type it, snap it, or speak privately on this device — no perfect wording needed.
         </p>
       </div>
 
@@ -43,23 +45,30 @@ export function Log() {
 
       {type === 'meal' ? (
         <section className="grid gap-4">
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <Link
-              className={`button-secondary ${!capture ? 'border-fg/40' : ''}`}
+              className={`button-secondary min-h-12 px-2 text-sm ${mode === 'describe' ? 'border-fg/40' : ''}`}
               to="/log?type=meal"
             >
               Describe
             </Link>
             <Link
-              className={`button-secondary ${capture ? 'border-fg/40' : ''}`}
+              className={`button-secondary min-h-12 px-2 text-sm ${mode === 'photo' ? 'border-fg/40' : ''}`}
               to="/log?type=meal&capture=photo"
             >
               <Camera size={16} />
               Photo
             </Link>
+            <Link
+              className={`button-secondary min-h-12 px-2 text-sm ${mode === 'voice' ? 'border-fg/40' : ''}`}
+              to="/log?type=meal&capture=voice"
+            >
+              <Mic size={16} />
+              Voice
+            </Link>
           </div>
 
-          {capture ? (
+          {mode === 'photo' ? (
             <div className="app-card grid place-items-center gap-3 py-16 text-center">
               <Camera size={28} className="text-fgMuted" strokeWidth={1.5} />
               <p className="font-medium text-fg">A soft photo of your plate</p>
@@ -70,18 +79,20 @@ export function Log() {
                 Continue with a sample plate
               </Link>
             </div>
+          ) : mode === 'voice' ? (
+            <PrivateVoiceCapture sampleTranscript={uiMock.mealDraft.raw} />
           ) : (
             <div className="grid gap-3">
               <label className="grid gap-2">
                 <span className="label">What did you eat?</span>
                 <textarea
                   className="field min-h-36 py-3"
-                  defaultValue="1 plate lemon rice with peanut chutney and cucumber salad"
-                  placeholder="e.g. 2 idli, sambar, coconut chutney"
+                  defaultValue={uiMock.mealDraft.raw}
+                  placeholder="e.g. nice bhagara rice with sarakha kura"
                 />
               </label>
               <p className="text-xs leading-relaxed text-fgMuted">
-                Katori, roti count, dabba, plate — all welcome. Rough is fine; we’ll estimate together.
+                Hungry, tired, stressed — you can say that too. Rough is fine; we’ll estimate together.
               </p>
               <Link className="button-primary" to="/log/meal/confirm">
                 Look it over with me
@@ -94,7 +105,7 @@ export function Log() {
           <div>
             <h2 className="text-lg font-medium text-fg">A lift when you feel ready</h2>
             <p className="mt-1 text-sm leading-relaxed text-fgMuted">
-              Optional — and still worthy. Pick exercises, then jot sets in plain English.
+              Optional — and still worthy. If energy is low, skip without guilt.
             </p>
           </div>
           <div className="rounded-2xl border border-border/70 bg-mist/50 px-4 py-3 text-sm leading-relaxed text-fgMuted">

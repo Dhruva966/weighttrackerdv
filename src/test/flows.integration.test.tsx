@@ -68,7 +68,7 @@ describe('app shell', () => {
     expect(screen.getByRole('heading', { name: /today is already going well/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /morning weight/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /what’s on your plate/i })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/ask how you’re doing/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/need motivation/i)).toBeInTheDocument();
   });
 
   it('navigates Log and History tabs', async () => {

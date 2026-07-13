@@ -17,12 +17,12 @@ const pillars = [
   {
     icon: Utensils,
     title: 'Meals in your words',
-    body: 'Idli, dal, roti, chai, dabba — describe the plate however you talk about it.',
+    body: 'Bhagara rice, sarakha kura, chai — describe the plate however you talk about it. Private voice stays on this device.',
   },
   {
     icon: Search,
-    title: 'Ask anytime',
-    body: 'Wonder how protein is going? Ask gently from the top of every screen.',
+    title: 'Motivation when you ask',
+    body: 'Energy dips are real. Ask for a kind nudge — no sleep tracking unless you want it later.',
   },
 ] as const;
 

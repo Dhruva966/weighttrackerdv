@@ -1,4 +1,4 @@
-import { Camera, ClipboardList, Scale, Utensils } from 'lucide-react';
+import { Camera, ClipboardList, Scale, Sparkles, Utensils } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EncouragementLine } from '../components/EncouragementLine';
 import { uiMock } from '../data/uiMock';
@@ -13,7 +13,7 @@ export function Today() {
   const mealLead =
     focus === 'weight'
       ? 'Weight comes first for you; meals still help when you feel like noting them.'
-      : 'Tell us what’s on the plate — idli, dal, roti, chai — in your own words. Small check-ins add up.';
+      : 'Tell us what’s on the plate — bhagara rice, sarakha kura, chai — in your own words. Small check-ins add up.';
 
   return (
     <div className="grid animate-rise gap-9">
@@ -26,6 +26,25 @@ export function Today() {
         <p className="page-lead mt-4">
           Note your weight when you’re ready. {mealLead}
         </p>
+      </section>
+
+      <section className="rounded-2xl border border-accent/15 bg-accentSoft/70 px-5 py-5">
+        <div className="flex items-start gap-3">
+          <Sparkles className="mt-0.5 text-fgMuted" size={18} strokeWidth={1.5} />
+          <div>
+            <h2 className="text-lg font-medium text-fg">{uiMock.motivation.title}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-fgMuted">{uiMock.motivation.body}</p>
+            <p className="mt-3 text-editorial text-fg">{uiMock.motivation.nudge}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link className="button-secondary min-h-11" to="/log?type=meal&capture=voice">
+                Say it privately
+              </Link>
+              <Link className="text-link self-center" to="/log?type=meal">
+                Or type the plate
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="app-card grid gap-5">
@@ -96,14 +115,17 @@ export function Today() {
           ))}
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2 sm:grid-cols-3">
           <Link className="button-primary" to="/log?type=meal">
             <Utensils size={18} strokeWidth={1.5} />
-            Log another meal
+            Log a meal
+          </Link>
+          <Link className="button-secondary" to="/log?type=meal&capture=voice">
+            Say privately
           </Link>
           <Link className="button-secondary" to="/log?type=meal&capture=photo">
             <Camera size={18} strokeWidth={1.5} />
-            Snap the plate
+            Snap
           </Link>
         </div>
       </section>
