@@ -89,8 +89,8 @@ export function App() {
       <AnimatedRoutes />
       <Link
         className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-5 z-30 grid h-14 w-14 place-items-center rounded-md border border-fg bg-fg text-bg shadow-soft md:hidden"
-        to="/exercises/new"
-        aria-label="New exercise"
+        to="/session/new"
+        aria-label="Start workout"
       >
         <Plus size={22} />
       </Link>

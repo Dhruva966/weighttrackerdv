@@ -40,6 +40,7 @@ export type WorkoutSession = {
   startedAt: string;
   endedAt?: string;
   notes?: string;
+  plannedExerciseIds?: string[];
 };
 
 export type LoggedSet = {

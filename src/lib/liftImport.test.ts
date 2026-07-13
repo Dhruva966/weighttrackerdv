@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildLiftProgress, formatImportedSessionNotes, parseBrainDump, parseLiftBrainDump } from './liftImport';
+import { buildLiftProgress, formatImportedSessionNotes, parseBrainDump, parseExerciseLog, parseLiftBrainDump } from './liftImport';
 
 describe('parseLiftBrainDump', () => {
   it('parses one bare current weight per line', () => {
@@ -36,6 +36,26 @@ describe('parseLiftBrainDump', () => {
       { exerciseName: 'preacher curl', weightLb: 115, reps: 7, raw },
       { exerciseName: 'preacher curl', weightLb: 115, reps: 7, raw },
     ]);
+  });
+});
+
+describe('parseExerciseLog', () => {
+  it('parses shorthand logs for a known exercise', () => {
+    expect(parseExerciseLog('115 for 8 7 7', 'preacher curl')).toEqual({
+      sets: [
+        { weightLb: 115, reps: 8 },
+        { weightLb: 115, reps: 7 },
+        { weightLb: 115, reps: 7 },
+      ],
+      notes: [],
+    });
+  });
+
+  it('keeps side notes without sets', () => {
+    expect(parseExerciseLog('last rep was helped by a friend', 'bench press')).toEqual({
+      sets: [],
+      notes: ['last rep was helped by a friend'],
+    });
   });
 });
 

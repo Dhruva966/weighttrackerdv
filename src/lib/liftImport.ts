@@ -36,6 +36,8 @@ const bareRepsPattern = /(\d+)\s*reps?\b/gi;
 const trailingWeightPattern = /(?:and|at|@|for)\s*(\d+(?:\.\d+)?)\s*(?:lb|lbs)?\s*$/i;
 const repSequencePattern =
   /^(.+?)\s+((?:\d{1,2}\s*(?:,|and)?\s*)+)(?:at|@|for)\s*(\d+(?:\.\d+)?)\s*(?:lb|lbs)?\s*$/i;
+const weightForRepsPattern = /(\d+(?:\.\d+)?)\s+for\s+(\d+)(?:\s*reps?)?/gi;
+const weightForRepListPattern = /^(\d+(?:\.\d+)?)\s+for\s+((?:\d{1,2}\s*)+)$/;
 const noteIndicatorPattern =
   /\b(helped|spotter|friend|assisted|assistance|failed|tired|sore|felt|felt like|maybe|remember|note|notes|grindy|slow|fast|easy|hard|pain|hurt|skipped|missed|almost|barely|struggled|good set|bad set|warmup|warm up|stretch|recover|recovery)\b/i;
 
@@ -250,11 +252,63 @@ function parseRepSequenceLine(raw: string): ParsedLiftSet[] | null {
   }));
 }
 
-function parseLiftSegment(raw: string): ParsedLiftSet[] {
+function parseWeightForRepList(raw: string, exerciseName: string): ParsedLiftSet[] | null {
+  const match = raw.trim().match(weightForRepListPattern);
+  if (!match) {
+    return null;
+  }
+
+  const weightLb = Number(match[1]);
+  const reps = [...match[2].matchAll(/(\d{1,2})/g)].map((part) => Number(part[1])).filter((value) => value > 0);
+  if (!Number.isFinite(weightLb) || weightLb <= 0 || reps.length === 0) {
+    return null;
+  }
+
+  return reps.map((repCount) => ({
+    exerciseName,
+    weightLb,
+    reps: repCount,
+    raw,
+  }));
+}
+
+function parseWeightForRepsLine(raw: string, defaultExerciseName?: string): ParsedLiftSet[] | null {
+  resetRegex(weightForRepsPattern);
+  const matches = [...raw.matchAll(weightForRepsPattern)];
+  if (matches.length === 0) {
+    return null;
+  }
+
+  const firstIndex = matches[0].index ?? 0;
+  const exerciseName = cleanExerciseName(
+    defaultExerciseName ?? raw.slice(0, firstIndex).trim(),
+  );
+  if (!exerciseName) {
+    return null;
+  }
+
+  return matches.map((match) => ({
+    exerciseName,
+    weightLb: Number(match[1]),
+    reps: Number(match[2]),
+    raw,
+  }));
+}
+
+function parseLiftSegment(raw: string, defaultExerciseName?: string): ParsedLiftSet[] {
+  if (defaultExerciseName) {
+    const repList = parseWeightForRepList(raw, defaultExerciseName);
+    if (repList) {
+      return repList;
+    }
+  }
+
   resetRegex(weightRepsPattern);
   const multiMatches = [...raw.matchAll(weightRepsPattern)];
   if (multiMatches.length > 0) {
-    const exerciseName = cleanExerciseName(raw.slice(0, multiMatches[0].index).trim());
+    const exerciseName = cleanExerciseName(
+      defaultExerciseName ?? raw.slice(0, multiMatches[0].index).trim(),
+    );
     if (!exerciseName) {
       return [];
     }
@@ -265,6 +319,11 @@ function parseLiftSegment(raw: string): ParsedLiftSet[] {
       reps: Number(match[2]),
       raw,
     }));
+  }
+
+  const weightForReps = parseWeightForRepsLine(raw, defaultExerciseName);
+  if (weightForReps) {
+    return weightForReps;
   }
 
   const proseSets = parseProseLiftLine(raw);
@@ -385,6 +444,53 @@ export function parseLiftBrainDump(text: string): ParsedLiftSet[] {
       raw: block.raw,
     })),
   );
+}
+
+function exerciseNamesMatch(left: string, right: string): boolean {
+  const leftSlug = left.toLowerCase().trim();
+  const rightSlug = right.toLowerCase().trim();
+  return leftSlug === rightSlug || leftSlug.includes(rightSlug) || rightSlug.includes(leftSlug);
+}
+
+export type ParsedExerciseLog = {
+  sets: Array<{ weightLb: number; reps: number }>;
+  notes: string[];
+};
+
+export function parseExerciseLog(text: string, exerciseName: string): ParsedExerciseLog {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return { sets: [], notes: [] };
+  }
+
+  const directSets = parseLiftSegment(trimmed, exerciseName);
+  if (directSets.length > 0) {
+    return {
+      sets: directSets.map((setItem) => ({ weightLb: setItem.weightLb, reps: setItem.reps })),
+      notes: [],
+    };
+  }
+
+  const candidates = [trimmed, `${exerciseName} ${trimmed}`];
+  for (const candidate of candidates) {
+    const parsed = parseBrainDump(candidate);
+    const block =
+      parsed.blocks.find((item) => exerciseNamesMatch(item.exerciseName, exerciseName)) ??
+      (parsed.blocks.length === 1 ? parsed.blocks[0] : undefined);
+
+    if (block?.sets.length) {
+      return {
+        sets: block.sets,
+        notes: [...block.notes, ...parsed.sessionNotes],
+      };
+    }
+  }
+
+  const noteOnly = parseBrainDump(trimmed);
+  return {
+    sets: [],
+    notes: [...noteOnly.blocks.flatMap((block) => block.notes), ...noteOnly.sessionNotes],
+  };
 }
 
 export function formatImportedSessionNotes(parsed: ParsedBrainDump): string | undefined {

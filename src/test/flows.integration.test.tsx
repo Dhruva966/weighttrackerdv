@@ -60,7 +60,7 @@ describe('app shell', () => {
     expect(screen.getByRole('heading', { name: /track the work/i })).toBeInTheDocument();
     expect(screen.getByText('Total sessions')).toBeInTheDocument();
     expect(screen.getByText('Logged sets')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /start workout/i })).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /start workout/i }).length).toBeGreaterThan(0);
   });
 
   it('navigates to the exercise library tab', async () => {
@@ -97,6 +97,7 @@ describe('active session flow', () => {
   it('logs a set and ends the workout from the session page', async () => {
     const session = useWorkoutStore.getState().createSession();
     const exercise = starterExercises[0];
+    useWorkoutStore.getState().setSessionPlan(session.id, [exercise.id]);
 
     render(
       <QueryClientProvider client={new QueryClient()}>
@@ -108,17 +109,11 @@ describe('active session flow', () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.change(screen.getByPlaceholderText(/search exercises/i), {
-      target: { value: exercise.name },
+    fireEvent.click(screen.getAllByRole('button', { name: new RegExp(exercise.name, 'i') })[0]!);
+    fireEvent.change(screen.getByPlaceholderText(/115 for 8 7 7/i), {
+      target: { value: '95 for 8' },
     });
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(exercise.name, 'i') }));
-
-    const form = screen.getByRole('button', { name: /save set/i }).closest('form');
-    expect(form).toBeTruthy();
-    const spinbuttons = within(form!).getAllByRole('spinbutton');
-    fireEvent.change(spinbuttons[0], { target: { value: '95' } });
-    fireEvent.change(spinbuttons[1], { target: { value: '8' } });
-    fireEvent.click(screen.getByRole('button', { name: /save set/i }));
+    fireEvent.click(screen.getByRole('button', { name: /log sets/i }));
 
     await waitFor(() => {
       const saved = useWorkoutStore

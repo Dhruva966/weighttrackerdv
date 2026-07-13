@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { starterExercises, starterGoals, starterSessions, starterSets } from '../data/catalog';
 import { slugify } from '../lib/fmt';
 import { formatImportedSessionNotes, parseBrainDump } from '../lib/liftImport';
+import { parseExerciseLogSmart } from '../lib/exercise-log-parse';
 import { isPersonalRecord } from '../lib/pr';
 import { syncExercise, syncGoal, syncSession, syncSet } from '../lib/supabase-sync';
 import { USER_ID } from '../lib/user';
@@ -28,6 +29,12 @@ type WorkoutState = {
   addSet: (input: Omit<LoggedSet, 'id' | 'setNumber' | 'isPr' | 'createdAt'>) => LoggedSet;
   addExercise: (input: ExerciseInput) => Exercise;
   importLiftDump: (text: string) => { imported: number; notes: number; skipped: string[] };
+  setSessionPlan: (sessionId: string, exerciseIds: string[]) => void;
+  logExerciseNotes: (
+    sessionId: string,
+    exerciseId: string,
+    text: string,
+  ) => Promise<{ imported: number; notes: string[] }>;
   clearHistory: () => void;
   toggleGoal: (goalId: string) => void;
 };
@@ -251,6 +258,52 @@ export const useWorkoutStore = create<WorkoutState>()(
         }
 
         return { imported: nextSets.length - state.sets.length, notes: noteCount, skipped };
+      },
+      setSessionPlan: (sessionId, exerciseIds) => {
+        set((state) => ({
+          sessions: state.sessions.map((session) =>
+            session.id === sessionId ? { ...session, plannedExerciseIds: exerciseIds } : session,
+          ),
+        }));
+        const session = get().sessions.find((item) => item.id === sessionId);
+        if (session) {
+          void syncSession({ ...session, plannedExerciseIds: exerciseIds });
+        }
+      },
+      logExerciseNotes: async (sessionId, exerciseId, text) => {
+        const state = get();
+        const exercise = state.exercises.find((item) => item.id === exerciseId);
+        const session = state.sessions.find((item) => item.id === sessionId);
+        if (!exercise || !session) {
+          return { imported: 0, notes: [] };
+        }
+
+        const parsed = await parseExerciseLogSmart(text, exercise.name);
+        let imported = 0;
+
+        for (const entry of parsed.sets) {
+          get().addSet({
+            sessionId,
+            exerciseId,
+            weightLb: entry.weightLb,
+            reps: entry.reps,
+            isWarmup: false,
+          });
+          imported += 1;
+        }
+
+        if (parsed.notes.length > 0) {
+          const noteLine = `${exercise.name}: ${parsed.notes.join(' ')}`;
+          const nextNotes = session.notes ? `${session.notes}\n${noteLine}` : noteLine;
+          set((current) => ({
+            sessions: current.sessions.map((item) =>
+              item.id === sessionId ? { ...item, notes: nextNotes } : item,
+            ),
+          }));
+          void syncSession({ ...session, notes: nextNotes });
+        }
+
+        return { imported, notes: parsed.notes };
       },
       clearHistory: () => {
         set({ sessions: [], sets: [], historyCleared: true });

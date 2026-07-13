@@ -32,6 +32,14 @@ export function SettingsPage() {
         </p>
       </section>
       <section className="app-card grid gap-3">
+        <p className="font-bold text-fg">Natural language logging</p>
+        <p className="text-sm text-fgMuted">
+          Workout logs parse for free on-device. For messier notes, add a free Groq key as{' '}
+          <code className="font-mono text-xs">VITE_GROQ_API_KEY</code> — Groq’s free tier uses Llama as a fallback
+          parser only when the local parser cannot find sets.
+        </p>
+      </section>
+      <section className="app-card grid gap-3">
         <p className="font-bold text-fg">Units</p>
         <div className="grid grid-cols-2 gap-2">
           {(['lb', 'kg'] as const).map((option) => (
