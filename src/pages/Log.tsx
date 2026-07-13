@@ -5,29 +5,41 @@ import { PrivateVoiceCapture } from '../components/PrivateVoiceCapture';
 import { uiMock } from '../data/uiMock';
 import { useUiStore } from '../stores/uiStore';
 
-export function Log() {
+type Props = {
+  forcedType?: 'meal' | 'workout';
+  hideIntro?: boolean;
+};
+
+export function Log({ forcedType, hideIntro = false }: Props) {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const setMealDraft = useUiStore((state) => state.setMealDraft);
-  const type = params.get('type') === 'workout' ? 'workout' : 'meal';
+  const tendGarden = useUiStore((state) => state.tendGarden);
+  const type =
+    forcedType ?? (params.get('type') === 'workout' ? 'workout' : 'meal');
   const capture = params.get('capture');
   const mode = capture === 'photo' ? 'photo' : capture === 'voice' ? 'voice' : 'describe';
   const [description, setDescription] = useState(uiMock.mealDraft.raw);
+  const mealBase = '/eat';
 
   function goToConfirm(source: string, raw: string) {
     setMealDraft({ source, raw, items: uiMock.mealDraft.items });
+    tendGarden();
     navigate('/log/meal/confirm');
   }
 
   return (
-    <div className="grid animate-rise gap-7">
-      <div>
-        <h1 className="page-title">You’re doing something kind</h1>
-        <p className="page-lead mt-3">
-          Type it, snap it, or speak privately on this device — no perfect wording needed.
-        </p>
-      </div>
+    <div className={`grid ${hideIntro || forcedType ? 'gap-4' : 'animate-rise gap-7'}`}>
+      {!hideIntro && !forcedType ? (
+        <div>
+          <h1 className="page-title">You’re doing something kind</h1>
+          <p className="page-lead mt-3">
+            Type it, snap it, or speak privately — or use the universal bar above.
+          </p>
+        </div>
+      ) : null}
 
+      {!forcedType ? (
       <div className="grid grid-cols-2 gap-2">
         <Link
           className={`flex min-h-12 items-center justify-center gap-2 rounded-2xl border text-sm font-medium transition ${
@@ -35,7 +47,7 @@ export function Log() {
               ? 'border-accent/25 bg-accentSoft text-fg'
               : 'border-border/80 bg-surface/80 text-fgMuted hover:bg-mist/70'
           }`}
-          to="/log?type=meal"
+          to="/eat"
         >
           <Utensils size={16} strokeWidth={1.5} />
           Meal
@@ -46,32 +58,33 @@ export function Log() {
               ? 'border-accent/25 bg-accentSoft text-fg'
               : 'border-border/80 bg-surface/80 text-fgMuted hover:bg-mist/70'
           }`}
-          to="/log?type=workout"
+          to="/move"
         >
           <Dumbbell size={16} strokeWidth={1.5} />
           Workout
         </Link>
       </div>
+      ) : null}
 
       {type === 'meal' ? (
         <section className="grid gap-4">
           <div className="grid grid-cols-3 gap-2">
             <Link
               className={`button-secondary min-h-12 px-2 text-sm ${mode === 'describe' ? 'border-fg/40' : ''}`}
-              to="/log?type=meal"
+              to={mealBase}
             >
               Describe
             </Link>
             <Link
               className={`button-secondary min-h-12 px-2 text-sm ${mode === 'photo' ? 'border-fg/40' : ''}`}
-              to="/log?type=meal&capture=photo"
+              to={`${mealBase}?capture=photo`}
             >
               <Camera size={16} />
               Photo
             </Link>
             <Link
               className={`button-secondary min-h-12 px-2 text-sm ${mode === 'voice' ? 'border-fg/40' : ''}`}
-              to="/log?type=meal&capture=voice"
+              to={`${mealBase}?capture=voice`}
             >
               <Mic size={16} />
               Voice

@@ -1,5 +1,4 @@
 import { Download, Database, Smartphone, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { downloadWorkoutExport } from '../lib/export';
 import { isExerciseLogLlmConfigured, isSupabaseLlmConfigured } from '../lib/exercise-log-parse';
 import { useOnline } from '../hooks/useOnline';
@@ -7,38 +6,33 @@ import { useSupabaseBootstrap } from '../hooks/useSupabaseBootstrap';
 import { useUiStore } from '../stores/uiStore';
 
 export function SettingsPage() {
-  const navigate = useNavigate();
   const unit = useUiStore((state) => state.unit);
   const setUnit = useUiStore((state) => state.setUnit);
   const restSeconds = useUiStore((state) => state.restSeconds);
   const setRestSeconds = useUiStore((state) => state.setRestSeconds);
   const preferredName = useUiStore((state) => state.preferredName);
-  const resetOnboarding = useUiStore((state) => state.resetOnboarding);
   const online = useOnline();
   const supabase = useSupabaseBootstrap();
 
   return (
     <div className="grid gap-4">
       <div>
-        <h1 className="page-title">Settings</h1>
-        <p className="mt-1 text-sm text-fgMuted">Units, rest timer, welcome flow, export, and install.</p>
+        <h1 className="page-title">You</h1>
+        <p className="mt-1 text-sm text-fgMuted">Settings, units, export, and garden preferences.</p>
       </div>
       <section className="app-card grid gap-3">
-        <p className="font-medium text-fg">Welcome again</p>
+        <p className="font-medium text-fg">Onboarding (stashed)</p>
         <p className="text-sm leading-relaxed text-fgMuted">
-          {preferredName
-            ? `Saved as ${preferredName}. Replay the soft intro anytime — it won’t erase your logs.`
-            : 'Replay the soft intro anytime — it won’t erase your logs.'}
+          The welcome tour is paused for now. Name stays {preferredName || 'Aloo'}. We’ll bring the soft
+          intro back when the garden shell settles.
         </p>
         <button
-          className="button-secondary"
+          className="button-secondary opacity-70"
           type="button"
-          onClick={() => {
-            resetOnboarding();
-            navigate('/', { replace: true });
-          }}
+          disabled
+          title="Onboarding is stashed"
         >
-          Replay onboarding
+          Replay onboarding (paused)
         </button>
       </section>
       <section className="app-card grid gap-3">

@@ -55,8 +55,7 @@ Weight Tracker is a single-user gym PWA for owner `vutukurydhruva@gmail.com`. Th
 | Export data | Read all owner-scoped rows and download JSON or CSV. |
 
 ## Open Handoff Notes
-- Mom research (Jul 2026): wants motivation/energy more than sleep tracking; eats rich home plates (e.g. bhagara rice + sarakha kura) when tired/stressed; private on-device voice for logging (not public). Sleep tracking is explicitly out for now.
-- Mom-first UI shell (UI-only mocks): Today / Log / History tabs, sticky Ask bar, `/onboarding` gate until `useUiStore.onboardingComplete` (persisted in `weight-tracker-ui`). Settings can replay onboarding without wiping logs. Default preferred name: Aloo. Log supports Describe / Photo / private Voice mock.
-- The current repo still contains a Vite starter entry in `src/main.ts`. Planned app files from the build plan are not all present yet.
-- The database migration and Supabase scripts are planned by the build plan but are outside this documentation-only task.
-- The exact `gstack` and `using-superpowers` skills are unavailable here. Use the equivalent workflow guidance in root docs.
+- **Garden shell (Jul 2026):** Onboarding stashed. Theme is greenery with growing leaf. Bottom nav: Today · Eat · Move · Grow · You. Sticky **UniversalCommandBar** (type + Web Speech mic). Free STT: Web Speech now; Groq Whisper edge next for iPhone PWA. See `decisions/2026-07-13-garden-universal-voice.md`.
+- Lose It steal: unified day diary, low-friction log, “showed up” framing. Avoid: leftover-calorie as hero.
+- Mom research: motivation/energy; private/on-device language for voice; no sleep tracking.
+- Still UI-only for meals/weight; gym session logging remains real via workout store.

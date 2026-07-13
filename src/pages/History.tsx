@@ -7,15 +7,17 @@ const kindStyles = {
   workout: 'border-border/60 bg-mist/50 text-fgMuted',
 } as const;
 
-export function History() {
+export function History({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="grid animate-rise gap-7">
+    <div className={compact ? 'grid gap-6' : 'grid animate-rise gap-7'}>
+      {compact ? null : (
       <div>
-        <h1 className="page-title">Look how far you’ve come</h1>
+        <h1 className="page-title">This week in the garden</h1>
         <p className="page-lead mt-3">
-          Weight, meals, and the rare workout — each day you logged is something to be proud of.
+          Weight, meals, and movement — each log tends the leaf. No leftover-calorie scoreboard.
         </p>
       </div>
+      )}
 
       <section className="app-card">
         <p className="text-sm text-fgMuted">This month</p>
@@ -80,7 +82,7 @@ export function History() {
       </section>
 
       <p className="text-center text-sm leading-relaxed text-fgMuted">
-        Gym sessions live quietly in{' '}
+        Older lifting sessions live in{' '}
         <Link className="text-link" to="/history/sessions">
           workout recaps
         </Link>

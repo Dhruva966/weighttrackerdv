@@ -1,10 +1,10 @@
-import { History as HistoryIcon, Home, PenLine, Settings } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Footprints, Home, Sprout, User, Utensils } from 'lucide-react';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
-import { AskBar } from './components/AskBar';
+import { GardenLeaf } from './components/GardenLeaf';
 import { Nav } from './components/Nav';
 import { SessionLauncher } from './components/SessionLauncher';
 import { Toaster } from './components/Toaster';
+import { UniversalCommandBar } from './components/UniversalCommandBar';
 import { useSupabaseBootstrap } from './hooks/useSupabaseBootstrap';
 import { ExerciseCreate } from './pages/ExerciseCreate';
 import { ExerciseDetail } from './pages/ExerciseDetail';
@@ -14,7 +14,6 @@ import { History } from './pages/History';
 import { HistorySession } from './pages/HistorySession';
 import { Log } from './pages/Log';
 import { MealConfirm } from './pages/MealConfirm';
-import { Onboarding } from './pages/Onboarding';
 import { Session } from './pages/Session';
 import { SettingsPage } from './pages/Settings';
 import { Today } from './pages/Today';
@@ -22,15 +21,18 @@ import { WorkoutHistory } from './pages/WorkoutHistory';
 import { useUiStore } from './stores/uiStore';
 
 function Header() {
+  const gardenDays = useUiStore((state) => state.gardenDays);
+
   return (
-    <header className="sticky top-0 z-30 border-b border-border/70 bg-bg/85 px-5 py-4 backdrop-blur-md">
-      <div className="mx-auto flex max-w-xl items-center justify-between">
+    <header className="sticky top-0 z-30 border-b border-border/70 bg-bg/85 px-5 py-3.5 backdrop-blur-md">
+      <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
         <Link to="/" className="page-title text-[1.55rem] tracking-[-0.02em]">
           Lift
         </Link>
-        <div className="flex items-center gap-1.5">
-          <Link className="icon-button" to="/settings" aria-label="Settings">
-            <Settings size={18} strokeWidth={1.5} />
+        <div className="flex items-center gap-2">
+          <p className="hidden text-xs text-fgMuted sm:block">{gardenDays} days in the garden</p>
+          <Link className="icon-button" to="/you" aria-label="You and settings">
+            <User size={18} strokeWidth={1.5} />
           </Link>
         </div>
       </div>
@@ -38,13 +40,62 @@ function Header() {
   );
 }
 
+function GrowPage() {
+  const gardenDays = useUiStore((state) => state.gardenDays);
+
+  return (
+    <div className="grid animate-rise gap-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="page-title">Your garden</h1>
+          <p className="page-lead mt-3">
+            Consistency grows the leaf — meals, walks, lifts, and weigh-ins all count as tending.
+          </p>
+        </div>
+        <GardenLeaf days={gardenDays} />
+      </div>
+      <History compact />
+    </div>
+  );
+}
+
+function MovePage() {
+  return (
+    <div className="grid animate-rise gap-4">
+      <div>
+        <h1 className="page-title">Move</h1>
+        <p className="page-lead mt-3">
+          Walks, lifts, or anything that counts as showing up. Log with the bar above, or open a session.
+        </p>
+      </div>
+      <Log forcedType="workout" />
+    </div>
+  );
+}
+
+function EatPage() {
+  return (
+    <div className="grid animate-rise gap-4">
+      <div>
+        <h1 className="page-title">Eat</h1>
+        <p className="page-lead mt-3">Plates in your words — idli to sandwiches. Voice or type in the bar above.</p>
+      </div>
+      <Log forcedType="meal" />
+    </div>
+  );
+}
+
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Today />} />
-      <Route path="/log" element={<Log />} />
+      <Route path="/eat" element={<EatPage />} />
+      <Route path="/move" element={<MovePage />} />
+      <Route path="/grow" element={<GrowPage />} />
+      <Route path="/you" element={<SettingsPage />} />
+      <Route path="/log" element={<Navigate to="/eat" replace />} />
       <Route path="/log/meal/confirm" element={<MealConfirm />} />
-      <Route path="/history" element={<History />} />
+      <Route path="/history" element={<Navigate to="/grow" replace />} />
       <Route path="/history/sessions" element={<WorkoutHistory />} />
       <Route path="/history/:sessionId" element={<HistorySession />} />
       <Route path="/session/new" element={<SessionLauncher />} />
@@ -53,63 +104,33 @@ function AppRoutes() {
       <Route path="/exercises/new" element={<ExerciseCreate />} />
       <Route path="/exercises/:slug" element={<ExerciseDetail />} />
       <Route path="/goals" element={<Goals />} />
-      <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/settings" element={<Navigate to="/you" replace />} />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />
-      <Route path="/progress" element={<Navigate to="/history" replace />} />
-      <Route path="/calendar" element={<Navigate to="/history" replace />} />
+      <Route path="/progress" element={<Navigate to="/grow" replace />} />
+      <Route path="/calendar" element={<Navigate to="/grow" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
 
-function useUiHydrated() {
-  const [hydrated, setHydrated] = useState(() => useUiStore.persist.hasHydrated());
-
-  useEffect(() => {
-    if (useUiStore.persist.hasHydrated()) {
-      setHydrated(true);
-      return;
-    }
-    return useUiStore.persist.onFinishHydration(() => setHydrated(true));
-  }, []);
-
-  return hydrated;
-}
-
 export function App() {
   useSupabaseBootstrap();
-  const hydrated = useUiHydrated();
-  const onboardingComplete = useUiStore((state) => state.onboardingComplete);
 
-  if (!hydrated) {
-    return (
-      <div className="grid min-h-[100dvh] place-items-center font-serif text-fgMuted">
-        <p className="text-sm tracking-wide">Preparing a calm start…</p>
-      </div>
-    );
-  }
-
-  if (!onboardingComplete) {
-    return (
-      <div className="min-h-screen font-serif text-fg antialiased">
-        <Onboarding />
-        <Toaster />
-      </div>
-    );
-  }
-
+  // Onboarding stashed — restore gate later from decisions/2026-07-13-garden-universal-voice.md
   return (
     <div className="min-h-screen font-serif text-fg antialiased">
       <Header />
-      <AskBar />
-      <main className="mx-auto min-h-[calc(100vh-180px)] max-w-xl overflow-x-hidden px-5 pb-28 pt-7">
+      <UniversalCommandBar />
+      <main className="mx-auto min-h-[calc(100vh-180px)] max-w-xl overflow-x-hidden px-5 pb-32 pt-7">
         <AppRoutes />
       </main>
       <Nav
         items={[
           { to: '/', label: 'Today', icon: Home },
-          { to: '/log', label: 'Log', icon: PenLine },
-          { to: '/history', label: 'History', icon: HistoryIcon },
+          { to: '/eat', label: 'Eat', icon: Utensils },
+          { to: '/move', label: 'Move', icon: Footprints },
+          { to: '/grow', label: 'Grow', icon: Sprout },
+          { to: '/you', label: 'You', icon: User },
         ]}
       />
       <Toaster />

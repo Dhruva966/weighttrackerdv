@@ -1,6 +1,7 @@
 import { Camera, ClipboardList, Scale, Utensils } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EncouragementLine } from '../components/EncouragementLine';
+import { GardenLeaf } from '../components/GardenLeaf';
 import { uiMock } from '../data/uiMock';
 import { useUiStore } from '../stores/uiStore';
 
@@ -9,49 +10,36 @@ export function Today() {
   const focus = useUiStore((state) => state.focus);
   const intentions = useUiStore((state) => state.intentions);
   const toggleIntention = useUiStore((state) => state.toggleIntention);
-  const showPreviewNotice = useUiStore((state) => state.showPreviewNotice);
+  const gardenDays = useUiStore((state) => state.gardenDays);
   const remaining = uiMock.todayMacros.calorieTarget - uiMock.todayMacros.calories;
   const doneCount = intentions.filter((goal) => goal.done).length;
   const greeting = preferredName ? `Hi ${preferredName} — glad you’re here` : 'Glad you’re here';
   const mealLead =
     focus === 'weight'
       ? 'Weight comes first for you; meals still help when you feel like noting them.'
-      : 'Tell us what’s on the plate — bhagara rice, sarakha kura, chai — in your own words.';
-  const primaryLog =
-    focus === 'weight' ? (
-      <button
-        className="button-primary"
-        type="button"
-        onClick={() =>
-          showPreviewNotice('Weigh-in editing stays preview-only for now — your logged number is already here.')
-        }
-      >
-        Morning weigh-in logged
-      </button>
-    ) : (
-      <Link className="button-primary" to="/log?type=meal">
-        <Utensils size={18} strokeWidth={1.5} />
-        Log a meal
-      </Link>
-    );
+      : 'Tell the bar above what’s on the plate — bhagara rice, sarakha kura, chai — or a walk.';
 
   return (
     <div className="grid animate-rise gap-9">
-      <section>
-        <p className="text-sm text-fgMuted">{greeting}</p>
-        <h1 className="page-title mt-2">One soft check-in is enough</h1>
-        <div className="mt-4">
-          <EncouragementLine />
+      <section className="grid gap-5 sm:grid-cols-[1fr_auto] sm:items-end">
+        <div>
+          <p className="text-sm text-fgMuted">{greeting}</p>
+          <h1 className="page-title mt-2">Your garden is growing</h1>
+          <div className="mt-4">
+            <EncouragementLine />
+          </div>
+          <p className="page-lead mt-4">{mealLead}</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link className="button-primary" to="/eat">
+              <Utensils size={18} strokeWidth={1.5} />
+              Open Eat
+            </Link>
+            <Link className="button-secondary" to="/move">
+              Open Move
+            </Link>
+          </div>
         </div>
-        <p className="page-lead mt-4">
-          Note your weight when you’re ready. {mealLead}
-        </p>
-        <div className="mt-5 grid gap-2">
-          {primaryLog}
-          <Link className="text-link" to="/log?type=meal&capture=voice">
-            Or say the plate privately on this device
-          </Link>
-        </div>
+        <GardenLeaf days={gardenDays} className="justify-self-center" />
       </section>
 
       <section className="app-card grid gap-5">
@@ -71,26 +59,17 @@ export function Today() {
             </p>
           </div>
         </div>
-        <button
-          className="button-secondary opacity-70"
-          type="button"
-          disabled
-          title="Weigh-in editing comes in a later preview"
-        >
-          Update weigh-in
-        </button>
         <p className="text-xs leading-relaxed text-fgMuted">
-          Editing the number arrives in a later preview. For now this is your calm demo weigh-in.
+          Say “weighed 142” in the bar above, or edit later when weigh-ins go live.
         </p>
       </section>
 
       <section className="grid gap-4">
         <div>
-          <h2 className="text-xl font-medium text-fg">What’s on your plate</h2>
+          <h2 className="text-xl font-medium text-fg">Today’s diary</h2>
           <p className="mt-1 text-sm leading-relaxed text-fgMuted">
-            {uiMock.todayMacros.calories} of {uiMock.todayMacros.calorieTarget} kcal · about {remaining} still
-            soft for the evening · protein {uiMock.todayMacros.proteinG}g · carbs{' '}
-            {uiMock.todayMacros.carbsG}g · fat {uiMock.todayMacros.fatG}g
+            {uiMock.todayMacros.calories} of {uiMock.todayMacros.calorieTarget} kcal · about {remaining} soft
+            room left · protein {uiMock.todayMacros.proteinG}g
           </p>
         </div>
 
@@ -107,13 +86,9 @@ export function Today() {
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Link className="text-link" to="/log?type=meal&capture=photo">
-            <span className="inline-flex items-center gap-1.5">
-              <Camera size={14} strokeWidth={1.5} /> Snap a plate later
-            </span>
-          </Link>
-        </div>
+        <Link className="text-link inline-flex items-center gap-1.5" to="/eat?capture=photo">
+          <Camera size={14} strokeWidth={1.5} /> Snap a plate later
+        </Link>
       </section>
 
       <hr className="section-rule" />
@@ -160,12 +135,12 @@ export function Today() {
         <div className="flex items-start gap-3">
           <ClipboardList className="mt-0.5 text-fgMuted" size={18} strokeWidth={1.5} />
           <div className="flex-1">
-            <p className="font-medium text-fg">If your body wants a lift later</p>
+            <p className="font-medium text-fg">Movement counts too</p>
             <p className="mt-1 text-sm leading-relaxed text-fgMuted">
-              You’re already taking care of today. The workout log will wait — proud either way.
+              Walks, lifts, anything that tends the garden. Say it in the bar or open Move.
             </p>
-            <Link className="button-secondary mt-4 inline-flex" to="/log?type=workout">
-              Open workout when ready
+            <Link className="button-secondary mt-4 inline-flex" to="/move">
+              Open Move
             </Link>
           </div>
         </div>

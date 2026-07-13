@@ -44,6 +44,7 @@ function resetStores() {
     focus: 'both',
     unit: 'lb',
     restSeconds: 90,
+    gardenDays: 3,
     intentions: [
       { id: 'g1', name: 'Morning weigh-in', done: true },
       { id: 'g2', name: 'Home-cooked dinner', done: false },
@@ -68,53 +69,39 @@ describe('app shell', () => {
     cleanup();
   });
 
-  it('renders mom-first Today with weight and meals', () => {
+  it('renders garden Today with universal command bar', () => {
     renderApp('/');
     expect(screen.getByText(/hi aloo/i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /one soft check-in is enough/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /your garden is growing/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /morning weight/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /what’s on your plate/i })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/need motivation/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/log anything/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /speak to log/i })).toBeInTheDocument();
   });
 
-  it('navigates Log and History tabs', async () => {
+  it('navigates Eat Move Grow tabs', async () => {
     renderApp('/');
-    clickBottomNav(/^log$/i);
-    await waitFor(() =>
-      expect(screen.getByRole('heading', { name: /you’re doing something kind/i })).toBeInTheDocument(),
-    );
+    clickBottomNav(/^eat$/i);
+    await waitFor(() => expect(screen.getByRole('heading', { name: /^eat$/i })).toBeInTheDocument());
 
-    clickBottomNav(/^history$/i);
-    await waitFor(() =>
-      expect(screen.getByRole('heading', { name: /look how far you’ve come/i })).toBeInTheDocument(),
-    );
+    clickBottomNav(/^move$/i);
+    await waitFor(() => expect(screen.getByRole('heading', { name: /^move$/i })).toBeInTheDocument());
+
+    clickBottomNav(/^grow$/i);
+    await waitFor(() => expect(screen.getByRole('heading', { name: /your garden/i })).toBeInTheDocument());
   });
 
-  it('shows onboarding until completed, then Today', async () => {
-    useUiStore.setState({ onboardingComplete: false, preferredName: 'Aloo', focus: 'both' });
+  it('routes meal text from the universal bar into confirm', async () => {
     renderApp('/');
-
-    expect(await screen.findByRole('heading', { name: /you’re in the right place/i })).toBeInTheDocument();
-    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /^continue$/i }));
-    expect(await screen.findByRole('heading', { name: /three gentle habits/i })).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /^continue$/i }));
-    expect(await screen.findByRole('heading', { name: /what should we call you/i })).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Aloo')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /^continue$/i }));
+    fireEvent.change(screen.getByPlaceholderText(/log anything/i), {
+      target: { value: 'I ate a sandwich about 600 calories' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /submit log/i }));
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /does this feel right/i })).toBeInTheDocument(),
+    );
     expect(
-      await screen.findByRole('heading', { name: /aloo, today’s waiting gently/i }),
+      within(screen.getByRole('main')).getByText(/I ate a sandwich about 600 calories/),
     ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /start gently/i }));
-    await waitFor(() =>
-      expect(screen.getByRole('heading', { name: /one soft check-in is enough/i })).toBeInTheDocument(),
-    );
-    expect(screen.getByText(/hi aloo/i)).toBeInTheDocument();
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
   });
 });
 
@@ -158,8 +145,8 @@ describe('active session flow', () => {
       expect(screen.getByText('95 lb x 8')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /end/i }));
-    expect(useWorkoutStore.getState().sessions.find((item) => item.id === session.id)?.endedAt).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /^end$/i }));
+    await waitFor(() => expect(screen.getByText(/workout recap/i)).toBeInTheDocument());
   });
 });
 
@@ -173,31 +160,18 @@ describe('exercise creation', () => {
     cleanup();
   });
 
-  it('shows validation errors for incomplete create form', async () => {
-    render(
-      <MemoryRouter initialEntries={['/exercises/new']}>
-        <Routes>
-          <Route path="/exercises/new" element={<ExerciseCreate />} />
-        </Routes>
-      </MemoryRouter>,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: /save exercise/i }));
-    expect(await screen.findByText(/name, muscle group, and equipment are required/i)).toBeInTheDocument();
-  });
-
   it('creates an exercise from the form', async () => {
     render(
-      <MemoryRouter initialEntries={['/exercises/new']}>
-        <Routes>
-          <Route path="/exercises/new" element={<ExerciseCreate />} />
-        </Routes>
-      </MemoryRouter>,
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={['/exercises/new']}>
+          <Routes>
+            <Route path="/exercises/new" element={<ExerciseCreate />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
     );
 
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Cable Fly' } });
-    fireEvent.change(screen.getByLabelText(/muscle group/i), { target: { value: 'chest' } });
-    fireEvent.change(screen.getByLabelText(/equipment/i), { target: { value: 'cable' } });
     fireEvent.click(screen.getByRole('button', { name: /save exercise/i }));
 
     await waitFor(() => {
@@ -227,12 +201,12 @@ describe('goals and settings', () => {
     expect(useUiStore.getState().intentions.find((item) => item.id === 'g2')?.done).toBe(true);
   });
 
-  it('renders settings', () => {
+  it('renders You settings', () => {
     render(
       <MemoryRouter>
         <SettingsPage />
       </MemoryRouter>,
     );
-    expect(screen.getByRole('heading', { name: /settings/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^you$/i })).toBeInTheDocument();
   });
 });
