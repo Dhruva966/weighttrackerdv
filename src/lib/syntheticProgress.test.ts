@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildJaggedSyntheticLiftSeries, buildSyntheticProgressRows, JAGGED_POINT_COUNT } from './syntheticProgress';
+import { buildJaggedSyntheticLiftSeries, buildSyntheticProgressRows, JAGGED_POINT_MAX, JAGGED_POINT_MIN } from './syntheticProgress';
 
 describe('buildSyntheticProgressRows', () => {
   it('uses explicit grade progression when provided', () => {
@@ -34,10 +34,11 @@ describe('buildSyntheticProgressRows', () => {
 });
 
 describe('buildJaggedSyntheticLiftSeries', () => {
-  it('creates a long synthetic timeline with many jagged points', () => {
+  it('creates a freshman-year timeline with 30-40 jagged points', () => {
     const series = buildJaggedSyntheticLiftSeries({ slug: 'lat-pulldown', currentWeightLb: 175, currentReps: 6 });
 
-    expect(series).toHaveLength(JAGGED_POINT_COUNT);
+    expect(series.length).toBeGreaterThanOrEqual(JAGGED_POINT_MIN);
+    expect(series.length).toBeLessThanOrEqual(JAGGED_POINT_MAX);
     expect(series[0].label).toMatch(/Sep/i);
     expect(series.at(-1)?.weightLb).toBe(175);
     expect(series.at(-1)?.reps).toBe(6);

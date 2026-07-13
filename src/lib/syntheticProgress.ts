@@ -32,7 +32,12 @@ const gradeRows: Array<Pick<SyntheticProgressRow, 'grade' | 'date'>> = [
 
 const JAGGED_SERIES_START = new Date('2022-09-01T12:00:00-07:00');
 const JAGGED_SERIES_END = new Date('2026-07-11T12:00:00-07:00');
-export const JAGGED_POINT_COUNT = 56;
+export const JAGGED_POINT_MIN = 30;
+export const JAGGED_POINT_MAX = 40;
+
+function jaggedPointCount(slug: string): number {
+  return JAGGED_POINT_MIN + (hashSlug(slug) % (JAGGED_POINT_MAX - JAGGED_POINT_MIN + 1));
+}
 
 function hashSlug(slug: string): number {
   return [...slug].reduce((sum, char) => sum + char.charCodeAt(0), 0);
@@ -70,6 +75,7 @@ export function buildSyntheticProgressRows(input: SyntheticProgressInput): Synth
 export function buildJaggedSyntheticLiftSeries(input: SyntheticProgressInput): SyntheticLiftChartPoint[] {
   const seed = hashSlug(input.slug);
   const random = createSeededRandom(seed);
+  const pointCount = jaggedPointCount(input.slug);
   const endWeight = input.currentWeightLb;
   const startWeight = roundToNearestHalf(endWeight * (0.5 + (seed % 13) / 100));
   const floorWeight = roundToNearestHalf(startWeight * 0.88);
@@ -78,8 +84,8 @@ export function buildJaggedSyntheticLiftSeries(input: SyntheticProgressInput): S
 
   let previousWeight = startWeight;
 
-  for (let index = 0; index < JAGGED_POINT_COUNT; index += 1) {
-    const progress = index / (JAGGED_POINT_COUNT - 1);
+  for (let index = 0; index < pointCount; index += 1) {
+    const progress = index / (pointCount - 1);
     const date = new Date(JAGGED_SERIES_START.getTime() + spanMs * progress);
     const trend = startWeight + (endWeight - startWeight) * progress ** 0.82;
     const seasonal =
@@ -92,12 +98,12 @@ export function buildJaggedSyntheticLiftSeries(input: SyntheticProgressInput): S
     let weightLb = roundToNearestHalf(trend + seasonal + dip + spike + pullback);
     weightLb = Math.max(floorWeight, Math.min(endWeight * 1.04, weightLb));
 
-    if (index === JAGGED_POINT_COUNT - 1) {
+    if (index === pointCount - 1) {
       weightLb = endWeight;
     }
 
     const reps =
-      index === JAGGED_POINT_COUNT - 1
+      index === pointCount - 1
         ? (input.currentReps ?? 8)
         : Math.max(3, Math.min(12, Math.round(6 + seasonal / 4 + (random() - 0.5) * 5)));
 
