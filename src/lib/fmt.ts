@@ -10,6 +10,12 @@ export function formatDate(value: string): string {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(value));
 }
 
+export function formatChartMonth(value: string | Date): string {
+  return new Intl.DateTimeFormat('en-US', { month: 'short', year: '2-digit' }).format(
+    value instanceof Date ? value : new Date(value),
+  );
+}
+
 export function formatDateTime(value: string): string {
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',

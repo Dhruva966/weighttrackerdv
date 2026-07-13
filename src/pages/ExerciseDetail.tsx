@@ -1,25 +1,47 @@
+import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ExerciseImage } from '../components/ExerciseImage';
 import { SetRow } from '../components/SetRow';
 import { estimateOneRepMax } from '../lib/pr';
+import { buildJaggedSyntheticLiftSeries } from '../lib/syntheticProgress';
 import { useExerciseBySlug } from '../hooks/useExercises';
 import { useWorkoutStore } from '../stores/workoutStore';
+
+const chartAxisTick = { fontSize: 11, fill: '#999999' };
 
 export function ExerciseDetail() {
   const { slug } = useParams();
   const exercise = useExerciseBySlug(slug);
   const sets = useWorkoutStore((state) => state.sets.filter((setItem) => setItem.exerciseId === exercise?.id));
 
+  const chartData = useMemo(() => {
+    if (!exercise) {
+      return [];
+    }
+
+    const workingSets = sets.filter((setItem) => !setItem.isWarmup);
+    const latest = [...workingSets].sort(
+      (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+    )[0];
+
+    return buildJaggedSyntheticLiftSeries({
+      slug: exercise.slug,
+      currentWeightLb: latest?.weightLb ?? 100,
+      currentReps: latest?.reps ?? 8,
+    }).map((point) => ({
+      label: point.label,
+      oneRm: point.oneRm,
+      weightLb: point.weightLb,
+    }));
+  }, [exercise, sets]);
+
   if (!exercise) {
     return <p className="text-fgMuted">Exercise not found.</p>;
   }
 
   const best = sets.reduce((max, setItem) => Math.max(max, estimateOneRepMax(setItem.weightLb, setItem.reps)), 0);
-  const chartData = sets.map((setItem) => ({
-    date: new Date(setItem.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    oneRm: estimateOneRepMax(setItem.weightLb, setItem.reps),
-  }));
+  const labelInterval = Math.max(1, Math.floor(chartData.length / 10));
 
   return (
     <div className="grid gap-4">
@@ -54,13 +76,21 @@ export function ExerciseDetail() {
           <p className="mt-2 text-sm text-fgMuted">No setup notes yet.</p>
         )}
       </section>
-      <div className="app-card h-64">
+      <div className="app-card h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
-            <XAxis dataKey="date" stroke="#999999" />
-            <YAxis stroke="#999999" />
+          <LineChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 28 }}>
+            <XAxis
+              dataKey="label"
+              stroke="#999999"
+              tick={chartAxisTick}
+              interval={labelInterval}
+              angle={-32}
+              textAnchor="end"
+              height={56}
+            />
+            <YAxis stroke="#999999" tick={chartAxisTick} width={42} />
             <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E5E5', borderRadius: 8, color: '#4A3B2A' }} />
-            <Line type="monotone" dataKey="oneRm" stroke="#4A3B2A" strokeWidth={2} dot={false} animationDuration={400} />
+            <Line type="linear" dataKey="oneRm" stroke="#4A3B2A" strokeWidth={2} dot={false} animationDuration={400} />
           </LineChart>
         </ResponsiveContainer>
       </div>

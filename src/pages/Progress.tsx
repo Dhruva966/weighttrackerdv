@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Bar, BarChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { BodyMap } from '../components/BodyMap';
 import { formatVolume } from '../lib/fmt';
-import { buildLiftProgress } from '../lib/liftImport';
+import { buildJaggedSyntheticLiftSeries } from '../lib/syntheticProgress';
 import { summarizeWeeklyVolume } from '../lib/volume';
 import { useWorkoutStore } from '../stores/workoutStore';
 
@@ -12,6 +12,21 @@ function weekStart(): string {
   date.setDate(date.getDate() - ((day + 6) % 7));
   return date.toISOString().slice(0, 10);
 }
+
+function liftAnchor(exerciseId: string, sets: ReturnType<typeof useWorkoutStore.getState>['sets']) {
+  const exerciseSets = sets.filter((setItem) => setItem.exerciseId === exerciseId && !setItem.isWarmup);
+  if (!exerciseSets.length) {
+    return { weightLb: 100, reps: 8 };
+  }
+
+  const latest = [...exerciseSets].sort(
+    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+  )[0];
+
+  return { weightLb: latest.weightLb, reps: latest.reps };
+}
+
+const chartAxisTick = { fontSize: 11, fill: '#999999' };
 
 export function Progress() {
   const sets = useWorkoutStore((state) => state.sets);
@@ -35,7 +50,20 @@ export function Progress() {
     [exercises, sets],
   );
   const selectedExercise = exercisesWithSets.find((exercise) => exercise.id === selectedExerciseId) ?? exercisesWithSets[0];
-  const liftProgress = selectedExercise ? buildLiftProgress(selectedExercise.id, sets) : [];
+  const liftProgress = useMemo(() => {
+    if (!selectedExercise) {
+      return [];
+    }
+
+    const anchor = liftAnchor(selectedExercise.id, sets);
+    return buildJaggedSyntheticLiftSeries({
+      slug: selectedExercise.slug,
+      currentWeightLb: anchor.weightLb,
+      currentReps: anchor.reps,
+    });
+  }, [selectedExercise, sets]);
+
+  const liftLabelInterval = Math.max(1, Math.floor(liftProgress.length / 10));
 
   return (
     <div className="grid gap-4">
@@ -62,7 +90,7 @@ export function Progress() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-medium text-fg">Lift progress</h2>
-            <p className="text-sm text-fgMuted">Pick any lift to see weight and estimated 1RM over time.</p>
+            <p className="text-sm text-fgMuted">Synthetic long-range history from 9th grade through today.</p>
           </div>
           <select
             className="field sm:max-w-xs"
@@ -76,15 +104,39 @@ export function Progress() {
             ))}
           </select>
         </div>
-        <div className="h-72">
+        <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={liftProgress}>
-              <XAxis dataKey="label" stroke="#999999" />
-              <YAxis stroke="#999999" />
+            <LineChart data={liftProgress} margin={{ top: 8, right: 12, left: 0, bottom: 28 }}>
+              <XAxis
+                dataKey="label"
+                stroke="#999999"
+                tick={chartAxisTick}
+                interval={liftLabelInterval}
+                angle={-32}
+                textAnchor="end"
+                height={56}
+              />
+              <YAxis stroke="#999999" tick={chartAxisTick} width={42} />
               <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E5E5', borderRadius: 8, color: '#4A3B2A' }} />
               <Legend />
-              <Line type="monotone" name="Weight" dataKey="weightLb" stroke="#4A3B2A" strokeWidth={2} dot animationDuration={400} />
-              <Line type="monotone" name="Est. 1RM" dataKey="oneRm" stroke="#8B6914" strokeWidth={2} dot animationDuration={400} />
+              <Line
+                type="linear"
+                name="Weight"
+                dataKey="weightLb"
+                stroke="#4A3B2A"
+                strokeWidth={2}
+                dot={false}
+                animationDuration={400}
+              />
+              <Line
+                type="linear"
+                name="Est. 1RM"
+                dataKey="oneRm"
+                stroke="#8B6914"
+                strokeWidth={2}
+                dot={false}
+                animationDuration={400}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDateTime, formatVolume, formatWeight, slugify } from './fmt';
+import { formatChartMonth, formatDate, formatDateTime, formatVolume, formatWeight, slugify } from './fmt';
 
 describe('slugify', () => {
   it('normalizes exercise names into URL slugs', () => {
@@ -29,6 +29,13 @@ describe('formatVolume', () => {
 describe('formatDate', () => {
   it('formats ISO timestamps for charts', () => {
     expect(formatDate('2026-07-11T12:00:00Z')).toMatch(/Jul/);
+  });
+});
+
+describe('formatChartMonth', () => {
+  it('formats elongated month labels for progress charts', () => {
+    expect(formatChartMonth('2022-09-01T12:00:00-07:00')).toMatch(/Sep/i);
+    expect(formatChartMonth('2022-09-01T12:00:00-07:00')).toMatch(/22/);
   });
 });
 
