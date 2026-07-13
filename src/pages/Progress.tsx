@@ -51,9 +51,9 @@ export function Progress() {
       <div className="app-card h-72">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData}>
-            <XAxis dataKey="muscle" stroke="#A1A1AA" />
-            <YAxis stroke="#A1A1AA" />
-            <Tooltip contentStyle={{ background: '#18181B', border: '1px solid #3F3F46', borderRadius: 12 }} />
+            <XAxis dataKey="muscle" stroke="#999999" />
+            <YAxis stroke="#999999" />
+            <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E5E5', borderRadius: 8, color: '#4A3B2A' }} />
             <Bar dataKey="volume" fill="#4A3B2A" radius={[4, 4, 0, 0]} animationDuration={400} />
           </BarChart>
         </ResponsiveContainer>
@@ -79,9 +79,9 @@ export function Progress() {
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={liftProgress}>
-              <XAxis dataKey="label" stroke="#A1A1AA" />
-              <YAxis stroke="#A1A1AA" />
-              <Tooltip contentStyle={{ background: '#18181B', border: '1px solid #3F3F46', borderRadius: 12 }} />
+              <XAxis dataKey="label" stroke="#999999" />
+              <YAxis stroke="#999999" />
+              <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E5E5', borderRadius: 8, color: '#4A3B2A' }} />
               <Legend />
               <Line type="monotone" name="Weight" dataKey="weightLb" stroke="#4A3B2A" strokeWidth={2} dot animationDuration={400} />
               <Line type="monotone" name="Est. 1RM" dataKey="oneRm" stroke="#8B6914" strokeWidth={2} dot animationDuration={400} />

@@ -1,5 +1,5 @@
 import { CheckCircle2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ExercisePicker } from '../components/ExercisePicker';
 import { RestTimer } from '../components/RestTimer';
@@ -19,6 +19,13 @@ export function Session() {
   const session = sessions.find((item) => item.id === sessionId);
   const sessionSets = sets.filter((setItem) => setItem.sessionId === sessionId);
   const selectedIds = useMemo(() => new Set(selected.map((exercise) => exercise.id)), [selected]);
+
+  useEffect(() => {
+    const lastSet = sessionSets.at(-1);
+    if (lastSet) {
+      setLastSetKey(lastSet.id);
+    }
+  }, [sessionSets]);
 
   if (!session) {
     return <p className="text-fgMuted">Session not found.</p>;
@@ -61,10 +68,7 @@ export function Session() {
                 sessionId={session.id}
                 exercise={exercise}
               />
-              <div
-                className="grid gap-2"
-                onTransitionEnd={() => setLastSetKey(exerciseSets.at(-1)?.id ?? '')}
-              >
+              <div className="grid gap-2">
                 {exerciseSets.map((setItem) => (
                   <SetRow key={setItem.id} setItem={setItem} />
                 ))}

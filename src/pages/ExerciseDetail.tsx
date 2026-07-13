@@ -57,9 +57,9 @@ export function ExerciseDetail() {
       <div className="app-card h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
-            <XAxis dataKey="date" stroke="#A1A1AA" />
-            <YAxis stroke="#A1A1AA" />
-            <Tooltip contentStyle={{ background: '#18181B', border: '1px solid #3F3F46', borderRadius: 12 }} />
+            <XAxis dataKey="date" stroke="#999999" />
+            <YAxis stroke="#999999" />
+            <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E5E5', borderRadius: 8, color: '#4A3B2A' }} />
             <Line type="monotone" dataKey="oneRm" stroke="#4A3B2A" strokeWidth={2} dot={false} animationDuration={400} />
           </LineChart>
         </ResponsiveContainer>
