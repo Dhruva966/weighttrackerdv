@@ -1,5 +1,5 @@
 import { BookOpen, History as HistoryIcon, Home, PenLine, Settings, Target } from 'lucide-react';
-import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { AskBar } from './components/AskBar';
 import { Nav } from './components/Nav';
 import { SessionLauncher } from './components/SessionLauncher';
@@ -66,14 +66,11 @@ function AppRoutes() {
 
 export function App() {
   useSupabaseBootstrap();
-  const location = useLocation();
-  const hideAsk =
-    location.pathname.startsWith('/session/') || location.pathname === '/log/meal/confirm';
 
   return (
     <div className="min-h-screen bg-bg font-serif text-fg antialiased">
       <Header />
-      {!hideAsk ? <AskBar /> : null}
+      <AskBar />
       <main className="mx-auto min-h-[calc(100vh-180px)] max-w-xl overflow-x-hidden px-5 pb-28 pt-6">
         <AppRoutes />
       </main>

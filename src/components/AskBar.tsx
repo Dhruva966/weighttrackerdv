@@ -17,7 +17,7 @@ export function AskBar() {
   }
 
   return (
-    <section className="border-b border-border bg-bg/95 px-5 py-3 backdrop-blur-sm">
+    <section className="sticky top-[4.5rem] z-20 border-b border-border bg-bg/95 px-5 py-3 backdrop-blur-sm">
       <form className="mx-auto max-w-xl" onSubmit={handleSubmit}>
         <label className="relative block">
           <span className="sr-only">Ask anything</span>
