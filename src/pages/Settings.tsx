@@ -1,5 +1,6 @@
-import { Download, Database, Smartphone } from 'lucide-react';
+import { Download, Database, Smartphone, Sparkles } from 'lucide-react';
 import { downloadWorkoutExport } from '../lib/export';
+import { isExerciseLogLlmConfigured } from '../lib/exercise-log-parse';
 import { useOnline } from '../hooks/useOnline';
 import { useSupabaseBootstrap } from '../hooks/useSupabaseBootstrap';
 import { useUiStore } from '../stores/uiStore';
@@ -32,11 +33,14 @@ export function SettingsPage() {
         </p>
       </section>
       <section className="app-card grid gap-3">
-        <p className="font-bold text-fg">Natural language logging</p>
+        <p className="flex items-center gap-2 font-bold text-fg">
+          <Sparkles size={18} />
+          Natural language logging
+        </p>
         <p className="text-sm text-fgMuted">
-          Workout logs parse for free on-device. For messier notes, add a free Groq key as{' '}
-          <code className="font-mono text-xs">VITE_GROQ_API_KEY</code> — Groq’s free tier uses Llama as a fallback
-          parser only when the local parser cannot find sets.
+          {isExerciseLogLlmConfigured()
+            ? 'Groq fallback is configured. The app tries the free on-device parser first, then Groq for tougher notes.'
+            : 'Add VITE_GROQ_API_KEY to .env.local for a free Groq fallback when on-device parsing cannot find sets.'}
         </p>
       </section>
       <section className="app-card grid gap-3">
