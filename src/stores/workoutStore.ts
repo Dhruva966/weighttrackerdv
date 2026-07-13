@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { starterExercises, starterGoals, starterSessions, starterSets } from '../data/catalog';
 import { slugify } from '../lib/fmt';
-import { parseLiftBrainDump } from '../lib/liftImport';
+import { formatImportedSessionNotes, parseBrainDump } from '../lib/liftImport';
 import { isPersonalRecord } from '../lib/pr';
 import { syncExercise, syncGoal, syncSession, syncSet } from '../lib/supabase-sync';
 import { USER_ID } from '../lib/user';
@@ -26,7 +26,7 @@ type WorkoutState = {
   endSession: (sessionId: string) => void;
   addSet: (input: Omit<LoggedSet, 'id' | 'setNumber' | 'isPr' | 'createdAt'>) => LoggedSet;
   addExercise: (input: ExerciseInput) => Exercise;
-  importLiftDump: (text: string) => { imported: number; skipped: string[] };
+  importLiftDump: (text: string) => { imported: number; notes: number; skipped: string[] };
   toggleGoal: (goalId: string) => void;
 };
 
@@ -162,9 +162,13 @@ export const useWorkoutStore = create<WorkoutState>()(
         return exercise;
       },
       importLiftDump: (text) => {
-        const parsed = parseLiftBrainDump(text);
-        if (parsed.length === 0) {
-          return { imported: 0, skipped: [] };
+        const parsed = parseBrainDump(text);
+        const importedSets = parsed.blocks.flatMap((block) => block.sets);
+        const noteCount =
+          parsed.sessionNotes.length + parsed.blocks.reduce((total, block) => total + block.notes.length, 0);
+
+        if (importedSets.length === 0 && noteCount === 0) {
+          return { imported: 0, notes: 0, skipped: [] };
         }
 
         const state = get();
@@ -173,20 +177,20 @@ export const useWorkoutStore = create<WorkoutState>()(
           userId: USER_ID,
           startedAt: new Date().toISOString(),
           endedAt: new Date().toISOString(),
-          notes: 'Imported from brain dump',
+          notes: formatImportedSessionNotes(parsed) ?? (importedSets.length > 0 ? 'Imported from brain dump' : undefined),
         };
         const exercises = [...state.exercises];
         const nextSets = [...state.sets];
         const skipped: string[] = [];
 
-        for (const entry of parsed) {
-          let exercise = findExerciseByName(exercises, entry.exerciseName);
+        for (const block of parsed.blocks) {
+          let exercise = findExerciseByName(exercises, block.exerciseName);
           if (!exercise) {
-            const slug = slugify(entry.exerciseName);
+            const slug = slugify(block.exerciseName);
             exercise = {
               id: newId(),
               slug,
-              name: entry.exerciseName,
+              name: block.exerciseName,
               muscleGroup: 'full-body',
               secondaryMuscles: [],
               equipment: 'other',
@@ -197,28 +201,30 @@ export const useWorkoutStore = create<WorkoutState>()(
             exercises.unshift(exercise);
           }
 
-          if (!Number.isFinite(entry.weightLb) || entry.weightLb <= 0 || entry.reps <= 0) {
-            skipped.push(entry.raw);
-            continue;
-          }
+          for (const entry of block.sets) {
+            if (!Number.isFinite(entry.weightLb) || entry.weightLb <= 0 || entry.reps <= 0) {
+              skipped.push(block.raw);
+              continue;
+            }
 
-          const exerciseSets = nextSets.filter((setItem) => setItem.exerciseId === exercise.id);
-          const history = exerciseSets.map((setItem) => ({
-            weightLb: setItem.weightLb,
-            reps: setItem.reps,
-            isWarmup: setItem.isWarmup,
-          }));
-          nextSets.push({
-            id: newId(),
-            sessionId: importSession.id,
-            exerciseId: exercise.id,
-            setNumber: exerciseSets.length + 1,
-            weightLb: entry.weightLb,
-            reps: entry.reps,
-            isWarmup: false,
-            isPr: isPersonalRecord(entry, history),
-            createdAt: new Date().toISOString(),
-          });
+            const exerciseSets = nextSets.filter((setItem) => setItem.exerciseId === exercise.id);
+            const history = exerciseSets.map((setItem) => ({
+              weightLb: setItem.weightLb,
+              reps: setItem.reps,
+              isWarmup: setItem.isWarmup,
+            }));
+            nextSets.push({
+              id: newId(),
+              sessionId: importSession.id,
+              exerciseId: exercise.id,
+              setNumber: exerciseSets.length + 1,
+              weightLb: entry.weightLb,
+              reps: entry.reps,
+              isWarmup: false,
+              isPr: isPersonalRecord(entry, history),
+              createdAt: new Date().toISOString(),
+            });
+          }
         }
 
         set({
@@ -235,7 +241,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           void syncSet(setItem);
         }
 
-        return { imported: nextSets.length - state.sets.length, skipped };
+        return { imported: nextSets.length - state.sets.length, notes: noteCount, skipped };
       },
       toggleGoal: (goalId) => {
         const current = get().goals.find((goal) => goal.id === goalId);

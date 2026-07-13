@@ -138,8 +138,29 @@ describe('workoutStore', () => {
     });
 
     it('returns zero imports for empty brain dumps', () => {
-      const result = useWorkoutStore.getState().importLiftDump('stretch and recover');
+      const result = useWorkoutStore.getState().importLiftDump('???');
       expect(result.imported).toBe(0);
+      expect(result.notes).toBe(0);
+    });
+
+    it('imports narrative notes with lifts into session history', () => {
+      const result = useWorkoutStore.getState().importLiftDump(
+        'preacher curl 115 lbs 8 reps 7 reps\nlast rep was helped by a friend',
+      );
+
+      expect(result.imported).toBe(2);
+      expect(result.notes).toBe(1);
+      expect(useWorkoutStore.getState().sessions[0].notes).toContain('last rep was helped by a friend');
+    });
+
+    it('saves note-only brain dumps as a session', () => {
+      const beforeSessions = useWorkoutStore.getState().sessions.length;
+      const result = useWorkoutStore.getState().importLiftDump('stretch and recover');
+
+      expect(result.imported).toBe(0);
+      expect(result.notes).toBe(1);
+      expect(useWorkoutStore.getState().sessions).toHaveLength(beforeSessions + 1);
+      expect(useWorkoutStore.getState().sessions[0].notes).toBe('stretch and recover');
     });
   });
 

@@ -145,7 +145,7 @@ export function Progress() {
         <div>
           <h2 className="text-xl font-medium text-fg">Brain dump import</h2>
           <p className="text-sm text-fgMuted">
-            Paste lines like “Lat pulldown 175 lbs”, “Bench 205 x 3 185 x 6”, or “preacher curl 8 reps 7 reps 7 reps and 115”.
+            Paste messy workout notes — lifts, reps, weights, and side comments like “last rep was helped by a friend”.
           </p>
         </div>
         <textarea
@@ -153,7 +153,7 @@ export function Progress() {
           value={dumpText}
           onChange={(event) => setDumpText(event.target.value)}
           placeholder={
-            'Lat pulldown 175 lbs\nBench 205 x 3 185 x 6\npreacher curl 3 sets first set was 8 reps second was 7 third was 7 and 115'
+            'preacher curl 3 sets first set was 8 reps second was 7 third was 7 and 115\nlast rep was helped by a friend\n\nBench 205 x 3 185 x 6\nLat pulldown 175 lbs'
           }
         />
         <button
@@ -161,12 +161,18 @@ export function Progress() {
           type="button"
           onClick={() => {
             const result = importLiftDump(dumpText);
-            setImportMessage(
-              result.imported > 0
-                ? `Imported ${result.imported} set${result.imported === 1 ? '' : 's'}.`
-                : 'No lift weights found.',
-            );
-            if (result.imported > 0) {
+            if (result.imported > 0 && result.notes > 0) {
+              setImportMessage(
+                `Imported ${result.imported} set${result.imported === 1 ? '' : 's'} with notes.`,
+              );
+            } else if (result.imported > 0) {
+              setImportMessage(`Imported ${result.imported} set${result.imported === 1 ? '' : 's'}.`);
+            } else if (result.notes > 0) {
+              setImportMessage(`Saved ${result.notes} note${result.notes === 1 ? '' : 's'} to history.`);
+            } else {
+              setImportMessage('No lift weights or notes found.');
+            }
+            if (result.imported > 0 || result.notes > 0) {
               setDumpText('');
             }
           }}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildLiftProgress, parseLiftBrainDump } from './liftImport';
+import { buildLiftProgress, formatImportedSessionNotes, parseBrainDump, parseLiftBrainDump } from './liftImport';
 
 describe('parseLiftBrainDump', () => {
   it('parses one bare current weight per line', () => {
@@ -36,6 +36,98 @@ describe('parseLiftBrainDump', () => {
       { exerciseName: 'preacher curl', weightLb: 115, reps: 7, raw },
       { exerciseName: 'preacher curl', weightLb: 115, reps: 7, raw },
     ]);
+  });
+});
+
+describe('parseBrainDump', () => {
+  it('keeps narrative notes with the lift block', () => {
+    const text = [
+      'preacher curl 3 sets first set was 8 reps second was 7 third was 7 and 115',
+      'last rep was helped by a friend',
+    ].join('\n');
+
+    expect(parseBrainDump(text)).toEqual({
+      blocks: [
+        {
+          exerciseName: 'preacher curl',
+          sets: [
+            { weightLb: 115, reps: 8 },
+            { weightLb: 115, reps: 7 },
+            { weightLb: 115, reps: 7 },
+          ],
+          notes: ['last rep was helped by a friend'],
+          raw: 'preacher curl 3 sets first set was 8 reps second was 7 third was 7 and 115',
+        },
+      ],
+      sessionNotes: [],
+    });
+  });
+
+  it('extracts quoted and parenthetical notes from lift lines', () => {
+    const text = 'bench 205 x 3 (last rep was helped by a friend) "felt grindy"';
+
+    expect(parseBrainDump(text)).toEqual({
+      blocks: [
+        {
+          exerciseName: 'bench',
+          sets: [{ weightLb: 205, reps: 3 }],
+          notes: [],
+          raw: 'bench 205 x 3',
+        },
+      ],
+      sessionNotes: ['last rep was helped by a friend', 'felt grindy'],
+    });
+  });
+
+  it('parses mixed workout paragraphs with multiple exercises', () => {
+    const text = [
+      'preacher curl 8 7 7 at 115',
+      'last rep was helped by a friend',
+      '',
+      'lat pulldown 175 lbs',
+      'felt strong today',
+    ].join('\n');
+
+    expect(parseBrainDump(text)).toEqual({
+      blocks: [
+        {
+          exerciseName: 'preacher curl',
+          sets: [
+            { weightLb: 115, reps: 8 },
+            { weightLb: 115, reps: 7 },
+            { weightLb: 115, reps: 7 },
+          ],
+          notes: ['last rep was helped by a friend'],
+          raw: 'preacher curl 8 7 7 at 115',
+        },
+        {
+          exerciseName: 'lat pulldown',
+          sets: [{ weightLb: 175, reps: 1 }],
+          notes: ['felt strong today'],
+          raw: 'lat pulldown 175 lbs',
+        },
+      ],
+      sessionNotes: [],
+    });
+  });
+
+  it('stores note-only text as session notes', () => {
+    expect(parseBrainDump('stretch and recover\nlegs still sore from yesterday')).toEqual({
+      blocks: [],
+      sessionNotes: ['stretch and recover', 'legs still sore from yesterday'],
+    });
+  });
+});
+
+describe('formatImportedSessionNotes', () => {
+  it('formats exercise notes and freeform notes for history', () => {
+    const parsed = parseBrainDump(
+      ['preacher curl 115 lbs 8 reps', 'last rep was helped by a friend', '', 'good gym day overall'].join('\n'),
+    );
+
+    expect(formatImportedSessionNotes(parsed)).toBe(
+      'preacher curl: last rep was helped by a friend\n\ngood gym day overall',
+    );
   });
 });
 
