@@ -18,12 +18,95 @@ export type LiftProgressPoint = {
 
 const weightRepsPattern = /(\d+(?:\.\d+)?)\s*(?:lb|lbs)?\s*(?:x|×)\s*(\d+)/gi;
 const bareWeightPattern = /(\d+(?:\.\d+)?)\s*(?:lb|lbs)\b/i;
+const ordinalSetPattern =
+  /(?:first|second|third|fourth|fifth|sixth)\s+(?:set\s+)?(?:was\s+)?(\d+)(?:\s*reps?)?/gi;
+const bareRepsPattern = /(\d+)\s*reps?\b/gi;
+const trailingWeightPattern = /(?:and|at|@)\s*(\d+(?:\.\d+)?)\s*(?:lb|lbs)?\s*$/i;
 
 function cleanExerciseName(value: string): string {
   return value
     .replace(/^[\s\-*•☐○]+/, '')
     .replace(/[:,-]+$/, '')
     .trim();
+}
+
+function extractProseReps(raw: string): number[] {
+  const ordinalMatches = [...raw.matchAll(ordinalSetPattern)];
+  if (ordinalMatches.length > 0) {
+    return ordinalMatches.map((match) => Number(match[1]));
+  }
+
+  return [...raw.matchAll(bareRepsPattern)].map((match) => Number(match[1]));
+}
+
+function extractProseWeight(raw: string, reps: number[]): number | null {
+  const trailingMatch = raw.match(trailingWeightPattern);
+  if (trailingMatch) {
+    return Number(trailingMatch[1]);
+  }
+
+  const lbsMatch = raw.match(bareWeightPattern);
+  if (lbsMatch) {
+    return Number(lbsMatch[1]);
+  }
+
+  const repValues = new Set(reps);
+  const numbers = [...raw.matchAll(/(\d+(?:\.\d+)?)/g)].map((match) => Number(match[1]));
+  for (let index = numbers.length - 1; index >= 0; index -= 1) {
+    const value = numbers[index];
+    if (!repValues.has(value) && value > 0) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+function proseExerciseNameEnd(raw: string, firstRepIndex: number): number {
+  let end = firstRepIndex > 0 ? firstRepIndex : raw.length;
+
+  const setsMatch = raw.match(/\d+\s*sets?\b/i);
+  if (setsMatch?.index !== undefined && setsMatch.index > 0) {
+    end = Math.min(end, setsMatch.index);
+  }
+
+  const firstSetMatch = raw.match(/\bfirst\s+set\b/i);
+  if (firstSetMatch?.index !== undefined && firstSetMatch.index > 0) {
+    end = Math.min(end, firstSetMatch.index);
+  }
+
+  const weightMatch = raw.match(bareWeightPattern);
+  if (weightMatch?.index !== undefined && weightMatch.index > 0) {
+    end = Math.min(end, weightMatch.index);
+  }
+
+  return end;
+}
+
+function parseProseLiftLine(raw: string): ParsedLiftSet[] | null {
+  const reps = extractProseReps(raw);
+  if (reps.length === 0) {
+    return null;
+  }
+
+  const weightLb = extractProseWeight(raw, reps);
+  if (!weightLb || weightLb <= 0) {
+    return null;
+  }
+
+  const firstRepMatch = raw.match(/(?:first|second|third|fourth|fifth|sixth)\s+(?:set\s+)?(?:was\s+)?\d+|\d+\s*reps?\b/i);
+  const firstRepIndex = firstRepMatch?.index ?? raw.length;
+  const exerciseName = cleanExerciseName(raw.slice(0, proseExerciseNameEnd(raw, firstRepIndex)).trim());
+  if (!exerciseName) {
+    return null;
+  }
+
+  return reps.map((repCount) => ({
+    exerciseName,
+    weightLb,
+    reps: repCount,
+    raw,
+  }));
 }
 
 export function parseLiftBrainDump(text: string): ParsedLiftSet[] {
@@ -50,6 +133,12 @@ export function parseLiftBrainDump(text: string): ParsedLiftSet[] {
           raw,
         });
       }
+      continue;
+    }
+
+    const proseSets = parseProseLiftLine(raw);
+    if (proseSets) {
+      parsed.push(...proseSets);
       continue;
     }
 

@@ -19,6 +19,24 @@ describe('parseLiftBrainDump', () => {
   it('ignores lines without a lift weight', () => {
     expect(parseLiftBrainDump('become fully flexible\npractice handstand')).toEqual([]);
   });
+
+  it('parses prose set notes with trailing weight', () => {
+    const raw = 'preacher curl 3 sets first set was 8 reps second was 7 third was 7 and 115';
+    expect(parseLiftBrainDump(raw)).toEqual([
+      { exerciseName: 'preacher curl', weightLb: 115, reps: 8, raw },
+      { exerciseName: 'preacher curl', weightLb: 115, reps: 7, raw },
+      { exerciseName: 'preacher curl', weightLb: 115, reps: 7, raw },
+    ]);
+  });
+
+  it('parses repeated reps with explicit lbs', () => {
+    const raw = 'preacher curl 115 lbs 8 reps 7 reps 7 reps';
+    expect(parseLiftBrainDump(raw)).toEqual([
+      { exerciseName: 'preacher curl', weightLb: 115, reps: 8, raw },
+      { exerciseName: 'preacher curl', weightLb: 115, reps: 7, raw },
+      { exerciseName: 'preacher curl', weightLb: 115, reps: 7, raw },
+    ]);
+  });
 });
 
 describe('buildLiftProgress', () => {

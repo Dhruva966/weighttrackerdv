@@ -144,13 +144,17 @@ export function Progress() {
       <section className="app-card grid gap-3">
         <div>
           <h2 className="text-xl font-medium text-fg">Brain dump import</h2>
-          <p className="text-sm text-fgMuted">Paste lines like “Lat pulldown 175 lbs” or “Bench 205 x 3 185 x 6”.</p>
+          <p className="text-sm text-fgMuted">
+            Paste lines like “Lat pulldown 175 lbs”, “Bench 205 x 3 185 x 6”, or “preacher curl 8 reps 7 reps 7 reps and 115”.
+          </p>
         </div>
         <textarea
           className="field min-h-40 py-3"
           value={dumpText}
           onChange={(event) => setDumpText(event.target.value)}
-          placeholder={'Lat pulldown 175 lbs\nBench 205 x 3 185 x 6\nDumbbell preacher curl 42.5 lb'}
+          placeholder={
+            'Lat pulldown 175 lbs\nBench 205 x 3 185 x 6\npreacher curl 3 sets first set was 8 reps second was 7 third was 7 and 115'
+          }
         />
         <button
           className="button-primary"
