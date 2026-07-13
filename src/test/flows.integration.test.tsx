@@ -40,7 +40,7 @@ function resetStores() {
   usePrStore.getState().clearPr();
   useUiStore.setState({
     onboardingComplete: true,
-    preferredName: '',
+    preferredName: 'Aloo',
     focus: 'both',
     unit: 'lb',
     restSeconds: 90,
@@ -64,6 +64,7 @@ describe('app shell', () => {
 
   it('renders mom-first Today with weight and meals', () => {
     renderApp('/');
+    expect(screen.getByText(/hi aloo/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /today is already going well/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /morning weight/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /what’s on your plate/i })).toBeInTheDocument();
@@ -84,7 +85,7 @@ describe('app shell', () => {
   });
 
   it('shows onboarding until completed, then Today', async () => {
-    useUiStore.setState({ onboardingComplete: false, preferredName: '', focus: 'both' });
+    useUiStore.setState({ onboardingComplete: false, preferredName: 'Aloo', focus: 'both' });
     renderApp('/');
 
     expect(await screen.findByRole('heading', { name: /you’re in the right place/i })).toBeInTheDocument();
@@ -95,18 +96,18 @@ describe('app shell', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /^continue$/i }));
     expect(await screen.findByRole('heading', { name: /what should we call you/i })).toBeInTheDocument();
-    fireEvent.change(screen.getByPlaceholderText(/amma|priya/i), { target: { value: 'Amma' } });
+    expect(screen.getByDisplayValue('Aloo')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /^continue$/i }));
     expect(
-      await screen.findByRole('heading', { name: /amma, today’s waiting gently/i }),
+      await screen.findByRole('heading', { name: /aloo, today’s waiting gently/i }),
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /begin today/i }));
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: /today is already going well/i })).toBeInTheDocument(),
     );
-    expect(screen.getByText(/hi amma/i)).toBeInTheDocument();
+    expect(screen.getByText(/hi aloo/i)).toBeInTheDocument();
     expect(screen.getByRole('navigation')).toBeInTheDocument();
   });
 });

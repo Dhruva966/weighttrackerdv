@@ -36,7 +36,7 @@ export function Onboarding() {
   const navigate = useNavigate();
   const completeOnboarding = useUiStore((state) => state.completeOnboarding);
   const [stepIndex, setStepIndex] = useState(0);
-  const [name, setName] = useState('');
+  const [name, setName] = useState('Aloo');
   const [focus, setFocus] = useState<Focus>('both');
 
   const step = steps[stepIndex];
@@ -117,7 +117,7 @@ export function Onboarding() {
                   className="field"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="e.g. Amma, Priya…"
+                  placeholder="Aloo"
                   autoComplete="given-name"
                 />
               </label>

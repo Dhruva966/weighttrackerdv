@@ -19,20 +19,20 @@ export const useUiStore = create<UiState>()(
       unit: 'lb',
       restSeconds: 90,
       onboardingComplete: false,
-      preferredName: '',
+      preferredName: 'Aloo',
       focus: 'both',
       setUnit: (unit) => set({ unit }),
       setRestSeconds: (restSeconds) => set({ restSeconds }),
       completeOnboarding: (input) =>
         set({
           onboardingComplete: true,
-          preferredName: input?.preferredName?.trim() ?? '',
+          preferredName: input?.preferredName?.trim() || 'Aloo',
           focus: input?.focus ?? 'both',
         }),
       resetOnboarding: () =>
         set({
           onboardingComplete: false,
-          preferredName: '',
+          preferredName: 'Aloo',
           focus: 'both',
         }),
     }),
