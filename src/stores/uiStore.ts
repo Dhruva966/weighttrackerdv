@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { uiMock } from '../data/uiMock';
+import type { MealItemEstimate } from '../lib/meal-from-text';
 
 export type Intention = { id: string; name: string; done: boolean };
 
 export type MealDraftPreview = {
   source: string;
   raw: string;
-  items: typeof uiMock.mealDraft.items;
+  items: MealItemEstimate[];
 };
 
 type Focus = 'meals' | 'weight' | 'both';
@@ -22,8 +22,8 @@ type UiState = {
   intentions: Intention[];
   mealDraft: MealDraftPreview;
   previewNotice: string | null;
-  /** Days tended — drives garden leaf growth (demo). */
-  gardenDays: number;
+  /** Days of consistency — drives pot-of-gold growth. */
+  goldDays: number;
   setUnit: (unit: 'lb' | 'kg') => void;
   setRestSeconds: (seconds: number) => void;
   completeOnboarding: (input?: { preferredName?: string; focus?: Focus }) => void;
@@ -33,14 +33,20 @@ type UiState = {
   clearMealDraft: () => void;
   showPreviewNotice: (message: string) => void;
   clearPreviewNotice: () => void;
-  tendGarden: () => void;
+  tendGold: () => void;
 };
 
-const defaultIntentions: Intention[] = uiMock.goals.map((goal) => ({
-  id: goal.id,
-  name: goal.name,
-  done: goal.done,
-}));
+const defaultIntentions: Intention[] = [
+  { id: 'g1', name: 'Morning weigh-in', done: false },
+  { id: 'g2', name: 'Train today (gym or walk)', done: false },
+  { id: 'g3', name: 'Better than yesterday', done: false },
+];
+
+const emptyDraft: MealDraftPreview = {
+  source: 'Universal command',
+  raw: '',
+  items: [],
+};
 
 export const useUiStore = create<UiState>()(
   persist(
@@ -48,25 +54,24 @@ export const useUiStore = create<UiState>()(
       unit: 'lb',
       restSeconds: 90,
       onboardingComplete: true,
-      preferredName: 'Aloo',
+      preferredName: 'Dhruva',
       focus: 'both',
       intentions: defaultIntentions,
-      mealDraft: { ...uiMock.mealDraft },
+      mealDraft: emptyDraft,
       previewNotice: null,
-      gardenDays: 3,
+      goldDays: 1,
       setUnit: (unit) => set({ unit }),
       setRestSeconds: (restSeconds) => set({ restSeconds }),
       completeOnboarding: (input) =>
         set({
           onboardingComplete: true,
-          preferredName: input?.preferredName?.trim() || 'Aloo',
+          preferredName: input?.preferredName?.trim() || 'Dhruva',
           focus: input?.focus ?? 'both',
         }),
       resetOnboarding: () =>
         set({
-          // Stashed: replay is a no-op for gating, but resets name gently
           onboardingComplete: true,
-          preferredName: 'Aloo',
+          preferredName: 'Dhruva',
           focus: 'both',
         }),
       toggleIntention: (id) =>
@@ -83,13 +88,13 @@ export const useUiStore = create<UiState>()(
             items: draft.items ?? state.mealDraft.items,
           },
         })),
-      clearMealDraft: () => set({ mealDraft: { ...uiMock.mealDraft } }),
+      clearMealDraft: () => set({ mealDraft: emptyDraft }),
       showPreviewNotice: (message) => set({ previewNotice: message }),
       clearPreviewNotice: () => set({ previewNotice: null }),
-      tendGarden: () => set((state) => ({ gardenDays: Math.min(21, state.gardenDays + 1) })),
+      tendGold: () => set((state) => ({ goldDays: Math.min(21, state.goldDays + 1) })),
     }),
     {
-      name: 'weight-tracker-ui-v2',
+      name: 'aloo-ui-v1',
       partialize: (state) => ({
         unit: state.unit,
         restSeconds: state.restSeconds,
@@ -97,7 +102,7 @@ export const useUiStore = create<UiState>()(
         preferredName: state.preferredName,
         focus: state.focus,
         intentions: state.intentions,
-        gardenDays: state.gardenDays,
+        goldDays: state.goldDays,
       }),
     },
   ),

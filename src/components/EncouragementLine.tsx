@@ -6,10 +6,10 @@ export function EncouragementLine() {
   const preferredName = useUiStore((state) => state.preferredName);
   const name = preferredName || 'friend';
   const lines = [
-    'Tired is real — one tiny step still counts.',
-    'A tiny step is enough for now.',
-    'Thinking a lot is okay. The next note can be small.',
-    `You’re building a kinder rhythm, ${name}.`,
+    'Better than yesterday — that’s the whole game.',
+    'Discipline compounds. Show up once more.',
+    'Stay lean, stay sharp, keep building.',
+    `Keep stacking wins, ${name}.`,
   ];
   const [index, setIndex] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);

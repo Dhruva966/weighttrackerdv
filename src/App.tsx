@@ -1,7 +1,7 @@
-import { Footprints, Home, Sprout, User, Utensils } from 'lucide-react';
+import { Footprints, Home, Sparkles, User, Utensils } from 'lucide-react';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
-import { GardenLeaf } from './components/GardenLeaf';
 import { Nav } from './components/Nav';
+import { PotOfGold } from './components/PotOfGold';
 import { SessionLauncher } from './components/SessionLauncher';
 import { Toaster } from './components/Toaster';
 import { UniversalCommandBar } from './components/UniversalCommandBar';
@@ -21,16 +21,16 @@ import { WorkoutHistory } from './pages/WorkoutHistory';
 import { useUiStore } from './stores/uiStore';
 
 function Header() {
-  const gardenDays = useUiStore((state) => state.gardenDays);
+  const goldDays = useUiStore((state) => state.goldDays);
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/70 bg-bg/85 px-5 py-3.5 backdrop-blur-md">
       <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
         <Link to="/" className="page-title text-[1.55rem] tracking-[-0.02em]">
-          Lift
+          Aloo
         </Link>
         <div className="flex items-center gap-2">
-          <p className="hidden text-xs text-fgMuted sm:block">{gardenDays} days in the garden</p>
+          <p className="hidden text-xs text-fgMuted sm:block">{goldDays} days compounding</p>
           <Link className="icon-button" to="/you" aria-label="You and settings">
             <User size={18} strokeWidth={1.5} />
           </Link>
@@ -41,18 +41,18 @@ function Header() {
 }
 
 function GrowPage() {
-  const gardenDays = useUiStore((state) => state.gardenDays);
+  const goldDays = useUiStore((state) => state.goldDays);
 
   return (
     <div className="grid animate-rise gap-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="page-title">Your garden</h1>
+          <h1 className="page-title">Your pot of gold</h1>
           <p className="page-lead mt-3">
-            Consistency grows the leaf — meals, walks, lifts, and weigh-ins all count as tending.
+            Consistency fills the pot — meals, walks, lifts, and weigh-ins all compound.
           </p>
         </div>
-        <GardenLeaf days={gardenDays} />
+        <PotOfGold days={goldDays} />
       </div>
       <History compact />
     </div>
@@ -78,7 +78,7 @@ function EatPage() {
     <div className="grid animate-rise gap-4">
       <div>
         <h1 className="page-title">Eat</h1>
-        <p className="page-lead mt-3">Plates in your words — idli to sandwiches. Voice or type in the bar above.</p>
+        <p className="page-lead mt-3">Log food in your words — type or voice in the bar above.</p>
       </div>
       <Log forcedType="meal" />
     </div>
@@ -116,7 +116,6 @@ function AppRoutes() {
 export function App() {
   useSupabaseBootstrap();
 
-  // Onboarding stashed — restore gate later from decisions/2026-07-13-garden-universal-voice.md
   return (
     <div className="min-h-screen font-serif text-fg antialiased">
       <Header />
@@ -129,7 +128,7 @@ export function App() {
           { to: '/', label: 'Today', icon: Home },
           { to: '/eat', label: 'Eat', icon: Utensils },
           { to: '/move', label: 'Move', icon: Footprints },
-          { to: '/grow', label: 'Grow', icon: Sprout },
+          { to: '/grow', label: 'Grow', icon: Sparkles },
           { to: '/you', label: 'You', icon: User },
         ]}
       />

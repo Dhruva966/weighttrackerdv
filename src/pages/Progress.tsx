@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Bar, BarChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { BodyMap } from '../components/BodyMap';
 import { formatVolume } from '../lib/fmt';
-import { buildJaggedSyntheticLiftSeries } from '../lib/syntheticProgress';
+import { buildLiftProgress } from '../lib/liftImport';
 import { summarizeWeeklyVolume } from '../lib/volume';
 import { useWorkoutStore } from '../stores/workoutStore';
 
@@ -13,20 +13,7 @@ function weekStart(): string {
   return date.toISOString().slice(0, 10);
 }
 
-function liftAnchor(exerciseId: string, sets: ReturnType<typeof useWorkoutStore.getState>['sets']) {
-  const exerciseSets = sets.filter((setItem) => setItem.exerciseId === exerciseId && !setItem.isWarmup);
-  if (!exerciseSets.length) {
-    return { weightLb: 100, reps: 8 };
-  }
-
-  const latest = [...exerciseSets].sort(
-    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
-  )[0];
-
-  return { weightLb: latest.weightLb, reps: latest.reps };
-}
-
-const chartAxisTick = { fontSize: 11, fill: '#999999' };
+const chartAxisTick = { fontSize: 11, fill: '#7A7164' };
 
 export function Progress() {
   const sets = useWorkoutStore((state) => state.sets);
@@ -54,13 +41,7 @@ export function Progress() {
     if (!selectedExercise) {
       return [];
     }
-
-    const anchor = liftAnchor(selectedExercise.id, sets);
-    return buildJaggedSyntheticLiftSeries({
-      slug: selectedExercise.slug,
-      currentWeightLb: anchor.weightLb,
-      currentReps: anchor.reps,
-    });
+    return buildLiftProgress(selectedExercise.id, sets);
   }, [selectedExercise, sets]);
 
   const liftLabelInterval = Math.max(1, Math.floor(liftProgress.length / 10));

@@ -4,11 +4,11 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'rec
 import { ExerciseImage } from '../components/ExerciseImage';
 import { SetRow } from '../components/SetRow';
 import { estimateOneRepMax } from '../lib/pr';
-import { buildJaggedSyntheticLiftSeries } from '../lib/syntheticProgress';
+import { buildLiftProgress } from '../lib/liftImport';
 import { useExerciseBySlug } from '../hooks/useExercises';
 import { useWorkoutStore } from '../stores/workoutStore';
 
-const chartAxisTick = { fontSize: 11, fill: '#999999' };
+const chartAxisTick = { fontSize: 11, fill: '#7A7164' };
 
 export function ExerciseDetail() {
   const { slug } = useParams();
@@ -19,17 +19,7 @@ export function ExerciseDetail() {
     if (!exercise) {
       return [];
     }
-
-    const workingSets = sets.filter((setItem) => !setItem.isWarmup);
-    const latest = [...workingSets].sort(
-      (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
-    )[0];
-
-    return buildJaggedSyntheticLiftSeries({
-      slug: exercise.slug,
-      currentWeightLb: latest?.weightLb ?? 100,
-      currentReps: latest?.reps ?? 8,
-    }).map((point) => ({
+    return buildLiftProgress(exercise.id, sets).map((point) => ({
       label: point.label,
       oneRm: point.oneRm,
       weightLb: point.weightLb,

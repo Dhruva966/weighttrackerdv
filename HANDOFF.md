@@ -55,7 +55,7 @@ Weight Tracker is a single-user gym PWA for owner `vutukurydhruva@gmail.com`. Th
 | Export data | Read all owner-scoped rows and download JSON or CSV. |
 
 ## Open Handoff Notes
-- **Garden shell (Jul 2026):** Onboarding stashed. Theme is greenery with growing leaf. Bottom nav: Today · Eat · Move · Grow · You. Sticky **UniversalCommandBar** (type + Web Speech mic). Free STT: Web Speech now; Groq Whisper edge next for iPhone PWA. See `decisions/2026-07-13-garden-universal-voice.md`.
-- Lose It steal: unified day diary, low-friction log, “showed up” framing. Avoid: leftover-calorie as hero.
-- Mom research: motivation/energy; private/on-device language for voice; no sleep tracking.
-- Still UI-only for meals/weight; gym session logging remains real via workout store.
+- **Aloo shell (Jul 2026):** Brand is **Aloo**. Soft gold + white. Pot of gold grows with consistency (`goldDays`). User display name **Dhruva**. Bottom nav: Today · Eat · Move · Grow · You. Sticky universal command bar (Web Speech). Onboarding stashed.
+- Real data: body weight + meals via `diaryStore` (seeded with Dhruva ~169 lb, empty meals). Lift charts use `buildLiftProgress` on real sets — no synthetic series in UI. Calendar/history built from workout + diary logs.
+- See `decisions/2026-07-13-garden-universal-voice.md` (superseded metaphor: pot of gold, not leaf).
+- Gym session logging remains real via workout store + Supabase when configured.

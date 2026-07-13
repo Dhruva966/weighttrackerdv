@@ -18,13 +18,12 @@ export function SettingsPage() {
     <div className="grid gap-4">
       <div>
         <h1 className="page-title">You</h1>
-        <p className="mt-1 text-sm text-fgMuted">Settings, units, export, and garden preferences.</p>
+        <p className="mt-1 text-sm text-fgMuted">Settings, units, export — built for {preferredName || 'Dhruva'}.</p>
       </div>
       <section className="app-card grid gap-3">
         <p className="font-medium text-fg">Onboarding (stashed)</p>
         <p className="text-sm leading-relaxed text-fgMuted">
-          The welcome tour is paused for now. Name stays {preferredName || 'Aloo'}. We’ll bring the soft
-          intro back when the garden shell settles.
+          Welcome tour is paused. Aloo stays gold-and-white with a pot that fills as you log.
         </p>
         <button
           className="button-secondary opacity-70"

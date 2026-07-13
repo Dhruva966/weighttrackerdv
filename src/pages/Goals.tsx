@@ -9,10 +9,10 @@ export function Goals() {
   return (
     <div className="grid animate-rise gap-6">
       <div>
-        <h1 className="page-title">Little intentions</h1>
+        <h1 className="page-title">Intentions</h1>
         <p className="page-lead mt-3">
-          Small daily nudges — weigh-in, home cooking, walks, kindness. {doneCount} of {intentions.length}{' '}
-          gently done. Each checkmark is a real win.
+          Daily checks that compound — weigh-in, train, better than yesterday. {doneCount} of{' '}
+          {intentions.length} done.
         </p>
       </div>
       <div className="grid gap-2">

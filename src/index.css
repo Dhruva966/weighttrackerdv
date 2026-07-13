@@ -3,7 +3,7 @@
 
 :root {
   color-scheme: light;
-  background: #f3f7f2;
+  background: #fffefb;
   font-family: 'EB Garamond', Georgia, Cambria, 'Times New Roman', serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -16,7 +16,7 @@
 }
 
 html {
-  background: #f3f7f2;
+  background: #fffefb;
   overflow-x: hidden;
   scroll-behavior: smooth;
 }
@@ -26,11 +26,11 @@ body {
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
-  color: #24352a;
+  color: #2b261c;
   background:
-    radial-gradient(ellipse 100% 70% at 0% 0%, rgba(61, 107, 79, 0.1), transparent 50%),
-    radial-gradient(ellipse 80% 50% at 100% 10%, rgba(228, 237, 230, 0.95), transparent 45%),
-    linear-gradient(180deg, #f7faf6 0%, #f3f7f2 40%, #eef4ee 100%);
+    radial-gradient(ellipse 95% 65% at 0% 0%, rgba(196, 163, 90, 0.16), transparent 52%),
+    radial-gradient(ellipse 70% 45% at 100% 8%, rgba(243, 235, 218, 0.9), transparent 48%),
+    linear-gradient(180deg, #fffefb 0%, #fbf7f0 42%, #f5efe4 100%);
 }
 
 button,
@@ -51,10 +51,10 @@ button {
 
 .app-card {
   border-radius: 1rem;
-  border: 1px solid #d5e2d7;
+  border: 1px solid #e6ddce;
   background: #ffffff;
   padding: 1.25rem;
-  box-shadow: 0 1px 2px rgba(36, 53, 42, 0.04);
+  box-shadow: 0 1px 2px rgba(43, 38, 28, 0.04);
 }
 
 .button-primary {
@@ -64,22 +64,22 @@ button {
   justify-content: center;
   gap: 0.5rem;
   border-radius: 1rem;
-  border: 1px solid #3d6b4f;
-  background: #3d6b4f;
+  border: 1px solid #c4a35a;
+  background: #c4a35a;
   padding: 0.75rem 1.25rem;
   font-weight: 500;
-  color: #f3f7f2;
-  box-shadow: 0 1px 2px rgba(36, 53, 42, 0.04);
+  color: #fffefb;
+  box-shadow: 0 1px 2px rgba(43, 38, 28, 0.04);
   transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 .button-primary:hover {
-  background: #335a43;
-  border-color: #335a43;
+  background: #b08d3a;
+  border-color: #b08d3a;
 }
 
 .button-primary:focus-visible {
-  outline: 2px solid #3d6b4f;
+  outline: 2px solid #c4a35a;
   outline-offset: 2px;
 }
 
@@ -95,21 +95,21 @@ button {
   justify-content: center;
   gap: 0.5rem;
   border-radius: 1rem;
-  border: 1px solid #d5e2d7;
+  border: 1px solid #e6ddce;
   background: #ffffff;
   padding: 0.5rem 1rem;
   font-weight: 500;
-  color: #24352a;
+  color: #2b261c;
   transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 .button-secondary:hover {
-  border-color: rgba(36, 53, 42, 0.2);
-  background: #e4ede6;
+  border-color: rgba(43, 38, 28, 0.2);
+  background: #f3ebda;
 }
 
 .button-secondary:focus-visible {
-  outline: 2px solid #24352a;
+  outline: 2px solid #2b261c;
   outline-offset: 2px;
 }
 
@@ -119,20 +119,20 @@ button {
   width: 2.75rem;
   place-items: center;
   border-radius: 9999px;
-  border: 1px solid #d5e2d7;
+  border: 1px solid #e6ddce;
   background: #ffffff;
-  color: #6b7c70;
+  color: #7a7164;
   transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 
 .icon-button:hover {
-  border-color: rgba(36, 53, 42, 0.2);
-  background: #e4ede6;
-  color: #24352a;
+  border-color: rgba(43, 38, 28, 0.2);
+  background: #f3ebda;
+  color: #2b261c;
 }
 
 .icon-button:focus-visible {
-  outline: 2px solid #24352a;
+  outline: 2px solid #2b261c;
   outline-offset: 2px;
 }
 
@@ -140,21 +140,21 @@ button {
   min-height: 3.5rem;
   width: 100%;
   border-radius: 1rem;
-  border: 1px solid #d5e2d7;
+  border: 1px solid #e6ddce;
   background: #ffffff;
   padding-left: 1rem;
   padding-right: 1rem;
-  color: #24352a;
+  color: #2b261c;
   outline: none;
   transition: border-color 150ms ease, background-color 150ms ease;
 }
 
 .field::placeholder {
-  color: #6b7c70;
+  color: #7a7164;
 }
 
 .field:focus {
-  border-color: #3d6b4f;
+  border-color: #c4a35a;
   background: #ffffff;
 }
 
@@ -162,7 +162,7 @@ button {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
-  color: #6b7c70;
+  color: #7a7164;
 }
 
 .tabular {
@@ -175,52 +175,52 @@ button {
   font-weight: 500;
   line-height: 1.25;
   letter-spacing: -0.02em;
-  color: #24352a;
+  color: #2b261c;
 }
 
 .page-lead {
   font-size: 1.125rem;
   line-height: 1.85;
-  color: #6b7c70;
+  color: #7a7164;
 }
 
 .section-rule {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   width: 2rem;
-  border-top: 1px solid #b9cbbe;
+  border-top: 1px solid #d4c8b4;
 }
 
 .text-link {
   font-size: 0.875rem;
   line-height: 1.25rem;
-  color: #6b7c70;
+  color: #7a7164;
   text-decoration: underline;
-  text-decoration-color: #d5e2d7;
+  text-decoration-color: #e6ddce;
   text-underline-offset: 4px;
   transition: color 150ms ease, text-decoration-color 150ms ease;
 }
 
 .text-link:hover {
-  color: #24352a;
-  text-decoration-color: rgba(36, 53, 42, 0.3);
+  color: #2b261c;
+  text-decoration-color: rgba(43, 38, 28, 0.3);
 }
 
 .quiet-chip {
   flex-shrink: 0;
   min-height: 2.75rem;
   border-radius: 9999px;
-  border: 1px solid #d5e2d7;
+  border: 1px solid #e6ddce;
   background: #ffffff;
   padding: 0.625rem 0.875rem;
   font-size: 0.75rem;
   line-height: 1rem;
-  color: #6b7c70;
+  color: #7a7164;
   transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 
 .quiet-chip:hover {
-  border-color: rgba(36, 53, 42, 0.2);
-  background: #e4ede6;
-  color: #24352a;
+  border-color: rgba(43, 38, 28, 0.2);
+  background: #f3ebda;
+  color: #2b261c;
 }

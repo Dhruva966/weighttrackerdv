@@ -1,10 +1,11 @@
 import { Mic, Send } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { estimateMealFromText, extractWeightLb } from '../lib/meal-from-text';
 import { isWebSpeechAvailable, listenOnce } from '../lib/speech/web-speech';
 import { parseUniversalCommand } from '../lib/universal-command';
+import { useDiaryStore } from '../stores/diaryStore';
 import { useUiStore } from '../stores/uiStore';
-import { uiMock } from '../data/uiMock';
 
 export function UniversalCommandBar() {
   const navigate = useNavigate();
@@ -13,12 +14,13 @@ export function UniversalCommandBar() {
   const [hint, setHint] = useState<string | null>(null);
   const setMealDraft = useUiStore((state) => state.setMealDraft);
   const showPreviewNotice = useUiStore((state) => state.showPreviewNotice);
-  const tendGarden = useUiStore((state) => state.tendGarden);
+  const tendGold = useUiStore((state) => state.tendGold);
+  const upsertBodyWeight = useDiaryStore((state) => state.upsertBodyWeight);
 
   async function handleMic() {
     if (!isWebSpeechAvailable()) {
       showPreviewNotice(
-        'Free voice works best in Chrome, or Safari on the phone browser. Typing always works — Groq Whisper can be added next for iPhone home-screen.',
+        'Free voice works best in Chrome, or Safari in the browser tab. Typing always works.',
       );
       return;
     }
@@ -44,31 +46,41 @@ export function UniversalCommandBar() {
       setMealDraft({
         source: 'Universal command (text or voice)',
         raw: parsed.raw,
-        items: uiMock.mealDraft.items,
+        items: estimateMealFromText(parsed.raw),
       });
-      tendGarden();
+      tendGold();
       navigate('/log/meal/confirm');
+      setQuery('');
       return;
     }
 
     if (parsed.intent === 'workout') {
-      tendGarden();
-      showPreviewNotice(`${parsed.summary} Opening Move — preview will attach sets next.`);
+      tendGold();
+      showPreviewNotice(`${parsed.summary} Opening Move.`);
       navigate('/move');
+      setQuery('');
       return;
     }
 
     if (parsed.intent === 'walk') {
-      tendGarden();
-      showPreviewNotice(`${parsed.summary} Walks count as Move — garden tended.`);
+      tendGold();
+      showPreviewNotice(`${parsed.summary} Walks count as Move.`);
       navigate('/move');
+      setQuery('');
       return;
     }
 
     if (parsed.intent === 'weight') {
-      tendGarden();
-      showPreviewNotice(`${parsed.summary} Weigh-ins stay preview-only on Today for now.`);
+      const weightLb = extractWeightLb(parsed.raw);
+      if (weightLb === null) {
+        showPreviewNotice('Couldn’t read a weight — try “weighed 169”.');
+        return;
+      }
+      upsertBodyWeight(weightLb);
+      tendGold();
+      showPreviewNotice(`Logged ${weightLb} lb.`);
       navigate('/');
+      setQuery('');
       return;
     }
 
@@ -97,7 +109,7 @@ export function UniversalCommandBar() {
                 setHint(null);
               }
             }}
-            placeholder="Log anything — ate bhagara rice… walked 20 min… weighed 142…"
+            placeholder="Log anything — ate sandwich 600 cal… walked 20 min… weighed 169…"
           />
         </label>
         <button

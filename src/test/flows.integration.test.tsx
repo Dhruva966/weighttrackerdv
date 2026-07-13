@@ -8,6 +8,7 @@ import { Goals } from '../pages/Goals';
 import { Session } from '../pages/Session';
 import { SettingsPage } from '../pages/Settings';
 import { starterExercises, starterGoals, starterSessions, starterSets } from '../data/catalog';
+import { useDiaryStore } from '../stores/diaryStore';
 import { usePrStore } from '../stores/prStore';
 import { useUiStore } from '../stores/uiStore';
 import { useWorkoutStore } from '../stores/workoutStore';
@@ -38,17 +39,22 @@ function resetStores() {
     sets: starterSets,
   });
   usePrStore.getState().clearPr();
+  useDiaryStore.setState({
+    bodyWeightLogs: [{ id: 'bw-seed-dhruva', loggedAt: '2026-07-13', weightLb: 169 }],
+    meals: [],
+    calorieTarget: 2400,
+  });
   useUiStore.setState({
     onboardingComplete: true,
-    preferredName: 'Aloo',
+    preferredName: 'Dhruva',
     focus: 'both',
     unit: 'lb',
     restSeconds: 90,
-    gardenDays: 3,
+    goldDays: 3,
     intentions: [
       { id: 'g1', name: 'Morning weigh-in', done: true },
-      { id: 'g2', name: 'Home-cooked dinner', done: false },
-      { id: 'g3', name: 'One tiny kind action', done: false },
+      { id: 'g2', name: 'Train today (gym or walk)', done: false },
+      { id: 'g3', name: 'Better than yesterday', done: false },
     ],
     previewNotice: null,
   });
@@ -69,11 +75,12 @@ describe('app shell', () => {
     cleanup();
   });
 
-  it('renders garden Today with universal command bar', () => {
+  it('renders Aloo Today with universal command bar', () => {
     renderApp('/');
-    expect(screen.getByText(/hi aloo/i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /your garden is growing/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /morning weight/i })).toBeInTheDocument();
+    expect(screen.getByText(/hi dhruva/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /your pot of gold is filling/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /body weight/i })).toBeInTheDocument();
+    expect(screen.getByText('169')).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/log anything/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /speak to log/i })).toBeInTheDocument();
   });
@@ -87,7 +94,7 @@ describe('app shell', () => {
     await waitFor(() => expect(screen.getByRole('heading', { name: /^move$/i })).toBeInTheDocument());
 
     clickBottomNav(/^grow$/i);
-    await waitFor(() => expect(screen.getByRole('heading', { name: /your garden/i })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('heading', { name: /your pot of gold/i })).toBeInTheDocument());
   });
 
   it('routes meal text from the universal bar into confirm', async () => {
@@ -102,6 +109,7 @@ describe('app shell', () => {
     expect(
       within(screen.getByRole('main')).getByText(/I ate a sandwich about 600 calories/),
     ).toBeInTheDocument();
+    expect(within(screen.getByRole('main')).getAllByText(/600 kcal/i).length).toBeGreaterThan(0);
   });
 });
 
@@ -190,14 +198,14 @@ describe('goals and settings', () => {
     cleanup();
   });
 
-  it('toggles a mom-first intention from the goals page', () => {
+  it('toggles an intention from the goals page', () => {
     render(
       <MemoryRouter>
         <Goals />
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /home-cooked dinner/i }));
+    fireEvent.click(screen.getByRole('button', { name: /train today/i }));
     expect(useUiStore.getState().intentions.find((item) => item.id === 'g2')?.done).toBe(true);
   });
 
