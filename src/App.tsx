@@ -1,4 +1,4 @@
-import { BookOpen, History as HistoryIcon, Home, PenLine, Settings, Target } from 'lucide-react';
+import { History as HistoryIcon, Home, PenLine, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { AskBar } from './components/AskBar';
@@ -29,12 +29,6 @@ function Header() {
           Lift
         </Link>
         <div className="flex items-center gap-1.5">
-          <Link className="icon-button" to="/exercises" aria-label="Exercises">
-            <BookOpen size={18} strokeWidth={1.5} />
-          </Link>
-          <Link className="icon-button" to="/goals" aria-label="Goals">
-            <Target size={18} strokeWidth={1.5} />
-          </Link>
           <Link className="icon-button" to="/settings" aria-label="Settings">
             <Settings size={18} strokeWidth={1.5} />
           </Link>

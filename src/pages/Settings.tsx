@@ -76,6 +76,9 @@ export function SettingsPage() {
             </button>
           ))}
         </div>
+        <p className="text-xs leading-relaxed text-fgMuted">
+          Affects workout logging for now. Today’s weight stays a calm demo in pounds.
+        </p>
       </section>
       <section className="app-card grid gap-3">
         <p className="font-bold text-fg">Rest timer</p>

@@ -10,9 +10,9 @@ export const uiMock = {
     calorieTarget: 1800,
   },
   motivation: {
-    title: 'A little energy for Aloo',
+    title: 'A little energy for you',
     body: 'Hungry and tired is a real combination — stress can make the night feel long. You don’t have to fix everything. One soft next step is enough: note the plate, or just breathe and drink water.',
-    nudge: 'You’re allowed to start imperfect. Execution gets easier when the first tap is tiny.',
+    nudge: 'You’re allowed to start imperfect. Showing up gets easier when the first tap is tiny.',
   },
   askExamples: [
     'I need a little motivation',
@@ -21,7 +21,7 @@ export const uiMock = {
   ],
   askAnswers: {
     motivation:
-      'You’re not lazy — you’re tired and thinking a lot. Pick one small thing: jot the meal in a sentence, or say it out loud privately on this device. Doing one tiny thing counts as execution.',
+      'You’re not lazy — you’re tired and thinking a lot. Pick one small thing: jot the meal in a sentence, or say it out loud privately on this device. One tiny note counts as showing up.',
     protein:
       'About 62 g so far — mostly from dal and the rice plate. That’s solid. Dinner can be gentle; you don’t need to “catch up” perfectly.',
     tiredEating:
@@ -30,7 +30,7 @@ export const uiMock = {
   askDemo: {
     question: 'I need a little motivation',
     answer:
-      'You’re not lazy — you’re tired and thinking a lot. Pick one small thing: jot the meal in a sentence, or say it out loud privately on this device. Doing one tiny thing counts as execution.',
+      'You’re not lazy — you’re tired and thinking a lot. Pick one small thing: jot the meal in a sentence, or say it out loud privately on this device. One tiny note counts as showing up.',
   },
   meals: [
     {

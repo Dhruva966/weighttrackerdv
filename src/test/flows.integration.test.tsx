@@ -44,6 +44,12 @@ function resetStores() {
     focus: 'both',
     unit: 'lb',
     restSeconds: 90,
+    intentions: [
+      { id: 'g1', name: 'Morning weigh-in', done: true },
+      { id: 'g2', name: 'Home-cooked dinner', done: false },
+      { id: 'g3', name: 'One tiny kind action', done: false },
+    ],
+    previewNotice: null,
   });
 }
 
@@ -65,7 +71,7 @@ describe('app shell', () => {
   it('renders mom-first Today with weight and meals', () => {
     renderApp('/');
     expect(screen.getByText(/hi aloo/i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /today is already going well/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /one soft check-in is enough/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /morning weight/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /what’s on your plate/i })).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/need motivation/i)).toBeInTheDocument();
@@ -103,9 +109,9 @@ describe('app shell', () => {
       await screen.findByRole('heading', { name: /aloo, today’s waiting gently/i }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /begin today/i }));
+    fireEvent.click(screen.getByRole('button', { name: /start gently/i }));
     await waitFor(() =>
-      expect(screen.getByRole('heading', { name: /today is already going well/i })).toBeInTheDocument(),
+      expect(screen.getByRole('heading', { name: /one soft check-in is enough/i })).toBeInTheDocument(),
     );
     expect(screen.getByText(/hi aloo/i)).toBeInTheDocument();
     expect(screen.getByRole('navigation')).toBeInTheDocument();
@@ -210,16 +216,15 @@ describe('goals and settings', () => {
     cleanup();
   });
 
-  it('toggles a goal from the goals page', () => {
-    const goal = starterGoals[0];
+  it('toggles a mom-first intention from the goals page', () => {
     render(
       <MemoryRouter>
         <Goals />
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: goal.name }));
-    expect(useWorkoutStore.getState().goals.find((item) => item.id === goal.id)?.achieved).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: /home-cooked dinner/i }));
+    expect(useUiStore.getState().intentions.find((item) => item.id === 'g2')?.done).toBe(true);
   });
 
   it('renders settings', () => {

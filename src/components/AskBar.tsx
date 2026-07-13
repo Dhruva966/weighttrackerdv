@@ -31,9 +31,9 @@ export function AskBar() {
 
   return (
     <section className="sticky top-[4.5rem] z-20 border-b border-border/70 bg-bg/90 px-5 py-3.5 backdrop-blur-md">
-      <form className="mx-auto max-w-xl" onSubmit={handleSubmit}>
-        <label className="relative block">
-          <span className="sr-only">Ask anything</span>
+      <form className="mx-auto flex max-w-xl items-stretch gap-2" onSubmit={handleSubmit}>
+        <label className="relative block min-w-0 flex-1">
+          <span className="sr-only">Ask how you’re doing</span>
           <Search
             className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fgMuted"
             size={18}
@@ -51,6 +51,9 @@ export function AskBar() {
             placeholder="Need motivation? Ask how you’re doing…"
           />
         </label>
+        <button className="button-secondary min-h-14 shrink-0 px-4" type="submit">
+          Ask
+        </button>
       </form>
 
       {!answer ? (

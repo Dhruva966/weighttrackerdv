@@ -169,7 +169,7 @@ export function Onboarding() {
           </button>
         ) : (
           <button className="button-primary" type="button" onClick={finish}>
-            Begin today
+            Start gently
           </button>
         )}
         {stepIndex > 0 && stepIndex < steps.length - 1 ? (

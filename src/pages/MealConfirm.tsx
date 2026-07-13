@@ -1,8 +1,10 @@
-import { Link } from 'react-router-dom';
-import { uiMock } from '../data/uiMock';
+import { Link, useNavigate } from 'react-router-dom';
+import { useUiStore } from '../stores/uiStore';
 
 export function MealConfirm() {
-  const draft = uiMock.mealDraft;
+  const navigate = useNavigate();
+  const draft = useUiStore((state) => state.mealDraft);
+  const showPreviewNotice = useUiStore((state) => state.showPreviewNotice);
   const totals = draft.items.reduce(
     (acc, item) => ({
       calories: acc.calories + item.calories,
@@ -20,7 +22,7 @@ export function MealConfirm() {
         <h1 className="page-title mt-1">Nice work — does this feel right?</h1>
         <p className="mt-3 text-editorial text-fgMuted">“{draft.raw}”</p>
         <p className="mt-2 text-sm leading-relaxed text-fgMuted">
-          You’re almost there. Tweak anything you’d like — then save with confidence.
+          Estimated items below are a gentle sample for this preview. Your words above stay as you wrote them.
         </p>
       </div>
 
@@ -38,15 +40,28 @@ export function MealConfirm() {
               P {item.proteinG}g · C {item.carbsG}g · F {item.fatG}g
             </p>
             <div className="flex gap-2">
-              <button className="button-secondary min-h-10 flex-1 text-sm" type="button">
+              <button
+                className="button-secondary min-h-11 flex-1 text-sm opacity-70"
+                type="button"
+                disabled
+                title="Item editing arrives in a later preview"
+              >
                 Edit
               </button>
-              <button className="button-secondary min-h-10 flex-1 text-sm" type="button">
+              <button
+                className="button-secondary min-h-11 flex-1 text-sm opacity-70"
+                type="button"
+                disabled
+                title="Item editing arrives in a later preview"
+              >
                 Remove
               </button>
             </div>
           </article>
         ))}
+        <p className="text-xs leading-relaxed text-fgMuted">
+          Edit and remove stay preview-only for now.
+        </p>
       </section>
 
       <section className="rounded-2xl border border-border/80 bg-mist/40 px-5 py-5">
@@ -58,9 +73,16 @@ export function MealConfirm() {
       </section>
 
       <div className="grid gap-2">
-        <Link className="button-primary" to="/">
-          Save — I did it
-        </Link>
+        <button
+          className="button-primary"
+          type="button"
+          onClick={() => {
+            showPreviewNotice('Done for now — Today’s plate list stays a demo until meals are wired.');
+            navigate('/');
+          }}
+        >
+          Done — back to Today
+        </button>
         <Link className="button-secondary" to="/log?type=meal">
           Go back
         </Link>
