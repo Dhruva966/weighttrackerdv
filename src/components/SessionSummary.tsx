@@ -10,17 +10,17 @@ export function SessionSummary({ sets }: { sets: LoggedSet[] }) {
     <div className="grid grid-cols-3 gap-3">
       <div className="app-card text-center">
         <p className="text-sm font-semibold text-fgMuted">Sets</p>
-        <p className="tabular mt-2 text-2xl font-extrabold text-fg">
+        <p className="tabular mt-2 text-2xl font-medium text-fg">
           <CountUp end={sets.length} duration={0.8} />
         </p>
       </div>
       <div className="app-card text-center">
         <p className="text-sm font-semibold text-fgMuted">Volume</p>
-        <p className="tabular mt-2 text-2xl font-extrabold text-fg">{formatVolume(volume)}</p>
+        <p className="tabular mt-2 text-2xl font-medium text-fg">{formatVolume(volume)}</p>
       </div>
       <div className="app-card text-center">
         <p className="text-sm font-semibold text-fgMuted">PRs</p>
-        <p className="tabular mt-2 text-2xl font-extrabold text-pr">
+        <p className="tabular mt-2 text-2xl font-medium text-pr">
           <CountUp end={prs} duration={0.8} />
         </p>
       </div>

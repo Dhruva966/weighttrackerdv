@@ -12,12 +12,12 @@ export function StreakBadge() {
 
   return (
     <div className="app-card flex items-center gap-3">
-      <div className="grid h-11 w-11 place-items-center rounded-xl bg-accentSoft text-accent">
-        <Flame size={22} />
+      <div className="grid h-11 w-11 place-items-center rounded-md border border-border bg-surfaceAlt text-fg">
+        <Flame size={20} strokeWidth={1.75} />
       </div>
       <div>
-        <p className="text-sm font-semibold text-fgMuted">Current streak</p>
-        <p className="tabular text-2xl font-extrabold text-fg">
+        <p className="label">Current streak</p>
+        <p className="tabular mt-1 text-2xl font-medium text-fg">
           <CountUp end={streak.current} duration={0.8} /> days
         </p>
       </div>

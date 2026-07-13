@@ -25,7 +25,7 @@ export function ExerciseDetail() {
     <div className="grid gap-4">
       <ExerciseImage exercise={exercise} />
       <div>
-        <h1 className="text-3xl font-extrabold text-fg">{exercise.name}</h1>
+        <h1 className="page-title">{exercise.name}</h1>
         <p className="mt-1 text-sm capitalize text-fgMuted">
           {exercise.muscleGroup} / {exercise.equipment}
         </p>
@@ -33,15 +33,15 @@ export function ExerciseDetail() {
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="app-card">
           <p className="text-sm font-semibold text-fgMuted">Estimated 1RM</p>
-          <p className="tabular mt-2 text-3xl font-extrabold text-accent">{best ? `${best} lb` : '-'}</p>
+          <p className="tabular mt-2 text-3xl font-medium text-accent">{best ? `${best} lb` : '-'}</p>
         </div>
         <div className="app-card">
           <p className="text-sm font-semibold text-fgMuted">Logged sets</p>
-          <p className="tabular mt-2 text-3xl font-extrabold text-fg">{sets.length}</p>
+          <p className="tabular mt-2 page-title">{sets.length}</p>
         </div>
       </div>
       <section className="app-card">
-        <h2 className="text-lg font-extrabold text-fg">Machine setup notes</h2>
+        <h2 className="text-lg font-medium text-fg">Machine setup notes</h2>
         {exercise.setupNotes?.length ? (
           <ul className="mt-3 grid gap-2">
             {exercise.setupNotes.map((note) => (
@@ -60,7 +60,7 @@ export function ExerciseDetail() {
             <XAxis dataKey="date" stroke="#A1A1AA" />
             <YAxis stroke="#A1A1AA" />
             <Tooltip contentStyle={{ background: '#18181B', border: '1px solid #3F3F46', borderRadius: 12 }} />
-            <Line type="monotone" dataKey="oneRm" stroke="#00FF88" strokeWidth={3} dot={false} animationDuration={400} />
+            <Line type="monotone" dataKey="oneRm" stroke="#4A3B2A" strokeWidth={2} dot={false} animationDuration={400} />
           </LineChart>
         </ResponsiveContainer>
       </div>

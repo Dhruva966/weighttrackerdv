@@ -22,7 +22,7 @@ export function ExercisePicker({ onPick }: { onPick: (exercise: Exercise) => voi
         {exercises.slice(0, 6).map((exercise) => (
           <button
             key={exercise.id}
-            className="flex min-h-14 items-center justify-between rounded-xl border border-border bg-bg px-3 text-left hover:border-accent"
+            className="flex min-h-14 items-center justify-between rounded-xl border border-border bg-bg px-3 text-left hover:border-fg/30"
             type="button"
             onClick={() => onPick(exercise)}
           >

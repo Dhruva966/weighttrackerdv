@@ -18,23 +18,26 @@ import { Today } from './pages/Today';
 
 function Header() {
   return (
-    <header className="sticky top-0 z-30 border-b border-border/80 bg-bg/90 px-4 py-3 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-lg font-extrabold tracking-normal text-fg">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent text-bg shadow-glow">
-            <Dumbbell size={20} />
-          </span>
+    <header className="sticky top-0 z-30 border-b border-border bg-bg/95 px-5 py-4 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-2xl items-center justify-between">
+        <Link to="/" className="page-title text-[1.35rem]">
           Lift
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <Link className="text-link" to="/exercises">
+            Library
+          </Link>
+          <Link className="text-link hidden min-[420px]:inline" to="/goals">
+            Goals
+          </Link>
           <Link className="icon-button" to="/exercises" aria-label="Search exercises">
-            <Search size={20} />
+            <Search size={18} />
           </Link>
           <Link className="icon-button hidden min-[420px]:grid" to="/goals" aria-label="Goals">
-            <Target size={20} />
+            <Target size={18} />
           </Link>
           <Link className="icon-button" to="/settings" aria-label="Settings">
-            <Settings size={20} />
+            <Settings size={18} />
           </Link>
         </div>
       </div>
@@ -49,7 +52,7 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait" initial={false}>
       <motion.main
         key={location.pathname}
-        className="mx-auto min-h-[calc(100vh-132px)] max-w-5xl overflow-x-hidden px-4 pb-28 pt-5"
+        className="mx-auto min-h-[calc(100vh-132px)] max-w-2xl overflow-x-hidden px-5 pb-28 pt-6"
         initial={false}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
@@ -76,15 +79,15 @@ function AnimatedRoutes() {
 
 export function App() {
   return (
-    <div className="min-h-screen bg-bg text-fg">
+    <div className="min-h-screen bg-bg font-serif text-fg antialiased">
       <Header />
       <AnimatedRoutes />
       <Link
-        className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-30 grid h-14 w-14 place-items-center rounded-2xl bg-accent text-bg shadow-glow md:hidden"
+        className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-5 z-30 grid h-14 w-14 place-items-center rounded-md border border-fg bg-fg text-bg shadow-soft md:hidden"
         to="/exercises/new"
         aria-label="New exercise"
       >
-        <Plus size={24} />
+        <Plus size={22} />
       </Link>
       <Nav
         items={[

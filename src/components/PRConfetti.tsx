@@ -14,7 +14,7 @@ export function PRConfetti() {
       particleCount: 90,
       spread: 70,
       origin: { y: 0.72 },
-      colors: ['#00FF88', '#FFD400', '#FAFAFA'],
+      colors: ['#4A3B2A', '#8B6914', '#FFFFFF'],
     });
   }, [lastPr]);
 

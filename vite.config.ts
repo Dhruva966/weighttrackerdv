@@ -3,6 +3,14 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  server: {
+    host: '0.0.0.0',
+    allowedHosts: true,
+  },
+  preview: {
+    host: '0.0.0.0',
+    allowedHosts: true,
+  },
   plugins: [
     react(),
     VitePWA({
@@ -13,8 +21,8 @@ export default defineConfig({
         short_name: 'Lift',
         start_url: '/',
         display: 'standalone',
-        background_color: '#09090B',
-        theme_color: '#00FF88',
+        background_color: '#FFFFFF',
+        theme_color: '#4A3B2A',
         icons: [
           { src: '/favicon.svg', sizes: '192x192', type: 'image/svg+xml' },
           { src: '/favicon.svg', sizes: '512x512', type: 'image/svg+xml' },

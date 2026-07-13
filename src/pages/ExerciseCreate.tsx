@@ -46,7 +46,7 @@ export function ExerciseCreate() {
       }}
     >
       <div>
-        <h1 className="text-3xl font-extrabold text-fg">New Exercise</h1>
+        <h1 className="page-title">New Exercise</h1>
         <p className="mt-1 text-sm text-fgMuted">Add name, target muscle, equipment, and optional camera photo.</p>
       </div>
       <label>

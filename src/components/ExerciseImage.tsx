@@ -13,8 +13,8 @@ export function ExerciseImage({ exercise }: { exercise: Exercise }) {
   }
 
   return (
-    <div className="grid h-32 w-full place-items-center rounded-xl border border-dashed border-accent/40 bg-accentSoft px-4 text-center">
-      <span className="text-lg font-extrabold text-accent">{exercise.name}</span>
+    <div className="grid h-32 w-full place-items-center rounded-xl border border-dashed border-border bg-surfaceAlt px-4 text-center">
+      <span className="text-lg font-medium text-fg">{exercise.name}</span>
     </div>
   );
 }

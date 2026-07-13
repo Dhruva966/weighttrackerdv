@@ -3,24 +3,32 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        serif: ['"EB Garamond"', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
+        mono: ['"DM Mono"', 'ui-monospace', 'monospace'],
+      },
+      fontSize: {
+        editorial: ['1.125rem', { lineHeight: '1.8' }],
+        display: ['1.6875rem', { lineHeight: '1.25' }],
+      },
       colors: {
-        bg: '#09090B',
-        surface: '#18181B',
-        surfaceAlt: '#27272A',
-        border: '#3F3F46',
-        fg: '#FAFAFA',
-        fgMuted: '#A1A1AA',
-        accent: '#00FF88',
-        accentSoft: '#00FF8830',
-        danger: '#FF4B4B',
-        pr: '#FFD400',
+        bg: '#FFFFFF',
+        surface: '#FAFAFA',
+        surfaceAlt: '#F5F5F5',
+        border: '#E5E5E5',
+        divider: '#CCCCCC',
+        fg: '#4A3B2A',
+        fgMuted: '#999999',
+        accent: '#4A3B2A',
+        accentSoft: '#4A3B2A14',
+        danger: '#B42318',
+        pr: '#8B6914',
       },
       boxShadow: {
-        glow: '0 0 24px rgba(0, 255, 136, 0.28)',
-        'glow-soft': '0 0 18px rgba(0, 255, 136, 0.14)',
-        card: '0 20px 50px rgba(0, 0, 0, 0.2)',
+        card: '0 1px 2px rgba(74, 59, 42, 0.06)',
+        soft: '0 8px 24px rgba(74, 59, 42, 0.08)',
       },
     },
   },
   plugins: [],
-}
+};

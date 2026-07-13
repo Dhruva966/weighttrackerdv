@@ -18,7 +18,7 @@ export function HistorySession() {
   return (
     <div className="grid gap-4">
       <div>
-        <h1 className="text-3xl font-extrabold text-fg">Session Recap</h1>
+        <h1 className="page-title">Session Recap</h1>
         <p className="mt-1 text-sm text-fgMuted">{formatDateTime(session.startedAt)}</p>
       </div>
       <SessionSummary sets={sessionSets} />

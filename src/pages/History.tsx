@@ -11,7 +11,7 @@ export function History() {
   return (
     <div className="grid gap-4">
       <div>
-        <h1 className="text-3xl font-extrabold text-fg">History</h1>
+        <h1 className="page-title">History</h1>
         <p className="mt-1 text-sm text-fgMuted">Completed sessions in chronological order.</p>
       </div>
       <div className="grid gap-3">
@@ -19,7 +19,7 @@ export function History() {
           completeSessions.map((session) => {
             const sessionSets = sets.filter((setItem) => setItem.sessionId === session.id);
             return (
-              <Link key={session.id} className="grid gap-3 rounded-2xl border border-border bg-surface p-4 hover:border-accent" to={`/history/${session.id}`}>
+              <Link key={session.id} className="grid gap-3 rounded-lg border border-border bg-surface p-4 hover:border-fg/30" to={`/history/${session.id}`}>
                 <p className="font-bold text-fg">{formatDateTime(session.startedAt)}</p>
                 <SessionSummary sets={sessionSets} />
               </Link>

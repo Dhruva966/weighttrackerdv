@@ -10,10 +10,10 @@ export function Toaster() {
   }
 
   return (
-    <div className="fixed inset-x-4 bottom-[calc(9rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-md rounded-2xl border border-pr/50 bg-surface p-4 shadow-glow">
+    <div className="fixed inset-x-4 bottom-[calc(9rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-md rounded-lg border border-border bg-bg p-4 shadow-soft">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-extrabold text-pr">New PR</p>
+          <p className="font-medium text-pr">New PR</p>
           <p className="mt-1 text-sm text-fg">
             {lastPr.exerciseName}: {lastPr.weightLb} lb x {lastPr.reps}
           </p>

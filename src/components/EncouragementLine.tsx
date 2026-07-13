@@ -15,7 +15,7 @@ export function EncouragementLine() {
     <AnimatePresence mode="wait">
       <motion.p
         key={lines[index]}
-        className="text-sm font-semibold text-accent"
+        className="text-sm font-medium text-fgMuted"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

@@ -28,7 +28,7 @@ export function Session() {
     <div className="grid gap-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-extrabold text-fg">Active Workout</h1>
+          <h1 className="page-title">Active Workout</h1>
           <p className="mt-1 text-sm text-fgMuted">Log path has no animation delay.</p>
         </div>
         {session.endedAt ? (

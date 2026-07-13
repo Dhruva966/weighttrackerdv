@@ -7,8 +7,8 @@ export function BodyMap({ summary }: { summary: WeeklyVolumeSummary }) {
     <div className="app-card">
       <p className="text-sm font-semibold text-fgMuted">Most trained this week</p>
       <div className="mt-4 grid grid-cols-[7rem_1fr] items-center gap-4">
-        <div className="grid h-28 w-24 place-items-center rounded-full border border-accent/40 bg-accentSoft text-accent">
-          <span className="text-sm font-extrabold uppercase">{top?.[0] ?? 'none'}</span>
+        <div className="grid h-28 w-24 place-items-center rounded-full border border-border bg-surfaceAlt text-fg">
+          <span className="text-sm font-medium uppercase">{top?.[0] ?? 'none'}</span>
         </div>
         <div className="space-y-2">
           {Object.entries(summary.percentByMuscle).map(([muscle, percent]) => (

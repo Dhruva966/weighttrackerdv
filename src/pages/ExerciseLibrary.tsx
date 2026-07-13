@@ -16,7 +16,7 @@ export function ExerciseLibrary() {
     <div className="grid gap-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-extrabold text-fg">Exercise Library</h1>
+          <h1 className="page-title">Exercise Library</h1>
           <p className="mt-1 text-sm text-fgMuted">Search, filter, and open past performance.</p>
         </div>
         <Link className="button-secondary hidden sm:inline-flex" to="/exercises/new">

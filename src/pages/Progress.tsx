@@ -40,12 +40,12 @@ export function Progress() {
   return (
     <div className="grid gap-4">
       <div>
-        <h1 className="text-3xl font-extrabold text-fg">Progress</h1>
+        <h1 className="page-title">Progress</h1>
         <p className="mt-1 text-sm text-fgMuted">Weekly volume, muscle balance, and trend surface.</p>
       </div>
       <div className="app-card">
         <p className="text-sm font-semibold text-fgMuted">Weekly volume</p>
-        <p className="tabular mt-2 text-4xl font-extrabold text-accent">{formatVolume(summary.totalVolume)}</p>
+        <p className="tabular mt-2 text-4xl font-medium text-accent">{formatVolume(summary.totalVolume)}</p>
       </div>
       <BodyMap summary={summary} />
       <div className="app-card h-72">
@@ -54,14 +54,14 @@ export function Progress() {
             <XAxis dataKey="muscle" stroke="#A1A1AA" />
             <YAxis stroke="#A1A1AA" />
             <Tooltip contentStyle={{ background: '#18181B', border: '1px solid #3F3F46', borderRadius: 12 }} />
-            <Bar dataKey="volume" fill="#00FF88" radius={[8, 8, 0, 0]} animationDuration={400} />
+            <Bar dataKey="volume" fill="#4A3B2A" radius={[4, 4, 0, 0]} animationDuration={400} />
           </BarChart>
         </ResponsiveContainer>
       </div>
       <section className="app-card grid gap-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-extrabold text-fg">Lift progress</h2>
+            <h2 className="text-xl font-medium text-fg">Lift progress</h2>
             <p className="text-sm text-fgMuted">Pick any lift to see weight and estimated 1RM over time.</p>
           </div>
           <select
@@ -83,15 +83,15 @@ export function Progress() {
               <YAxis stroke="#A1A1AA" />
               <Tooltip contentStyle={{ background: '#18181B', border: '1px solid #3F3F46', borderRadius: 12 }} />
               <Legend />
-              <Line type="monotone" name="Weight" dataKey="weightLb" stroke="#00FF88" strokeWidth={3} dot animationDuration={400} />
-              <Line type="monotone" name="Est. 1RM" dataKey="oneRm" stroke="#FFD400" strokeWidth={3} dot animationDuration={400} />
+              <Line type="monotone" name="Weight" dataKey="weightLb" stroke="#4A3B2A" strokeWidth={2} dot animationDuration={400} />
+              <Line type="monotone" name="Est. 1RM" dataKey="oneRm" stroke="#8B6914" strokeWidth={2} dot animationDuration={400} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </section>
       <section className="app-card grid gap-3">
         <div>
-          <h2 className="text-xl font-extrabold text-fg">Brain dump import</h2>
+          <h2 className="text-xl font-medium text-fg">Brain dump import</h2>
           <p className="text-sm text-fgMuted">Paste lines like “Lat pulldown 175 lbs” or “Bench 205 x 3 185 x 6”.</p>
         </div>
         <textarea

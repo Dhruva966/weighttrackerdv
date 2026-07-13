@@ -10,7 +10,7 @@ export function SetRow({ setItem }: { setItem: LoggedSet }) {
         {formatWeight(setItem.weightLb)} x {setItem.reps}
       </span>
       {setItem.isPr ? (
-        <span className="inline-flex items-center gap-1 rounded-full bg-pr/15 px-2 py-1 text-xs font-extrabold text-pr">
+        <span className="inline-flex items-center gap-1 rounded-full bg-pr/15 px-2 py-1 text-xs font-medium text-pr">
           <Trophy size={14} />
           PR
         </span>

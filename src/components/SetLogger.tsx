@@ -12,7 +12,7 @@ export function SetLogger({ sessionId, exercise }: { sessionId: string; exercise
 
   return (
     <form
-      className="grid gap-3 rounded-2xl border border-border bg-surface p-3"
+      className="grid gap-3 rounded-lg border border-border bg-surface p-3"
       onSubmit={(event) => {
         event.preventDefault();
         addSet({ sessionId, exerciseId: exercise.id, weightLb, reps, isWarmup: false });

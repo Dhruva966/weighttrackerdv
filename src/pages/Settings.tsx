@@ -12,7 +12,7 @@ export function SettingsPage() {
   return (
     <div className="grid gap-4">
       <div>
-        <h1 className="text-3xl font-extrabold text-fg">Settings</h1>
+        <h1 className="page-title">Settings</h1>
         <p className="mt-1 text-sm text-fgMuted">Units, rest timer, export, and install state.</p>
       </div>
       <section className="app-card grid gap-3">
