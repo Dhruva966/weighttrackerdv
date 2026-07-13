@@ -21,20 +21,15 @@ import { WorkoutHistory } from './pages/WorkoutHistory';
 import { useUiStore } from './stores/uiStore';
 
 function Header() {
-  const goldDays = useUiStore((state) => state.goldDays);
-
   return (
     <header className="sticky top-0 z-30 border-b border-border/70 bg-bg/85 px-5 py-3.5 backdrop-blur-md">
       <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
         <Link to="/" className="page-title text-[1.55rem] tracking-[-0.02em]">
           Aloo
         </Link>
-        <div className="flex items-center gap-2">
-          <p className="hidden text-xs text-fgMuted sm:block">{goldDays} days compounding</p>
-          <Link className="icon-button" to="/you" aria-label="You and settings">
-            <User size={18} strokeWidth={1.5} />
-          </Link>
-        </div>
+        <Link className="icon-button" to="/you" aria-label="You and settings">
+          <User size={18} strokeWidth={1.5} />
+        </Link>
       </div>
     </header>
   );
