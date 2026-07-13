@@ -1,5 +1,4 @@
 @tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 :root {
@@ -45,57 +44,183 @@ button {
   cursor: pointer;
 }
 
-@layer components {
-  .app-shell {
-    @apply relative min-h-screen;
-  }
+/* Component classes use plain CSS so custom palette tokens stay stable under Vite. */
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+}
 
-  .app-card {
-    @apply rounded-2xl border border-border/80 bg-surface/90 p-5 shadow-card backdrop-blur-[2px];
-  }
+.app-card {
+  border-radius: 1rem;
+  border: 1px solid #e8e2d9;
+  background: #ffffff;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(63, 52, 40, 0.04);
+}
 
-  .button-primary {
-    @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-accent/90 bg-accent px-5 py-3 font-medium text-bg shadow-card transition hover:bg-accent/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-50;
-  }
+.button-primary {
+  display: inline-flex;
+  min-height: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid #5c4a38;
+  background: #5c4a38;
+  padding: 0.75rem 1.25rem;
+  font-weight: 500;
+  color: #faf8f5;
+  box-shadow: 0 1px 2px rgba(63, 52, 40, 0.04);
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
 
-  .button-secondary {
-    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-border/80 bg-surface/90 px-4 py-2 font-medium text-fg transition hover:border-fg/15 hover:bg-mist/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg;
-  }
+.button-primary:hover {
+  background: #4f3f30;
+  border-color: #4f3f30;
+}
 
-  .icon-button {
-    @apply grid h-11 w-11 place-items-center rounded-full border border-border/80 bg-surface/80 text-fgMuted transition hover:border-fg/15 hover:bg-mist hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg;
-  }
+.button-primary:focus-visible {
+  outline: 2px solid #5c4a38;
+  outline-offset: 2px;
+}
 
-  .field {
-    @apply min-h-14 w-full rounded-2xl border border-border/80 bg-surface px-4 text-fg outline-none transition placeholder:text-fgMuted/80 focus:border-accent/35 focus:bg-surface;
-  }
+.button-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 
-  .label {
-    @apply text-sm font-medium text-fgMuted;
-  }
+.button-secondary {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid #e8e2d9;
+  background: #ffffff;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #3f3428;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
 
-  .tabular {
-    @apply font-mono;
-    font-variant-numeric: tabular-nums;
-  }
+.button-secondary:hover {
+  border-color: rgba(63, 52, 40, 0.2);
+  background: #ede8e1;
+}
 
-  .page-title {
-    @apply text-display font-medium leading-tight tracking-[-0.02em] text-fg;
-  }
+.button-secondary:focus-visible {
+  outline: 2px solid #3f3428;
+  outline-offset: 2px;
+}
 
-  .page-lead {
-    @apply text-editorial text-fgMuted;
-  }
+.icon-button {
+  display: grid;
+  height: 2.75rem;
+  width: 2.75rem;
+  place-items: center;
+  border-radius: 9999px;
+  border: 1px solid #e8e2d9;
+  background: #ffffff;
+  color: #8a8075;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
 
-  .section-rule {
-    @apply my-2 w-8 border-t border-divider/80;
-  }
+.icon-button:hover {
+  border-color: rgba(63, 52, 40, 0.2);
+  background: #ede8e1;
+  color: #3f3428;
+}
 
-  .text-link {
-    @apply text-sm text-fgMuted underline decoration-border underline-offset-4 transition-colors hover:text-fg hover:decoration-fg/30;
-  }
+.icon-button:focus-visible {
+  outline: 2px solid #3f3428;
+  outline-offset: 2px;
+}
 
-  .quiet-chip {
-    @apply shrink-0 rounded-full border border-border/70 bg-surface/70 px-3 py-1.5 text-xs text-fgMuted transition hover:border-fg/15 hover:bg-mist hover:text-fg;
-  }
+.field {
+  min-height: 3.5rem;
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid #e8e2d9;
+  background: #ffffff;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  color: #3f3428;
+  outline: none;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.field::placeholder {
+  color: #8a8075;
+}
+
+.field:focus {
+  border-color: #5c4a38;
+  background: #ffffff;
+}
+
+.label {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: #8a8075;
+}
+
+.tabular {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: #3f3428;
+}
+
+.page-lead {
+  font-size: 1.125rem;
+  line-height: 1.85;
+  color: #8a8075;
+}
+
+.section-rule {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  width: 2rem;
+  border-top: 1px solid #d4ccc0;
+}
+
+.text-link {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #8a8075;
+  text-decoration: underline;
+  text-decoration-color: #e8e2d9;
+  text-underline-offset: 4px;
+  transition: color 150ms ease, text-decoration-color 150ms ease;
+}
+
+.text-link:hover {
+  color: #3f3428;
+  text-decoration-color: rgba(63, 52, 40, 0.3);
+}
+
+.quiet-chip {
+  flex-shrink: 0;
+  border-radius: 9999px;
+  border: 1px solid #e8e2d9;
+  background: #ffffff;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #8a8075;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.quiet-chip:hover {
+  border-color: rgba(63, 52, 40, 0.2);
+  background: #ede8e1;
+  color: #3f3428;
 }
