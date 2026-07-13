@@ -9,9 +9,10 @@ export function Log() {
   return (
     <div className="grid animate-rise gap-7">
       <div>
-        <h1 className="page-title">Log something kind</h1>
+        <h1 className="page-title">You’re doing something kind</h1>
         <p className="page-lead mt-3">
-          Start with food. Describe a thali, dabba, or cutting chai — or take a soft photo of the plate.
+          Every note helps. Describe a thali, dabba, or cutting chai — or take a soft photo of the plate.
+          No perfect wording needed.
         </p>
       </div>
 
@@ -80,10 +81,10 @@ export function Log() {
                 />
               </label>
               <p className="text-xs leading-relaxed text-fgMuted">
-                Katori, roti count, dabba, plate — all welcome. We’ll estimate macros when you review.
+                Katori, roti count, dabba, plate — all welcome. Rough is fine; we’ll estimate together.
               </p>
               <Link className="button-primary" to="/log/meal/confirm">
-                Review gently
+                Look it over with me
               </Link>
             </div>
           )}
@@ -91,16 +92,16 @@ export function Log() {
       ) : (
         <section className="app-card grid gap-4">
           <div>
-            <h2 className="text-lg font-medium text-fg">Workout, when you’re ready</h2>
+            <h2 className="text-lg font-medium text-fg">A lift when you feel ready</h2>
             <p className="mt-1 text-sm leading-relaxed text-fgMuted">
-              Optional. Pick exercises, then jot sets in plain English.
+              Optional — and still worthy. Pick exercises, then jot sets in plain English.
             </p>
           </div>
           <div className="rounded-2xl border border-border/70 bg-mist/50 px-4 py-3 text-sm leading-relaxed text-fgMuted">
-            Example: “preacher curl 115 for 8 7 7, last rep helped”
+            Example: “preacher curl 115 for 8 7 7, last rep helped — felt strong”
           </div>
           <Link className="button-secondary" to="/session/new">
-            Open workout logger
+            Start when you’re ready
           </Link>
           <Link className="text-link" to="/exercises">
             Browse exercises

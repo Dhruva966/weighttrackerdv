@@ -1,7 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-const lines = ['Stack the small wins.', 'Beat one number today.', 'Clean reps count.', 'Future you reads this log.'];
+const lines = [
+  'Showing up today already counts.',
+  'One honest note is enough.',
+  'Home cooking is a quiet win.',
+  'You’re building a kinder rhythm.',
+];
 
 export function EncouragementLine() {
   const [index, setIndex] = useState(0);
@@ -15,11 +20,11 @@ export function EncouragementLine() {
     <AnimatePresence mode="wait">
       <motion.p
         key={lines[index]}
-        className="text-sm font-medium text-fgMuted"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.4 }}
+        className="text-editorial text-fgMuted"
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -4 }}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
       >
         {lines[index]}
       </motion.p>

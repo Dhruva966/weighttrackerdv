@@ -11,8 +11,10 @@ export function History() {
   return (
     <div className="grid animate-rise gap-7">
       <div>
-        <h1 className="page-title">Your days, gathered</h1>
-        <p className="page-lead mt-3">Weight, meals, and the rare workout — one calm timeline.</p>
+        <h1 className="page-title">Look how far you’ve come</h1>
+        <p className="page-lead mt-3">
+          Weight, meals, and the rare workout — each day you logged is something to be proud of.
+        </p>
       </div>
 
       <section className="app-card">
@@ -48,9 +50,9 @@ export function History() {
           })}
         </div>
         <div className="mt-3 flex flex-wrap gap-4 text-xs text-fgMuted">
-          <span>Soft fill = a day you logged</span>
+          <span>Soft fill = a day you honored</span>
           <span>
-            <span className="font-medium text-accent">+</span> = a gym PR day
+            <span className="font-medium text-accent">+</span> = a gym PR day — celebrate it
           </span>
         </div>
       </section>

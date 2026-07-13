@@ -56,22 +56,22 @@ describe('app shell', () => {
 
   it('renders mom-first Today with weight and meals', () => {
     renderApp('/');
-    expect(screen.getByRole('heading', { name: /a calm place for today/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /today is already going well/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /morning weight/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /what’s on your plate/i })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/ask gently/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/ask how you’re doing/i)).toBeInTheDocument();
   });
 
   it('navigates Log and History tabs', async () => {
     renderApp('/');
     clickBottomNav(/^log$/i);
     await waitFor(() =>
-      expect(screen.getByRole('heading', { name: /log something kind/i })).toBeInTheDocument(),
+      expect(screen.getByRole('heading', { name: /you’re doing something kind/i })).toBeInTheDocument(),
     );
 
     clickBottomNav(/^history$/i);
     await waitFor(() =>
-      expect(screen.getByRole('heading', { name: /your days, gathered/i })).toBeInTheDocument(),
+      expect(screen.getByRole('heading', { name: /look how far you’ve come/i })).toBeInTheDocument(),
     );
   });
 });

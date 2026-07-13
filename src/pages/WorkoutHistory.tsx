@@ -15,7 +15,9 @@ export function WorkoutHistory() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="page-title">Sessions you’ve finished</h1>
-          <p className="page-lead mt-3">Only when you want them — no pressure to fill this list.</p>
+          <p className="page-lead mt-3">
+            Every completed workout lives here. Empty is fine — you’ve already shown up in other ways.
+          </p>
         </div>
         {completeSessions.length > 0 || sets.length > 0 ? (
           <button
@@ -49,9 +51,9 @@ export function WorkoutHistory() {
           })
         ) : (
           <div className="app-card text-center">
-            <p className="font-medium text-fg">A quiet start</p>
+            <p className="font-medium text-fg">Room to grow — gently</p>
             <p className="mt-2 text-sm leading-relaxed text-fgMuted">
-              Finished workouts will land here — whenever you’re ready.
+              Finished workouts will land here. Until then, take pride in the rest of your day.
             </p>
           </div>
         )}

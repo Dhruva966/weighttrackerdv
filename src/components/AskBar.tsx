@@ -34,7 +34,7 @@ export function AskBar() {
                 setAnswer(null);
               }
             }}
-            placeholder="Ask gently — weight, meals, lifts…"
+            placeholder="Ask how you’re doing — weight, meals, lifts…"
           />
         </label>
       </form>
@@ -56,8 +56,8 @@ export function AskBar() {
           ))}
         </div>
       ) : (
-        <div className="mx-auto mt-3 max-w-xl rounded-2xl border border-border/70 bg-surface/95 px-4 py-3.5 shadow-card">
-          <p className="text-xs tracking-wide text-fgMuted">A quiet answer</p>
+        <div className="mx-auto mt-3 max-w-xl rounded-2xl border border-accent/15 bg-accentSoft/80 px-4 py-3.5 shadow-card">
+          <p className="text-xs tracking-wide text-fgMuted">Here’s a kind read</p>
           <p className="mt-1.5 text-editorial text-fg">{answer}</p>
           <button className="text-link mt-2" type="button" onClick={() => setAnswer(null)}>
             Clear

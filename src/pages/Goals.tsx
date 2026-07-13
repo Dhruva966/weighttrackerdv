@@ -10,7 +10,7 @@ export function Goals() {
       <div>
         <h1 className="page-title">Little intentions</h1>
         <p className="page-lead mt-3">
-          Small daily nudges — weigh-in, home cooking, walks, lifts. Check them off gently.
+          Small daily nudges — weigh-in, home cooking, walks, lifts. Each checkmark is a real win.
         </p>
       </div>
       <div className="grid gap-2">

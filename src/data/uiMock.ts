@@ -10,13 +10,14 @@ export const uiMock = {
     calorieTarget: 1800,
   },
   askExamples: [
-    'How’s my morning weight this week?',
-    'How much protein today?',
-    'What’s my best bench so far?',
+    'How am I doing on protein?',
+    'Did I keep a steady weigh-in?',
+    'What’s going well this week?',
   ],
   askDemo: {
-    question: 'How much protein today?',
-    answer: 'About 62 g so far — mostly from moong dal and paneer bhurji at lunch. You’re doing well.',
+    question: 'How am I doing on protein?',
+    answer:
+      'About 62 g so far — mostly from moong dal and paneer at lunch. That’s solid for afternoon. A little more at dinner and you’ll land right where you hoped.',
   },
   meals: [
     {

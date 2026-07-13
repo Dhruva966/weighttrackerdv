@@ -1,18 +1,23 @@
 import { Camera, ClipboardList, Scale, Utensils } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { EncouragementLine } from '../components/EncouragementLine';
 import { uiMock } from '../data/uiMock';
 
 export function Today() {
   const remaining = uiMock.todayMacros.calorieTarget - uiMock.todayMacros.calories;
+  const proteinShare = Math.round((uiMock.todayMacros.proteinG / 80) * 100);
 
   return (
     <div className="grid animate-rise gap-9">
       <section>
-        <p className="text-sm text-fgMuted">Welcome back</p>
-        <h1 className="page-title mt-2">A calm place for today</h1>
+        <p className="text-sm text-fgMuted">You’re here — that matters</p>
+        <h1 className="page-title mt-2">Today is already going well</h1>
+        <div className="mt-4">
+          <EncouragementLine />
+        </div>
         <p className="page-lead mt-4">
           Note your weight when you’re ready. Tell us what’s on the plate — idli, dal, roti, chai —
-          in your own words. Everything else can wait.
+          in your own words. Small check-ins add up.
         </p>
       </section>
 
@@ -22,13 +27,15 @@ export function Today() {
             <Scale size={18} className="text-fgMuted" strokeWidth={1.5} />
             <h2 className="text-lg font-medium text-fg">Morning weight</h2>
           </div>
-          <span className="rounded-full bg-mist px-3 py-1 text-xs text-fgMuted">Today</span>
+          <span className="rounded-full bg-accentSoft px-3 py-1 text-xs text-fg">Logged — nice</span>
         </div>
         <div className="flex items-end justify-between gap-4">
           <p className="tabular text-5xl font-medium leading-none tracking-tight text-fg">{uiMock.weightLb}</p>
           <div className="pb-1 text-right">
             <p className="text-sm text-fgMuted">pounds</p>
-            <p className="mt-1 text-sm text-fg">{uiMock.weightDelta} since yesterday</p>
+            <p className="mt-1 text-sm text-fg">
+              {uiMock.weightDelta} since yesterday · steady work
+            </p>
           </div>
         </div>
         <button className="button-secondary" type="button">
@@ -40,9 +47,9 @@ export function Today() {
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="text-xl font-medium text-fg">What’s on your plate</h2>
-            <p className="mt-1 text-sm text-fgMuted">
-              {uiMock.todayMacros.calories} of {uiMock.todayMacros.calorieTarget} kcal · {remaining} still
-              soft for the evening
+            <p className="mt-1 text-sm leading-relaxed text-fgMuted">
+              {uiMock.todayMacros.calories} of {uiMock.todayMacros.calorieTarget} kcal so far — room
+              for about {remaining} more. Protein is at {proteinShare}% of a gentle target. Good pace.
             </p>
           </div>
           <Link className="text-link" to="/log">
@@ -56,7 +63,10 @@ export function Today() {
             { label: 'Carbs', value: `${uiMock.todayMacros.carbsG} g` },
             { label: 'Fat', value: `${uiMock.todayMacros.fatG} g` },
           ].map((item) => (
-            <div key={item.label} className="rounded-2xl border border-border/70 bg-surface/80 px-3 py-4 text-center">
+            <div
+              key={item.label}
+              className="rounded-2xl border border-border/70 bg-surface/80 px-3 py-4 text-center"
+            >
               <p className="text-xs text-fgMuted">{item.label}</p>
               <p className="tabular mt-1 text-lg font-medium text-fg">{item.value}</p>
             </div>
@@ -65,7 +75,10 @@ export function Today() {
 
         <div className="grid gap-2">
           {uiMock.meals.map((meal) => (
-            <article key={meal.id} className="rounded-2xl border border-border/70 bg-surface/80 px-4 py-3.5">
+            <article
+              key={meal.id}
+              className="rounded-2xl border border-border/70 bg-surface/80 px-4 py-3.5"
+            >
               <div className="flex items-baseline justify-between gap-3">
                 <p className="font-medium text-fg">{meal.title}</p>
                 <p className="tabular text-sm text-fgMuted">{meal.calories} kcal</p>
@@ -79,7 +92,7 @@ export function Today() {
         <div className="grid gap-2 sm:grid-cols-2">
           <Link className="button-primary" to="/log?type=meal">
             <Utensils size={18} strokeWidth={1.5} />
-            Log a meal
+            Log another meal
           </Link>
           <Link className="button-secondary" to="/log?type=meal&capture=photo">
             <Camera size={18} strokeWidth={1.5} />
@@ -92,7 +105,10 @@ export function Today() {
 
       <section className="grid gap-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-xl font-medium text-fg">Little intentions</h2>
+          <div>
+            <h2 className="text-xl font-medium text-fg">Little intentions</h2>
+            <p className="mt-1 text-sm text-fgMuted">One done already — keep going gently.</p>
+          </div>
           <Link className="text-link" to="/goals">
             See all
           </Link>
@@ -112,7 +128,9 @@ export function Today() {
               >
                 ✓
               </span>
-              <p className={`text-sm ${goal.done ? 'text-fg' : 'text-fgMuted'}`}>{goal.name}</p>
+              <p className={`text-sm ${goal.done ? 'text-fg' : 'text-fgMuted'}`}>
+                {goal.done ? `${goal.name} — done` : goal.name}
+              </p>
             </div>
           ))}
         </div>
@@ -122,12 +140,12 @@ export function Today() {
         <div className="flex items-start gap-3">
           <ClipboardList className="mt-0.5 text-fgMuted" size={18} strokeWidth={1.5} />
           <div className="flex-1">
-            <p className="font-medium text-fg">Feeling strong enough to lift?</p>
+            <p className="font-medium text-fg">If your body wants a lift later</p>
             <p className="mt-1 text-sm leading-relaxed text-fgMuted">
-              No pressure — your workout log is here when the day has room for it.
+              You’re already taking care of today. The workout log will wait for you — proud either way.
             </p>
             <Link className="button-secondary mt-4 inline-flex" to="/log?type=workout">
-              Open workout
+              Open workout when ready
             </Link>
           </div>
         </div>

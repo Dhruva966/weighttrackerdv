@@ -17,10 +17,10 @@ export function MealConfirm() {
     <div className="grid animate-rise gap-7">
       <div>
         <p className="text-sm text-fgMuted">{draft.source}</p>
-        <h1 className="page-title mt-1">Does this feel right?</h1>
+        <h1 className="page-title mt-1">Nice work — does this feel right?</h1>
         <p className="mt-3 text-editorial text-fgMuted">“{draft.raw}”</p>
         <p className="mt-2 text-sm leading-relaxed text-fgMuted">
-          Tweak anything you’d like — then save when you’re ready.
+          You’re almost there. Tweak anything you’d like — then save with confidence.
         </p>
       </div>
 
@@ -59,7 +59,7 @@ export function MealConfirm() {
 
       <div className="grid gap-2">
         <Link className="button-primary" to="/">
-          Save to today
+          Save — I did it
         </Link>
         <Link className="button-secondary" to="/log?type=meal">
           Go back
