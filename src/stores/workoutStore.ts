@@ -22,11 +22,13 @@ type WorkoutState = {
   goals: Goal[];
   sessions: WorkoutSession[];
   sets: LoggedSet[];
+  historyCleared?: boolean;
   createSession: () => WorkoutSession;
   endSession: (sessionId: string) => void;
   addSet: (input: Omit<LoggedSet, 'id' | 'setNumber' | 'isPr' | 'createdAt'>) => LoggedSet;
   addExercise: (input: ExerciseInput) => Exercise;
   importLiftDump: (text: string) => { imported: number; notes: number; skipped: string[] };
+  clearHistory: () => void;
   toggleGoal: (goalId: string) => void;
 };
 
@@ -70,6 +72,12 @@ function mergeSets(required: LoggedSet[], persisted: LoggedSet[] | undefined): L
   return [...required, ...customSets];
 }
 
+function hasLegacyStarterHistory(sessions: WorkoutSession[] | undefined): boolean {
+  return (sessions ?? []).some(
+    (session) => session.id.startsWith('session-synthetic') || session.id === 'session-current-board-import',
+  );
+}
+
 function findExerciseByName(exercises: Exercise[], name: string): Exercise | undefined {
   const slug = slugify(name);
   return (
@@ -86,6 +94,7 @@ export const useWorkoutStore = create<WorkoutState>()(
       goals: starterGoals,
       sessions: starterSessions,
       sets: starterSets,
+      historyCleared: false,
       createSession: () => {
         const session: WorkoutSession = {
           id: newId(),
@@ -243,6 +252,10 @@ export const useWorkoutStore = create<WorkoutState>()(
 
         return { imported: nextSets.length - state.sets.length, notes: noteCount, skipped };
       },
+      clearHistory: () => {
+        set({ sessions: [], sets: [], historyCleared: true });
+        usePrStore.getState().clearPr();
+      },
       toggleGoal: (goalId) => {
         const current = get().goals.find((goal) => goal.id === goalId);
         if (!current) {
@@ -265,13 +278,17 @@ export const useWorkoutStore = create<WorkoutState>()(
       name: 'weight-tracker-workouts',
       merge: (persisted, current) => {
         const stored = persisted as Partial<WorkoutState> | undefined;
+        const legacyStarterHistory = hasLegacyStarterHistory(stored?.sessions);
+        const useStarterHistory = !stored?.historyCleared && !legacyStarterHistory;
+
         return {
           ...current,
           ...stored,
+          historyCleared: stored?.historyCleared || legacyStarterHistory || false,
           exercises: mergeExercises(starterExercises, stored?.exercises),
           goals: mergeById(starterGoals, stored?.goals),
-          sessions: mergeById(starterSessions, stored?.sessions),
-          sets: mergeSets(starterSets, stored?.sets),
+          sessions: useStarterHistory ? mergeById(starterSessions, stored?.sessions) : legacyStarterHistory ? [] : (stored?.sessions ?? []),
+          sets: useStarterHistory ? mergeSets(starterSets, stored?.sets) : legacyStarterHistory ? [] : (stored?.sets ?? []),
         };
       },
     },

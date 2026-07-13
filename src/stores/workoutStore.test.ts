@@ -162,6 +162,17 @@ describe('workoutStore', () => {
       expect(useWorkoutStore.getState().sessions).toHaveLength(beforeSessions + 1);
       expect(useWorkoutStore.getState().sessions[0].notes).toBe('stretch and recover');
     });
+
+    it('clears all sessions and sets', () => {
+      useWorkoutStore.getState().importLiftDump('Lat pulldown 175 lbs');
+      expect(useWorkoutStore.getState().sets.length).toBeGreaterThan(0);
+
+      useWorkoutStore.getState().clearHistory();
+
+      expect(useWorkoutStore.getState().sessions).toEqual([]);
+      expect(useWorkoutStore.getState().sets).toEqual([]);
+      expect(useWorkoutStore.getState().historyCleared).toBe(true);
+    });
   });
 
   describe('toggleGoal', () => {
