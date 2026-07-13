@@ -60,7 +60,7 @@ async function parseExerciseLogWithGroq(text: string, exerciseName: string): Pro
   }
 
   try {
-    return llmResponseSchema.parse(JSON.parse(content));
+    return llmResponseSchema.parse(JSON.parse(content)) as ParsedExerciseLog;
   } catch {
     return null;
   }
@@ -81,7 +81,7 @@ async function parseExerciseLogWithSupabase(text: string, exerciseName: string):
   }
 
   try {
-    return llmResponseSchema.parse(data);
+    return llmResponseSchema.parse(data) as ParsedExerciseLog;
   } catch {
     return null;
   }

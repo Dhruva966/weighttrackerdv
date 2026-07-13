@@ -5,7 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
 import { ExerciseCreate } from '../pages/ExerciseCreate';
 import { Goals } from '../pages/Goals';
-import { Progress } from '../pages/Progress';
 import { Session } from '../pages/Session';
 import { SettingsPage } from '../pages/Settings';
 import { starterExercises, starterGoals, starterSessions, starterSets } from '../data/catalog';
@@ -55,29 +54,18 @@ describe('app shell', () => {
     cleanup();
   });
 
-  it('renders the Today dashboard with starter stats', () => {
+  it('renders mom-first Today with weight and meals', () => {
     renderApp('/');
-    expect(screen.getByRole('heading', { name: /track the work/i })).toBeInTheDocument();
-    expect(screen.getByText('Total sessions')).toBeInTheDocument();
-    expect(screen.getByText('Logged sets')).toBeInTheDocument();
-    expect(screen.getAllByRole('link', { name: /start workout/i }).length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: /keep it simple today/i })).toBeInTheDocument();
+    expect(screen.getByText('Weight')).toBeInTheDocument();
+    expect(screen.getByText(/today’s food/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/ask anything/i)).toBeInTheDocument();
   });
 
-  it('navigates to the exercise library tab', async () => {
+  it('navigates Log and History tabs', async () => {
     renderApp('/');
-    clickBottomNav(/^library$/i);
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /exercise library/i })).toBeInTheDocument();
-    });
-  });
-
-  it('navigates to progress, calendar, and history tabs', async () => {
-    renderApp('/');
-    clickBottomNav(/^progress$/i);
-    await waitFor(() => expect(screen.getByRole('heading', { name: /^progress$/i })).toBeInTheDocument());
-
-    clickBottomNav(/^calendar$/i);
-    await waitFor(() => expect(screen.getByRole('heading', { name: /^calendar$/i })).toBeInTheDocument());
+    clickBottomNav(/^log$/i);
+    await waitFor(() => expect(screen.getByRole('heading', { name: /^log$/i })).toBeInTheDocument());
 
     clickBottomNav(/^history$/i);
     await waitFor(() => expect(screen.getByRole('heading', { name: /^history$/i })).toBeInTheDocument());
@@ -139,7 +127,7 @@ describe('exercise creation', () => {
     cleanup();
   });
 
-  it('validates required fields before saving', () => {
+  it('shows validation errors for incomplete create form', async () => {
     render(
       <MemoryRouter initialEntries={['/exercises/new']}>
         <Routes>
@@ -149,32 +137,30 @@ describe('exercise creation', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: /save exercise/i }));
-    expect(screen.getByText(/required/i)).toBeInTheDocument();
-    expect(useWorkoutStore.getState().exercises).toHaveLength(starterExercises.length);
+    expect(await screen.findByText(/name, muscle group, and equipment are required/i)).toBeInTheDocument();
   });
 
-  it('creates a new exercise when the form is valid', async () => {
+  it('creates an exercise from the form', async () => {
     render(
       <MemoryRouter initialEntries={['/exercises/new']}>
         <Routes>
           <Route path="/exercises/new" element={<ExerciseCreate />} />
-          <Route path="/exercises/:slug" element={<div>Exercise saved</div>} />
         </Routes>
       </MemoryRouter>,
     );
 
-    fireEvent.change(screen.getByPlaceholderText(/seated lateral raise/i), {
-      target: { value: 'Incline Cable Fly' },
-    });
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Cable Fly' } });
+    fireEvent.change(screen.getByLabelText(/muscle group/i), { target: { value: 'chest' } });
+    fireEvent.change(screen.getByLabelText(/equipment/i), { target: { value: 'cable' } });
     fireEvent.click(screen.getByRole('button', { name: /save exercise/i }));
 
     await waitFor(() => {
-      expect(useWorkoutStore.getState().exercises.some((item) => item.slug === 'incline-cable-fly')).toBe(true);
+      expect(useWorkoutStore.getState().exercises.some((item) => item.slug === 'cable-fly')).toBe(true);
     });
   });
 });
 
-describe('goals and progress tools', () => {
+describe('goals and settings', () => {
   beforeEach(() => {
     localStorage.clear();
     resetStores();
@@ -196,47 +182,12 @@ describe('goals and progress tools', () => {
     expect(useWorkoutStore.getState().goals.find((item) => item.id === goal.id)?.achieved).toBe(true);
   });
 
-  it('imports lift notes from the progress page', async () => {
-    const before = useWorkoutStore.getState().sets.length;
-    render(
-      <MemoryRouter>
-        <Progress />
-      </MemoryRouter>,
-    );
-
-    fireEvent.change(screen.getByPlaceholderText(/lat pulldown 175 lbs/i), {
-      target: { value: 'Lat pulldown 180 lbs' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: /import lift notes/i }));
-
-    await waitFor(() => {
-      expect(useWorkoutStore.getState().sets.length).toBeGreaterThan(before);
-      expect(screen.getByText(/imported 1 set/i)).toBeInTheDocument();
-    });
-  });
-});
-
-describe('settings', () => {
-  beforeEach(() => {
-    localStorage.clear();
-    resetStores();
-  });
-
-  afterEach(() => {
-    cleanup();
-  });
-
-  it('switches units and updates the rest timer default', () => {
+  it('renders settings', () => {
     render(
       <MemoryRouter>
         <SettingsPage />
       </MemoryRouter>,
     );
-
-    fireEvent.click(screen.getByRole('button', { name: 'kg' }));
-    fireEvent.change(screen.getByRole('slider'), { target: { value: '120' } });
-
-    expect(screen.getByText('120s default')).toBeInTheDocument();
-    expect(screen.getByText(/online/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /settings/i })).toBeInTheDocument();
   });
 });

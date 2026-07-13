@@ -9,7 +9,7 @@ export function Goals() {
     <div className="grid gap-4">
       <div>
         <h1 className="page-title">Goals</h1>
-        <p className="mt-1 text-sm text-fgMuted">Board goals converted into checkable targets.</p>
+        <p className="mt-1 text-sm text-fgMuted">Small daily intentions — weigh-in, home cooking, walks, lifts.</p>
       </div>
       <div className="grid gap-2">
         {goals.map((goal) => (

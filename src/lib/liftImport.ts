@@ -122,10 +122,6 @@ function splitIntoParagraphs(text: string): string[][] {
     .filter((paragraph) => paragraph.length > 0);
 }
 
-function splitIntoSegments(text: string): string[] {
-  return splitIntoParagraphs(text).flat();
-}
-
 function isNoteSegment(segment: string): boolean {
   const trimmed = segment.trim();
   if (!trimmed) {

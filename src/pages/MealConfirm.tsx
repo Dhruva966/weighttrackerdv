@@ -1,0 +1,67 @@
+import { Link } from 'react-router-dom';
+import { uiMock } from '../data/uiMock';
+
+export function MealConfirm() {
+  const draft = uiMock.mealDraft;
+  const totals = draft.items.reduce(
+    (acc, item) => ({
+      calories: acc.calories + item.calories,
+      proteinG: acc.proteinG + item.proteinG,
+      carbsG: acc.carbsG + item.carbsG,
+      fatG: acc.fatG + item.fatG,
+    }),
+    { calories: 0, proteinG: 0, carbsG: 0, fatG: 0 },
+  );
+
+  return (
+    <div className="grid gap-6">
+      <div>
+        <p className="text-sm text-fgMuted">{draft.source}</p>
+        <h1 className="page-title mt-1">Does this look right?</h1>
+        <p className="mt-3 text-editorial text-fgMuted">“{draft.raw}”</p>
+      </div>
+
+      <section className="grid gap-2">
+        {draft.items.map((item) => (
+          <article key={item.name} className="app-card grid gap-2">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-medium text-fg">{item.name}</p>
+                <p className="mt-1 text-sm text-fgMuted">{item.portion}</p>
+              </div>
+              <p className="tabular text-sm text-fgMuted">{item.calories} kcal</p>
+            </div>
+            <p className="tabular text-xs text-fgMuted">
+              P {item.proteinG}g · C {item.carbsG}g · F {item.fatG}g
+            </p>
+            <div className="flex gap-2">
+              <button className="button-secondary min-h-10 flex-1 text-sm" type="button">
+                Edit
+              </button>
+              <button className="button-secondary min-h-10 flex-1 text-sm" type="button">
+                Remove
+              </button>
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <section className="rounded-lg border border-border bg-surface px-4 py-4">
+        <p className="text-sm text-fgMuted">Meal total</p>
+        <p className="tabular mt-1 text-3xl font-medium text-fg">{totals.calories} kcal</p>
+        <p className="tabular mt-2 text-sm text-fgMuted">
+          Protein {totals.proteinG}g · Carbs {totals.carbsG}g · Fat {totals.fatG}g
+        </p>
+      </section>
+
+      <div className="grid gap-2">
+        <Link className="button-primary" to="/">
+          Save meal
+        </Link>
+        <Link className="button-secondary" to="/log?type=meal">
+          Back
+        </Link>
+      </div>
+    </div>
+  );
+}
