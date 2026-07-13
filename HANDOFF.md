@@ -55,6 +55,7 @@ Weight Tracker is a single-user gym PWA for owner `vutukurydhruva@gmail.com`. Th
 | Export data | Read all owner-scoped rows and download JSON or CSV. |
 
 ## Open Handoff Notes
+- Mom-first UI shell (UI-only mocks): Today / Log / History tabs, sticky Ask bar, `/onboarding` gate until `useUiStore.onboardingComplete` (persisted in `weight-tracker-ui`). Settings can replay onboarding without wiping logs.
 - The current repo still contains a Vite starter entry in `src/main.ts`. Planned app files from the build plan are not all present yet.
 - The database migration and Supabase scripts are planned by the build plan but are outside this documentation-only task.
 - The exact `gstack` and `using-superpowers` skills are unavailable here. Use the equivalent workflow guidance in root docs.

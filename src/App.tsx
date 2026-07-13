@@ -1,4 +1,5 @@
 import { BookOpen, History as HistoryIcon, Home, PenLine, Settings, Target } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { AskBar } from './components/AskBar';
 import { Nav } from './components/Nav';
@@ -13,10 +14,12 @@ import { History } from './pages/History';
 import { HistorySession } from './pages/HistorySession';
 import { Log } from './pages/Log';
 import { MealConfirm } from './pages/MealConfirm';
+import { Onboarding } from './pages/Onboarding';
 import { Session } from './pages/Session';
 import { SettingsPage } from './pages/Settings';
 import { Today } from './pages/Today';
 import { WorkoutHistory } from './pages/WorkoutHistory';
+import { useUiStore } from './stores/uiStore';
 
 function Header() {
   return (
@@ -57,6 +60,7 @@ function AppRoutes() {
       <Route path="/exercises/:slug" element={<ExerciseDetail />} />
       <Route path="/goals" element={<Goals />} />
       <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/onboarding" element={<Navigate to="/" replace />} />
       <Route path="/progress" element={<Navigate to="/history" replace />} />
       <Route path="/calendar" element={<Navigate to="/history" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -64,8 +68,41 @@ function AppRoutes() {
   );
 }
 
+function useUiHydrated() {
+  const [hydrated, setHydrated] = useState(() => useUiStore.persist.hasHydrated());
+
+  useEffect(() => {
+    if (useUiStore.persist.hasHydrated()) {
+      setHydrated(true);
+      return;
+    }
+    return useUiStore.persist.onFinishHydration(() => setHydrated(true));
+  }, []);
+
+  return hydrated;
+}
+
 export function App() {
   useSupabaseBootstrap();
+  const hydrated = useUiHydrated();
+  const onboardingComplete = useUiStore((state) => state.onboardingComplete);
+
+  if (!hydrated) {
+    return (
+      <div className="grid min-h-[100dvh] place-items-center font-serif text-fgMuted">
+        <p className="text-sm tracking-wide">Preparing a calm start…</p>
+      </div>
+    );
+  }
+
+  if (!onboardingComplete) {
+    return (
+      <div className="min-h-screen font-serif text-fg antialiased">
+        <Onboarding />
+        <Toaster />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen font-serif text-fg antialiased">

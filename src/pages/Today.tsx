@@ -2,22 +2,29 @@ import { Camera, ClipboardList, Scale, Utensils } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EncouragementLine } from '../components/EncouragementLine';
 import { uiMock } from '../data/uiMock';
+import { useUiStore } from '../stores/uiStore';
 
 export function Today() {
+  const preferredName = useUiStore((state) => state.preferredName);
+  const focus = useUiStore((state) => state.focus);
   const remaining = uiMock.todayMacros.calorieTarget - uiMock.todayMacros.calories;
   const proteinShare = Math.round((uiMock.todayMacros.proteinG / 80) * 100);
+  const greeting = preferredName ? `Hi ${preferredName} — you’re here` : 'You’re here — that matters';
+  const mealLead =
+    focus === 'weight'
+      ? 'Weight comes first for you; meals still help when you feel like noting them.'
+      : 'Tell us what’s on the plate — idli, dal, roti, chai — in your own words. Small check-ins add up.';
 
   return (
     <div className="grid animate-rise gap-9">
       <section>
-        <p className="text-sm text-fgMuted">You’re here — that matters</p>
+        <p className="text-sm text-fgMuted">{greeting}</p>
         <h1 className="page-title mt-2">Today is already going well</h1>
         <div className="mt-4">
           <EncouragementLine />
         </div>
         <p className="page-lead mt-4">
-          Note your weight when you’re ready. Tell us what’s on the plate — idli, dal, roti, chai —
-          in your own words. Small check-ins add up.
+          Note your weight when you’re ready. {mealLead}
         </p>
       </section>
 

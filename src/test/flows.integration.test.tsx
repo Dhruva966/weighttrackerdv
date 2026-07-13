@@ -9,6 +9,7 @@ import { Session } from '../pages/Session';
 import { SettingsPage } from '../pages/Settings';
 import { starterExercises, starterGoals, starterSessions, starterSets } from '../data/catalog';
 import { usePrStore } from '../stores/prStore';
+import { useUiStore } from '../stores/uiStore';
 import { useWorkoutStore } from '../stores/workoutStore';
 
 vi.mock('canvas-confetti', () => ({
@@ -37,6 +38,13 @@ function resetStores() {
     sets: starterSets,
   });
   usePrStore.getState().clearPr();
+  useUiStore.setState({
+    onboardingComplete: true,
+    preferredName: '',
+    focus: 'both',
+    unit: 'lb',
+    restSeconds: 90,
+  });
 }
 
 function clickBottomNav(label: RegExp) {
@@ -73,6 +81,33 @@ describe('app shell', () => {
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: /look how far you’ve come/i })).toBeInTheDocument(),
     );
+  });
+
+  it('shows onboarding until completed, then Today', async () => {
+    useUiStore.setState({ onboardingComplete: false, preferredName: '', focus: 'both' });
+    renderApp('/');
+
+    expect(await screen.findByRole('heading', { name: /you’re in the right place/i })).toBeInTheDocument();
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /^continue$/i }));
+    expect(await screen.findByRole('heading', { name: /three gentle habits/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /^continue$/i }));
+    expect(await screen.findByRole('heading', { name: /what should we call you/i })).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText(/amma|priya/i), { target: { value: 'Amma' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /^continue$/i }));
+    expect(
+      await screen.findByRole('heading', { name: /amma, today’s waiting gently/i }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /begin today/i }));
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /today is already going well/i })).toBeInTheDocument(),
+    );
+    expect(screen.getByText(/hi amma/i)).toBeInTheDocument();
+    expect(screen.getByRole('navigation')).toBeInTheDocument();
   });
 });
 

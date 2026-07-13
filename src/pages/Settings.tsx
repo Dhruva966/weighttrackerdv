@@ -1,4 +1,5 @@
 import { Download, Database, Smartphone, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { downloadWorkoutExport } from '../lib/export';
 import { isExerciseLogLlmConfigured, isSupabaseLlmConfigured } from '../lib/exercise-log-parse';
 import { useOnline } from '../hooks/useOnline';
@@ -6,10 +7,13 @@ import { useSupabaseBootstrap } from '../hooks/useSupabaseBootstrap';
 import { useUiStore } from '../stores/uiStore';
 
 export function SettingsPage() {
+  const navigate = useNavigate();
   const unit = useUiStore((state) => state.unit);
   const setUnit = useUiStore((state) => state.setUnit);
   const restSeconds = useUiStore((state) => state.restSeconds);
   const setRestSeconds = useUiStore((state) => state.setRestSeconds);
+  const preferredName = useUiStore((state) => state.preferredName);
+  const resetOnboarding = useUiStore((state) => state.resetOnboarding);
   const online = useOnline();
   const supabase = useSupabaseBootstrap();
 
@@ -17,8 +21,26 @@ export function SettingsPage() {
     <div className="grid gap-4">
       <div>
         <h1 className="page-title">Settings</h1>
-        <p className="mt-1 text-sm text-fgMuted">Units, rest timer, export, and install state.</p>
+        <p className="mt-1 text-sm text-fgMuted">Units, rest timer, welcome flow, export, and install.</p>
       </div>
+      <section className="app-card grid gap-3">
+        <p className="font-medium text-fg">Welcome again</p>
+        <p className="text-sm leading-relaxed text-fgMuted">
+          {preferredName
+            ? `Saved as ${preferredName}. Replay the soft intro anytime — it won’t erase your logs.`
+            : 'Replay the soft intro anytime — it won’t erase your logs.'}
+        </p>
+        <button
+          className="button-secondary"
+          type="button"
+          onClick={() => {
+            resetOnboarding();
+            navigate('/', { replace: true });
+          }}
+        >
+          Replay onboarding
+        </button>
+      </section>
       <section className="app-card grid gap-3">
         <p className="flex items-center gap-2 font-bold text-fg">
           <Database size={18} />
