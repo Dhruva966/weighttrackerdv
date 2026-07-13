@@ -29,6 +29,8 @@ type UiState = {
   completeOnboarding: (input?: { preferredName?: string; focus?: Focus }) => void;
   resetOnboarding: () => void;
   toggleIntention: (id: string) => void;
+  addIntention: (name: string) => Intention | null;
+  removeIntention: (id: string) => void;
   setMealDraft: (draft: Partial<MealDraftPreview> & { source: string; raw: string }) => void;
   clearMealDraft: () => void;
   showPreviewNotice: (message: string) => void;
@@ -79,6 +81,23 @@ export const useUiStore = create<UiState>()(
           intentions: state.intentions.map((item) =>
             item.id === id ? { ...item, done: !item.done } : item,
           ),
+        })),
+      addIntention: (name) => {
+        const trimmed = name.trim();
+        if (!trimmed) {
+          return null;
+        }
+        const intention: Intention = {
+          id: `g-${crypto.randomUUID()}`,
+          name: trimmed.slice(0, 80),
+          done: false,
+        };
+        set((state) => ({ intentions: [...state.intentions, intention] }));
+        return intention;
+      },
+      removeIntention: (id) =>
+        set((state) => ({
+          intentions: state.intentions.filter((item) => item.id !== id),
         })),
       setMealDraft: (draft) =>
         set((state) => ({

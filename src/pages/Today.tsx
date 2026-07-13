@@ -51,12 +51,9 @@ export function Today() {
           <div className="mt-4">
             <EncouragementLine />
           </div>
-          <p className="page-lead mt-4">
-            Log weight, food, walks, and lifts in one bar. Better than yesterday — stay in motion.
-          </p>
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="mt-5 flex flex-wrap gap-2">
             <Link className="button-primary" to="/eat">
-              <Utensils size={18} strokeWidth={1.5} />
+              <Utensils size={16} strokeWidth={1.5} className="block" />
               Open Eat
             </Link>
             <Link className="button-secondary" to="/move">
@@ -139,11 +136,11 @@ export function Today() {
             </p>
           </div>
           <Link className="text-link" to="/goals">
-            See all
+            Add / edit
           </Link>
         </div>
         <div className="grid gap-2">
-          {intentions.slice(0, 3).map((goal) => (
+          {intentions.slice(0, 5).map((goal) => (
             <button
               key={goal.id}
               type="button"

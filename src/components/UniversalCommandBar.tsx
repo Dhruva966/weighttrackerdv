@@ -96,12 +96,15 @@ export function UniversalCommandBar() {
   }
 
   return (
-    <section className="sticky top-[4.5rem] z-20 border-b border-border/70 bg-bg/90 px-5 py-2 backdrop-blur-md">
-      <form className="mx-auto flex max-w-xl items-center gap-1.5" onSubmit={handleSubmit}>
-        <label className="relative block min-w-0 flex-1">
+    <section className="sticky top-[4.5rem] z-20 border-b border-border/70 bg-bg/90 px-4 py-1.5 backdrop-blur-md">
+      <form
+        className="mx-auto grid h-9 max-w-xl grid-cols-[minmax(0,1fr)_2.25rem_2.25rem] items-stretch gap-1.5"
+        onSubmit={handleSubmit}
+      >
+        <label className="relative block min-w-0">
           <span className="sr-only">Log anything with text or voice</span>
           <input
-            className="field !h-9 !min-h-0 border-border/60 bg-surface/95 !px-3 text-sm shadow-card"
+            className="box-border h-full w-full rounded-xl border border-border/60 bg-surface/95 px-3 text-sm leading-none text-fg shadow-card outline-none placeholder:text-fgMuted focus:border-accent"
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);
@@ -113,20 +116,26 @@ export function UniversalCommandBar() {
           />
         </label>
         <button
-          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-fgMuted transition hover:bg-mist hover:text-fg ${listening ? 'border-accent bg-accentSoft text-accent' : ''}`}
+          className={`box-border grid h-full w-full place-items-center rounded-full border border-border bg-surface p-0 leading-none text-fgMuted transition hover:bg-mist hover:text-fg disabled:opacity-60 ${listening ? 'border-accent bg-accentSoft text-accent' : ''}`}
           type="button"
           onClick={handleMic}
           aria-label={listening ? 'Listening' : 'Speak to log'}
           disabled={listening}
         >
-          <Mic size={16} strokeWidth={1.5} className={`block ${listening ? 'animate-pulse' : ''}`} />
+          <Mic
+            size={16}
+            strokeWidth={1.5}
+            absoluteStrokeWidth
+            className={`block size-4 shrink-0 ${listening ? 'animate-pulse' : ''}`}
+            aria-hidden
+          />
         </button>
         <button
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-fgMuted transition hover:bg-mist hover:text-fg"
+          className="box-border grid h-full w-full place-items-center rounded-xl border border-border bg-surface p-0 leading-none text-fgMuted transition hover:bg-mist hover:text-fg"
           type="submit"
           aria-label="Submit log"
         >
-          <Send size={15} strokeWidth={1.5} className="block" />
+          <Send size={15} strokeWidth={1.5} absoluteStrokeWidth className="block size-3.5 shrink-0" aria-hidden />
         </button>
       </form>
       {hint ? (

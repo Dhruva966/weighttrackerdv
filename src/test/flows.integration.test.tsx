@@ -205,8 +205,24 @@ describe('goals and settings', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /train today/i }));
+    fireEvent.click(screen.getAllByRole('button', { name: /train today/i })[0]!);
     expect(useUiStore.getState().intentions.find((item) => item.id === 'g2')?.done).toBe(true);
+  });
+
+  it('adds a custom intention', () => {
+    render(
+      <MemoryRouter>
+        <Goals />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText(/add an intention/i), {
+      target: { value: 'Hit protein target' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /^add$/i }));
+    expect(useUiStore.getState().intentions.some((item) => item.name === 'Hit protein target')).toBe(
+      true,
+    );
   });
 
   it('renders You settings', () => {
