@@ -64,8 +64,8 @@ export function Today() {
       <section className="grid gap-4">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-xl font-medium text-fg">Last session</h2>
-          <Link className="text-link" to="/history">
-            View history
+          <Link className="text-link" to="/calendar">
+            View calendar
           </Link>
         </div>
         {lastSession ? (

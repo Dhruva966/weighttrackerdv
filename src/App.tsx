@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Dumbbell, HistoryIcon, LineChart, Plus, Search, Settings, Target } from 'lucide-react';
+import { CalendarDays, Dumbbell, HistoryIcon, LineChart, Plus, Search, Settings, Target } from 'lucide-react';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Nav } from './components/Nav';
 import { PRConfetti } from './components/PRConfetti';
 import { SessionLauncher } from './components/SessionLauncher';
 import { Toaster } from './components/Toaster';
 import { useSupabaseBootstrap } from './hooks/useSupabaseBootstrap';
+import { Calendar } from './pages/Calendar';
 import { ExerciseCreate } from './pages/ExerciseCreate';
 import { ExerciseDetail } from './pages/ExerciseDetail';
 import { ExerciseLibrary } from './pages/ExerciseLibrary';
@@ -67,6 +68,7 @@ function AnimatedRoutes() {
           <Route path="/exercises/new" element={<ExerciseCreate />} />
           <Route path="/exercises/:slug" element={<ExerciseDetail />} />
           <Route path="/progress" element={<Progress />} />
+          <Route path="/calendar" element={<Calendar />} />
           <Route path="/history" element={<History />} />
           <Route path="/history/:sessionId" element={<HistorySession />} />
           <Route path="/goals" element={<Goals />} />
@@ -97,6 +99,7 @@ export function App() {
           { to: '/', label: 'Today', icon: Dumbbell },
           { to: '/exercises', label: 'Library', icon: Search },
           { to: '/progress', label: 'Progress', icon: LineChart },
+          { to: '/calendar', label: 'Calendar', icon: CalendarDays },
           { to: '/history', label: 'History', icon: HistoryIcon },
         ]}
       />

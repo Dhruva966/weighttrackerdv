@@ -71,10 +71,13 @@ describe('app shell', () => {
     });
   });
 
-  it('navigates to progress and history tabs', async () => {
+  it('navigates to progress, calendar, and history tabs', async () => {
     renderApp('/');
     clickBottomNav(/^progress$/i);
     await waitFor(() => expect(screen.getByRole('heading', { name: /^progress$/i })).toBeInTheDocument());
+
+    clickBottomNav(/^calendar$/i);
+    await waitFor(() => expect(screen.getByRole('heading', { name: /^calendar$/i })).toBeInTheDocument());
 
     clickBottomNav(/^history$/i);
     await waitFor(() => expect(screen.getByRole('heading', { name: /^history$/i })).toBeInTheDocument());
