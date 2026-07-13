@@ -61,6 +61,27 @@ flowchart LR
 4. Set local script-only secrets in the shell when running seed or backfill.
 5. Verify `exercises`, `sessions`, `sets`, `body_weight_logs`, and `goals` exist before running the app.
 
+## Supabase Edge Function secrets
+Groq belongs in **Supabase secrets**, not Postgres tables.
+
+1. In `.env.local`, set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `GROQ_API_KEY` (or `VITE_GROQ_API_KEY`).
+2. Log in and link your project: `npx supabase login` then `npx supabase link --project-ref <ref>`.
+3. Push secrets to Supabase:
+
+   ```bash
+   pnpm supabase:secrets
+   ```
+
+4. Deploy the parser function:
+
+   ```bash
+   pnpm supabase:deploy-functions
+   ```
+
+Or manually in the Supabase dashboard: **Project Settings → Edge Functions → Secrets** → add `GROQ_API_KEY`.
+
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are copied **from** Supabase API settings into Vercel/`.env.local`. They are not stored back into Supabase.
+
 ## Vercel Setup
 1. Import the GitHub repo into Vercel.
 2. Set framework preset to Vite.

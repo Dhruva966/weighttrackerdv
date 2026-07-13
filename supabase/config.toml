@@ -1,0 +1,4 @@
+name = "weight-tracker"
+
+[functions.parse-exercise-log]
+verify_jwt = false

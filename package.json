@@ -11,7 +11,9 @@
     "seed": "tsx scripts/seed-user-board.ts",
     "backfill:images": "tsx scripts/backfill-images.ts",
     "check:supabase": "tsx scripts/check-supabase.ts",
-    "check:groq": "tsx scripts/check-groq.ts"
+    "check:groq": "tsx scripts/check-groq.ts",
+    "supabase:secrets": "tsx scripts/push-supabase-secrets.ts",
+    "supabase:deploy-functions": "tsx scripts/deploy-supabase-functions.ts"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

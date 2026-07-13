@@ -1,6 +1,6 @@
 import { Download, Database, Smartphone, Sparkles } from 'lucide-react';
 import { downloadWorkoutExport } from '../lib/export';
-import { isExerciseLogLlmConfigured } from '../lib/exercise-log-parse';
+import { isExerciseLogLlmConfigured, isSupabaseLlmConfigured } from '../lib/exercise-log-parse';
 import { useOnline } from '../hooks/useOnline';
 import { useSupabaseBootstrap } from '../hooks/useSupabaseBootstrap';
 import { useUiStore } from '../stores/uiStore';
@@ -38,9 +38,11 @@ export function SettingsPage() {
           Natural language logging
         </p>
         <p className="text-sm text-fgMuted">
-          {isExerciseLogLlmConfigured()
-            ? 'Groq fallback is configured. The app tries the free on-device parser first, then Groq for tougher notes.'
-            : 'Add VITE_GROQ_API_KEY to .env.local for a free Groq fallback when on-device parsing cannot find sets.'}
+          {isSupabaseLlmConfigured()
+            ? 'Groq runs through Supabase Edge Functions (key stored in Supabase secrets, not the browser). On-device parsing runs first.'
+            : isExerciseLogLlmConfigured()
+              ? 'Browser Groq fallback is configured. Prefer storing GROQ_API_KEY in Supabase secrets instead.'
+              : 'Add Supabase URL + anon key, then run `pnpm supabase:secrets` to store GROQ_API_KEY in Supabase.'}
         </p>
       </section>
       <section className="app-card grid gap-3">

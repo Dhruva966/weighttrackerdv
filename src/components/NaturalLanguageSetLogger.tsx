@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { isExerciseLogLlmConfigured } from '../lib/exercise-log-parse';
+import { isExerciseLogLlmConfigured, isSupabaseLlmConfigured } from '../lib/exercise-log-parse';
 import { useWorkoutStore } from '../stores/workoutStore';
 import type { Exercise } from '../types';
 import { SetRow } from './SetRow';
@@ -65,9 +65,11 @@ export function NaturalLanguageSetLogger({
         />
       </label>
       <p className="text-xs text-fgMuted">
-        {isExerciseLogLlmConfigured()
-          ? 'Free on-device parser first, then Groq if needed.'
-          : 'Free on-device parser. Add VITE_GROQ_API_KEY in settings for tougher notes.'}
+        {isSupabaseLlmConfigured()
+          ? 'Free on-device parser first, then Groq via Supabase if needed.'
+          : isExerciseLogLlmConfigured()
+            ? 'Free on-device parser first, then browser Groq fallback.'
+            : 'Free on-device parser. Store GROQ_API_KEY in Supabase secrets for tougher notes.'}
       </p>
       <button className="button-primary" type="submit" disabled={disabled || isSaving || !text.trim()}>
         {isSaving ? 'Parsing…' : 'Log sets'}
