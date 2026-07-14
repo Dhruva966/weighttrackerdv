@@ -1,6 +1,7 @@
 import { Camera, Dumbbell, Mic, Utensils } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { MovementLogger } from '../components/MovementLogger';
 import { PrivateVoiceCapture } from '../components/PrivateVoiceCapture';
 import { estimateMealFromText } from '../lib/meal-from-text';
 import { useUiStore } from '../stores/uiStore';
@@ -134,11 +135,12 @@ export function Log({ forcedType, hideIntro = false }: Props) {
           <div>
             <h2 className="text-lg font-medium text-fg">Train when you’re ready</h2>
             <p className="mt-1 text-sm leading-relaxed text-fgMuted">
-              Log lifts in a session, or drop plain English into the bar above.
+              Log walks in plain English, or open a lifting session.
             </p>
           </div>
+          <MovementLogger compact />
           <div className="rounded-2xl border border-border/70 bg-mist/50 px-4 py-3 text-sm leading-relaxed text-fgMuted">
-            Example: “biceps 3 sets 8 reps 110 pounds”
+            Lift example: “biceps 3 sets 8 reps 110 pounds”
           </div>
           <Link className="button-secondary" to="/session/new">
             Start a session

@@ -2,6 +2,7 @@ import { CheckCircle2, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ExercisePicker } from '../components/ExercisePicker';
+import { MovementLogger } from '../components/MovementLogger';
 import { NaturalLanguageSetLogger } from '../components/NaturalLanguageSetLogger';
 import { RestTimer } from '../components/RestTimer';
 import { SessionSummary } from '../components/SessionSummary';
@@ -119,6 +120,16 @@ export function Session() {
 
       {!isEnded && sessionSets.length > 0 ? (
         <RestTimer activeKey={lastSetKey || sessionSets.at(-1)?.id || session.id} />
+      ) : null}
+
+      {!isEnded ? (
+        <section className="grid gap-3">
+          <h2 className="text-lg font-medium text-fg">Log movement</h2>
+          <p className="text-sm text-fgMuted">
+            Walks and cardio go here in plain English — e.g. “walking 30 min”.
+          </p>
+          <MovementLogger compact />
+        </section>
       ) : null}
 
       {!isEnded ? (

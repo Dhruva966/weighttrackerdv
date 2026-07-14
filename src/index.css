@@ -159,6 +159,10 @@ button {
   transition: border-color 150ms ease, background-color 150ms ease;
 }
 
+.field-with-leading-icon {
+  padding-left: 2.75rem;
+}
+
 .field::placeholder {
   color: #7a7164;
 }

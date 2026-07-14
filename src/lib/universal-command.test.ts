@@ -8,6 +8,7 @@ describe('parseUniversalCommand', () => {
 
   it('routes walks', () => {
     expect(parseUniversalCommand('walked 20 minutes').intent).toBe('walk');
+    expect(parseUniversalCommand('walking 30 min').intent).toBe('walk');
   });
 
   it('routes lifts', () => {

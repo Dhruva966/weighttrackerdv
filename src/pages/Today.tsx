@@ -6,6 +6,7 @@ import {
   getBodyWeightDelta,
   getLatestBodyWeight,
   mealsForDay,
+  movementsForDay,
   sumMacros,
   useDiaryStore,
 } from '../stores/diaryStore';
@@ -28,6 +29,7 @@ export function Today() {
 
   const bodyWeightLogs = useDiaryStore((state) => state.bodyWeightLogs);
   const meals = useDiaryStore((state) => state.meals);
+  const movements = useDiaryStore((state) => state.movements);
   const calorieTarget = useDiaryStore((state) => state.calorieTarget);
   const sessions = useWorkoutStore((state) => state.sessions);
   const sets = useWorkoutStore((state) => state.sets);
@@ -35,6 +37,7 @@ export function Today() {
   const latestWeight = getLatestBodyWeight(bodyWeightLogs);
   const weightDelta = getBodyWeightDelta(bodyWeightLogs);
   const todayMeals = mealsForDay(meals);
+  const todayMovements = movementsForDay(movements);
   const macros = sumMacros(todayMeals);
   const remaining = calorieTarget - macros.calories;
   const doneCount = intentions.filter((goal) => goal.done).length;
@@ -171,9 +174,18 @@ export function Today() {
           <div className="flex-1">
             <p className="font-medium text-fg">Training log</p>
             <p className="mt-1 text-sm leading-relaxed text-fgMuted">
-              {setCount === 0
-                ? 'No lifts logged yet — open Move or speak a set into the bar.'
-                : `${setCount} sets recorded · ${openSessions} open session${openSessions === 1 ? '' : 's'}.`}
+              {setCount === 0 && todayMovements.length === 0
+                ? 'No lifts or walks yet — try “walking 30 min” in the bar or open Move.'
+                : [
+                    setCount > 0
+                      ? `${setCount} sets · ${openSessions} open session${openSessions === 1 ? '' : 's'}`
+                      : null,
+                    todayMovements.length > 0
+                      ? `${todayMovements.length} movement${todayMovements.length === 1 ? '' : 's'} today`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
             </p>
             <Link className="button-secondary mt-4 inline-flex" to="/move">
               Open Move

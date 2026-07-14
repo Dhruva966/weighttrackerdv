@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 import { buildMonthGrid, buildSessionDayMap, toDayKey } from '../lib/calendar';
-import { mealsForDay, useDiaryStore } from '../stores/diaryStore';
+import { mealsForDay, movementsForDay, useDiaryStore } from '../stores/diaryStore';
 import { useWorkoutStore } from '../stores/workoutStore';
 
 const kindStyles = {
   weight: 'border-accent/15 bg-accentSoft text-fg',
   meal: 'border-border/70 bg-surface/90 text-fg',
   workout: 'border-border/60 bg-mist/50 text-fgMuted',
+  walk: 'border-accent/10 bg-mist/60 text-fg',
 } as const;
 
 type HistoryItem = {
@@ -38,6 +39,7 @@ export function History({ compact = false }: { compact?: boolean }) {
   const exercises = useWorkoutStore((state) => state.exercises);
   const bodyWeightLogs = useDiaryStore((state) => state.bodyWeightLogs);
   const meals = useDiaryStore((state) => state.meals);
+  const movements = useDiaryStore((state) => state.movements);
 
   const timeZone = 'America/Los_Angeles';
   const todayKey = toDayKey(new Date(), timeZone);
@@ -72,6 +74,9 @@ export function History({ compact = false }: { compact?: boolean }) {
   for (const meal of meals) {
     dayKeys.add(meal.loggedAt.slice(0, 10));
   }
+  for (const movement of movements) {
+    dayKeys.add(movement.loggedAt.slice(0, 10));
+  }
   for (const session of sessions) {
     dayKeys.add(toDayKey(session.startedAt, timeZone));
   }
@@ -89,6 +94,13 @@ export function History({ compact = false }: { compact?: boolean }) {
         kind: 'meal',
         label: meal.title,
         detail: meal.summary || meal.raw || `${meal.calories} kcal`,
+      });
+    }
+    for (const movement of movementsForDay(movements, day)) {
+      items.push({
+        kind: 'walk',
+        label: movement.title,
+        detail: movement.summary || movement.raw,
       });
     }
     const daySessions = sessions.filter(

@@ -42,6 +42,7 @@ function resetStores() {
   useDiaryStore.setState({
     bodyWeightLogs: [{ id: 'bw-seed-dhruva', loggedAt: '2026-07-13', weightLb: 169 }],
     meals: [],
+    movements: [],
     calorieTarget: 2400,
   });
   useUiStore.setState({

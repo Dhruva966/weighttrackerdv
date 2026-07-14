@@ -2,6 +2,7 @@ import { Mic, Send } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { estimateMealFromText, extractWeightLb } from '../lib/meal-from-text';
+import { parseMovementText } from '../lib/movement-from-text';
 import { isWebSpeechAvailable, listenOnce } from '../lib/speech/web-speech';
 import { parseUniversalCommand } from '../lib/universal-command';
 import { useDiaryStore } from '../stores/diaryStore';
@@ -16,6 +17,7 @@ export function UniversalCommandBar() {
   const showPreviewNotice = useUiStore((state) => state.showPreviewNotice);
   const tendGold = useUiStore((state) => state.tendGold);
   const upsertBodyWeight = useDiaryStore((state) => state.upsertBodyWeight);
+  const addMovement = useDiaryStore((state) => state.addMovement);
 
   async function handleMic() {
     if (!isWebSpeechAvailable()) {
@@ -63,8 +65,25 @@ export function UniversalCommandBar() {
     }
 
     if (parsed.intent === 'walk') {
-      tendGold();
-      showPreviewNotice(`${parsed.summary} Walks count as Move.`);
+      const movement = parseMovementText(parsed.raw);
+      if (movement) {
+        addMovement({
+          kind: movement.kind,
+          title: movement.title,
+          durationMin: movement.durationMin,
+          summary: movement.summary,
+          raw: movement.raw,
+        });
+        tendGold();
+        showPreviewNotice(
+          movement.durationMin
+            ? `Logged ${movement.title.toLowerCase()} · ${movement.durationMin} min`
+            : `Logged ${movement.title.toLowerCase()}`,
+        );
+      } else {
+        tendGold();
+        showPreviewNotice(`${parsed.summary} Couldn’t read duration — try “walking 30 min”.`);
+      }
       navigate('/move');
       setQuery('');
       return;

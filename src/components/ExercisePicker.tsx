@@ -18,7 +18,7 @@ export function ExercisePicker({
       <label className="relative block">
         <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fgMuted" size={18} />
         <input
-          className="field pl-11"
+          className="field field-with-leading-icon"
           placeholder="Search exercises to add"
           value={query}
           onChange={(event) => setQuery(event.target.value)}

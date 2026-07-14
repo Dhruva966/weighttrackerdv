@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { MovementKind } from '../lib/movement-from-text';
 
 export type BodyWeightLog = {
   id: string;
@@ -19,12 +20,26 @@ export type MealLog = {
   raw: string;
 };
 
+export type MovementLog = {
+  id: string;
+  loggedAt: string; // ISO
+  kind: MovementKind;
+  title: string;
+  durationMin: number | null;
+  summary: string;
+  raw: string;
+};
+
 type DiaryState = {
   bodyWeightLogs: BodyWeightLog[];
   meals: MealLog[];
+  movements: MovementLog[];
   calorieTarget: number;
   upsertBodyWeight: (weightLb: number, loggedAt?: string) => BodyWeightLog;
   addMeal: (meal: Omit<MealLog, 'id' | 'loggedAt'> & { loggedAt?: string }) => MealLog;
+  addMovement: (
+    movement: Omit<MovementLog, 'id' | 'loggedAt'> & { loggedAt?: string },
+  ) => MovementLog;
   clearMealsForToday: () => void;
 };
 
@@ -55,6 +70,7 @@ export const useDiaryStore = create<DiaryState>()(
         },
       ],
       meals: [],
+      movements: [],
       calorieTarget: 2400,
       upsertBodyWeight: (weightLb, loggedAt) => {
         const day = loggedAt ?? todayKey();
@@ -85,6 +101,19 @@ export const useDiaryStore = create<DiaryState>()(
         set((state) => ({ meals: [entry, ...state.meals] }));
         return entry;
       },
+      addMovement: (movement) => {
+        const entry: MovementLog = {
+          id: newId('move'),
+          loggedAt: movement.loggedAt ?? new Date().toISOString(),
+          kind: movement.kind,
+          title: movement.title,
+          durationMin: movement.durationMin,
+          summary: movement.summary,
+          raw: movement.raw,
+        };
+        set((state) => ({ movements: [entry, ...state.movements] }));
+        return entry;
+      },
       clearMealsForToday: () => {
         const day = todayKey();
         set((state) => ({
@@ -97,8 +126,17 @@ export const useDiaryStore = create<DiaryState>()(
       partialize: (state) => ({
         bodyWeightLogs: state.bodyWeightLogs,
         meals: state.meals,
+        movements: state.movements,
         calorieTarget: state.calorieTarget,
       }),
+      merge: (persisted, current) => {
+        const partial = (persisted ?? {}) as Partial<DiaryState>;
+        return {
+          ...current,
+          ...partial,
+          movements: partial.movements ?? [],
+        };
+      },
     },
   ),
 );
@@ -117,6 +155,10 @@ export function getBodyWeightDelta(logs: BodyWeightLog[]): number | null {
 
 export function mealsForDay(meals: MealLog[], day = todayKey()): MealLog[] {
   return meals.filter((meal) => meal.loggedAt.slice(0, 10) === day);
+}
+
+export function movementsForDay(movements: MovementLog[], day = todayKey()): MovementLog[] {
+  return movements.filter((movement) => movement.loggedAt.slice(0, 10) === day);
 }
 
 export function sumMacros(meals: MealLog[]) {
