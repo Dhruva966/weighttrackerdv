@@ -1,6 +1,6 @@
 # Deployment
 
-Deploy the Weight Tracker PWA with Vercel for the web app and Supabase for database, storage, and seed data.
+Deploy the **Aloo** PWA with Vercel for the web app and Supabase for gym database, storage, and seed data. (Local diary: weight/meals/walks currently live in browser Zustand until synced.)
 
 ## Environment Variables
 | Variable | Required | Where | Purpose |

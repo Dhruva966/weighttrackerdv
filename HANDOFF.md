@@ -1,63 +1,48 @@
-# Weight Tracker Handoff
+# Handoff — Aloo (current)
 
 Use this file when one agent hands work to another. Keep it short, contract-focused, and current.
 
 ## Current Product Shape
-Weight Tracker is a single-user gym PWA for owner `vutukurydhruva@gmail.com`. The MVP has no login, uses one hardcoded `USER_ID`, stores data in Supabase Postgres, stores exercise images in Supabase Storage, and keeps offline writes in Dexie until they replay.
+**Aloo** is a single-user PWA for owner Dhruva (`vutultadhruva@gmail.com`). Gym path uses hardcoded `USER_ID` + Supabase when configured. Diary (weight, meals, walks) and UI prefs are local-first Zustand (`aloo-diary-v1`, `aloo-ui-v1`). Soft gold + white shell; pot of gold grows with `goldDays`.
 
-## Subsystems
-| Subsystem | Owner doc | Responsibilities |
-|-----------|-----------|------------------|
-| Web PWA | `web/CLAUDE.md` | Routes, pages, components, React Query, Zustand, Dexie, PWA shell, animation discipline. |
-| Database | `db/CLAUDE.md` | Supabase schema, migrations, storage bucket, seed data, image backfill, offline payload contracts. |
+## Nav & routes
+**Today · Eat · Move · Grow · You**  
+`/` Today · `/eat` · `/move` · `/grow` · `/you` · `/session/:id` · `/exercises*` · `/goals`  
+Legacy redirects: `/log`→`/eat`, `/history`→`/grow`, `/progress`→`/grow`, `/settings`→`/you`, `/onboarding`→`/`
 
-## Data Contracts
+## Data contracts
+### Gym (Supabase / workoutStore)
+| Contract | Notes |
+|----------|-------|
+| Exercise / Session / Set / Goal | Unchanged from init schema; client UUIDs for offline. |
+| PendingWrite | Dexie queue for Supabase writes. |
+
+### Diary (local `diaryStore` — not yet synced)
 | Contract | Shape | Notes |
 |----------|-------|-------|
-| Exercise | `{ id, slug, name, muscle_group, secondary_muscles, equipment, instructions, image_url, image_style, source, archived }` | `slug` is stable. `image_style='name-only'` is valid and must render. |
-| Session | `{ id, user_id, started_at, ended_at, notes }` | `/session/new` creates a session and redirects to `/session/:id`. |
-| Set | `{ id, session_id, exercise_id, set_number, weight_lb, reps, rpe, is_warmup, is_pr, created_at }` | `weight_lb` accepts decimals. `reps > 0`. Client-generated `id` supports offline replay. |
-| BodyWeightLog | `{ id, user_id, logged_at, weight_lb }` | Unique per user/date. Use upsert for edits. |
-| Goal | `{ id, user_id, name, target_value, target_unit, achieved, achieved_at, created_at }` | Imported from board goals and editable later. |
-| PendingWrite | `{ id, table, op, payload, ts }` | Dexie queue drains in insertion order on `online` and `visibilitychange`. |
+| BodyWeightLog | `{ id, loggedAt, weightLb }` | Seeded ~169; NL “weighed N” upserts day |
+| MealLog | `{ id, loggedAt, title, summary, calories, proteinG, carbsG, fatG, raw }` | From meal confirm |
+| MovementLog | `{ id, loggedAt, kind, title, durationMin, summary, raw }` | “walking 30 min”, etc. |
 
-## Event Types
-| Event | Producer | Consumer | Payload |
-|-------|----------|----------|---------|
-| `set.saved` | `SetLogger` or set hook | React Query cache, rest timer | `{ setId, sessionId, exerciseId }` |
-| `set.pr` | Supabase insert response or PR wrapper | `prStore`, toast, confetti | `{ setId, exerciseId, weight_lb, reps }` |
-| `session.completed` | Session page | Session summary, Today page | `{ sessionId, totalVolume, setCount, prCount }` |
-| `offline.queued` | Offline queue | Toast/status UI | `{ table, op, id }` |
-| `offline.synced` | Offline queue drain | Toast/status UI, React Query invalidation | `{ count }` |
-| `exercise.image_backfilled` | Backfill script | Logs only | `{ slug, sourceUrl, storagePath }` |
+### UI (`uiStore`)
+Intentions `{ id, name, done }` — add/remove/toggle. `goldDays` / `tendGold`. Onboarding stashed.
 
-## Integration Checklist
-- Route map matches root `CLAUDE.md`: `/`, `/session/new`, `/session/:id`, `/exercises`, `/exercises/new`, `/exercises/:slug`, `/progress`, `/history`, `/history/:sessionId`, `/goals`, `/settings`.
-- Supabase migration exists before hooks or seed scripts depend on tables.
-- `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are present locally and in Vercel.
-- Storage bucket `exercise-images` exists with public read.
-- Seed JSON is user-verified before first seed run.
-- Offline queue writes use client-generated UUIDs.
-- PR badge, toast, and confetti depend on persisted `is_pr`, not a client guess alone.
-- Log path has no motion on weight input, reps buttons, or save-set tap.
-- All changed contracts are reflected in `CLAUDE.md`, `AGENTS.md`, subsystem docs, and this file.
+## Key files
+| What | Where |
+|------|-------|
+| Shell / routes / bar | `src/App.tsx`, `UniversalCommandBar.tsx` |
+| Pot of gold | `src/components/PotOfGold.tsx` |
+| Diary | `src/stores/diaryStore.ts` |
+| NL parsers | `src/lib/meal-from-text.ts`, `src/lib/movement-from-text.ts`, `src/lib/universal-command.ts` |
+| Session + search | `src/pages/Session.tsx`, `ExercisePicker.tsx`, `MovementLogger.tsx` |
+| Theme | `tailwind.config.js`, `src/index.css` |
+| ADRs | `decisions/2026-07-14-aloo-gold-diary.md`, `decisions/2026-07-14-context-save.md` |
 
-## Actions Needing Endpoints or Shared Hooks
-| Action | Required implementation |
-|--------|-------------------------|
-| Start workout | Create `sessions` row, then redirect to `/session/:id`. |
-| Save set | Validate payload, insert `sets`, queue offline on failure, update cache. |
-| Finish workout | Patch `sessions.ended_at`, calculate summary, navigate to recap. |
-| Create exercise | Validate form, upload optional image, insert `exercises`. |
-| Backfill image | Fetch Free Exercise DB, upload to Storage, update exercise image fields. |
-| Log body weight | Upsert `body_weight_logs` by `(user_id, logged_at)`. |
-| Toggle goal | Patch `goals.achieved` and `achieved_at`. |
-| Export data | Read all owner-scoped rows and download JSON or CSV. |
+## Open follow-ups
+- Sync diary weight/meals/walks to Supabase when tables/policies ready
+- Groq Whisper edge for iPhone installed-PWA STT
+- Optional USDA/meal DB; photo meal capture
+- Keep touch targets usable when slimming CTAs
 
-## Open Handoff Notes
-- **Aloo shell (Jul 2026):** Brand is **Aloo**. Soft gold + white. Pot of gold grows with consistency (`goldDays`). User display name **Dhruva**. Bottom nav: Today · Eat · Move · Grow · You. Sticky universal command bar (Web Speech). Onboarding stashed.
-- Real data: body weight + meals + **movements/walks** via `diaryStore` (seeded weight ~169 lb). Lift charts use `buildLiftProgress` on real sets — no synthetic series in UI. Calendar/history built from workout + diary logs. Intentions are user-editable (add/remove).
-- **Open UI bug:** Session/Library exercise search overlapping icon is **fixed** by ditching absolute+padding hacks for a flex row (icon sibling + input). Verify with hard refresh.
-- Full pause snapshot: `decisions/2026-07-14-context-save.md`.
-- See also `decisions/2026-07-13-garden-universal-voice.md` (leaf metaphor superseded by pot of gold).
-- Gym session logging remains real via workout store + Supabase when configured.
+## Verification
+`pnpm test` · `pnpm build` · hard-refresh preview (or restart Cloudflare quick tunnel) after UI ships

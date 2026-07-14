@@ -1,23 +1,25 @@
 # Web Subsystem
 
-Purpose: Build the mobile-first React PWA for workout logging, exercise discovery, progress charts, and offline-tolerant interaction.
+Purpose: Build the mobile-first React PWA (**Aloo**) for diary-style weight/food/walk logging plus gym sessions, with offline-tolerant gym sync.
 
 Return to the root instructions before changing shared contracts: [../CLAUDE.md](../CLAUDE.md).
 
 ## Key Files
 | What | Where |
 |------|-------|
-| Current scaffold entry | `../src/main.ts` |
-| Planned React entry | `../src/main.tsx` |
-| Planned app shell | `../src/App.tsx` |
-| Planned styles | `../src/index.css`, `../src/style.css` during scaffold transition |
-| Planned routes | `../src/pages/` |
-| Planned components | `../src/components/` |
-| Planned hooks | `../src/hooks/` |
-| Planned state stores | `../src/stores/` |
-| Planned app libraries | `../src/lib/` |
-| Static/PWA assets | `../public/` |
+| React entry | `../src/main.tsx` |
+| App shell + five-tab nav | `../src/App.tsx` |
+| Universal NL + mic bar | `../src/components/UniversalCommandBar.tsx` |
+| Pot of gold | `../src/components/PotOfGold.tsx` |
+| Diary store | `../src/stores/diaryStore.ts` |
+| UI / intentions / goldDays | `../src/stores/uiStore.ts` |
+| Workout store | `../src/stores/workoutStore.ts` |
+| Styles (gold theme) | `../src/index.css`, `../tailwind.config.js` |
+| Pages | `../src/pages/` (Today, Log/Eat/Move, Session, History/Grow, Goals, Settings/You, Library) |
+| Hooks / lib | `../src/hooks/`, `../src/lib/` |
+| Static/PWA assets | `../public/` (manifest name **Aloo**) |
 | Deployment guide | `../DEPLOYMENT.md` |
+| Current handoff | `../HANDOFF.md` |
 
 ## Allowed Patterns
 ### Keep set logging instant
@@ -61,18 +63,7 @@ if (!slug) return <Navigate to="/exercises" replace />
 ```
 
 ### Design for iPhone Safari first
-Use fixed bottom navigation, safe-area padding, and minimum 56px touch targets on the log path.
-
-```css
-.bottom-nav {
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
-}
-
-.log-button {
-  min-height: 56px;
-}
-```
-
+Use fixed bottom navigation (**Today · Eat · Move · Grow · You**), safe-area padding, and usable touch targets. Prefer lean CTAs over oversized cards on secondary chrome; keep log-path targets comfortable.
 ## Forbidden Patterns
 ### Do not animate the log path
 Animations are reserved for delight moments, not repeated input.

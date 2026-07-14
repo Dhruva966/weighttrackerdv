@@ -1,20 +1,21 @@
 # Database Subsystem
 
-Purpose: Own Supabase schema, storage, seed data, offline write contracts, and database-side rules for the Weight Tracker PWA.
+Purpose: Own Supabase schema, storage, seed data, offline write contracts, and database-side rules for the **Aloo** PWA (gym path). Body weight / meals / walks currently also exist as **local** diary state in `src/stores/diaryStore.ts` — do not assume they are synced until a migration and client sync land.
 
 Return to the root instructions before changing shared contracts: [../CLAUDE.md](../CLAUDE.md).
 
 ## Key Files
 | What | Where |
 |------|-------|
-| Planned migration | `../supabase/migrations/0001_init.sql` |
-| Planned Supabase client | `../src/lib/supabase.ts` |
-| Planned single-user constant | `../src/lib/user.ts` |
-| Planned Dexie schema | `../src/lib/db.ts` |
-| Planned offline queue | `../src/lib/offline-queue.ts` |
-| Planned seed script | `../scripts/seed-user-board.ts` |
-| Planned image backfill | `../scripts/backfill-images.ts` |
-| Planned board data | `../scripts/data/user-board.json` |
+| Init migration | `../supabase/migrations/0001_init.sql` |
+| Supabase client | `../src/lib/supabase.ts` |
+| Single-user constant | `../src/lib/user.ts` |
+| Dexie schema | `../src/lib/db.ts` |
+| Offline queue | `../src/lib/offline-queue.ts` |
+| Local diary (not synced) | `../src/stores/diaryStore.ts` |
+| Seed script | `../scripts/seed-user-board.ts` |
+| Image backfill | `../scripts/backfill-images.ts` |
+| Board data | `../scripts/data/user-board.json` |
 | Cross-agent contracts | `../HANDOFF.md` |
 | Deployment runbook | `../DEPLOYMENT.md` |
 

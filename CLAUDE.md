@@ -1,7 +1,7 @@
-# Weight Tracker PWA
+# Aloo (Weight Tracker PWA)
 
 ## What This Is
-Weight Tracker is a single-user, mobile-first gym PWA for logging weight and reps, browsing a searchable exercise library, and tracking long-term lifting progress. It replaces the owner's board-style workout notes with a persistent Supabase-backed app that works well from iPhone Safari and can later be wrapped with Capacitor.
+**Aloo** is a single-user, mobile-first PWA for owner Dhruva: body weight, food, walks/cardio, and gym logging. Soft gold + white chrome; a pot of gold grows with consistency (`goldDays`). Lose It–inspired diary + universal text/voice bar. Supabase backs gym data; weight/meals/walks are local-first Zustand until synced. Works from iPhone Safari / PWA; Capacitor later.
 
 ## Tech Stack
 | Layer | Technology |
@@ -31,7 +31,7 @@ Weight Tracker is a single-user, mobile-first gym PWA for logging weight and rep
 |   |-- hooks/                   # React Query and app state hooks.
 |   |-- stores/                  # Zustand stores for PR events and UI preferences.
 |   |-- components/              # App shell, exercise cards, set logger, rest timer, charts, badges.
-|   `-- pages/                   # Today, Session, Library, Progress, History, Goals, Settings.
+|   `-- pages/                   # Today, Eat/Move (Log), Session, Library, Grow/History, Goals, You/Settings.
 |-- public/                      # PWA manifest, icons, body-map SVG, static assets.
 |-- supabase/migrations/         # Planned database migrations. Do not hand-edit applied migrations.
 |-- scripts/                     # Planned seed, image backfill, and board import utilities.
@@ -60,15 +60,19 @@ Escalate only when the lower tier fails with a concrete reasoning gap. Keep the 
 |------|-------|
 | React entry | `src/main.tsx` |
 | App shell and router | `src/App.tsx` |
+| Universal NL + mic bar | `src/components/UniversalCommandBar.tsx` |
+| Pot of gold | `src/components/PotOfGold.tsx` |
+| Diary (weight/meals/walks) | `src/stores/diaryStore.ts` |
+| UI prefs / intentions / goldDays | `src/stores/uiStore.ts` |
 | Supabase client | `src/lib/supabase.ts` |
 | Single-user constant | `src/lib/user.ts` |
 | Offline database | `src/lib/db.ts` |
 | Offline queue | `src/lib/offline-queue.ts` |
 | Session state | `src/stores/workoutStore.ts` |
-| Set logging UI | `src/components/SetLogger.tsx` |
+| Set logging UI | `src/components/NaturalLanguageSetLogger.tsx` |
 | Active session page | `src/pages/Session.tsx` |
 | Exercise library | `src/pages/ExerciseLibrary.tsx` |
-| Progress dashboard | `src/pages/Progress.tsx` |
+| Grow / history | `src/pages/History.tsx` (also `/grow`) |
 | DB migration | `supabase/migrations/0001_init.sql` |
 | Seed script | `scripts/seed-user-board.ts` |
 | Image backfill script | `scripts/backfill-images.ts` |
@@ -141,9 +145,10 @@ Parallel dispatch: use only for independent files with no shared state. Sequenti
 ### Adding a route
 1. Add the page under `src/pages/`.
 2. Register the route in `src/App.tsx`.
-3. Add navigation only if it belongs in the four-tab shell: Today, Library, Progress, History.
+3. Add navigation only if it belongs in the five-tab shell: **Today, Eat, Move, Grow, You**.
 4. Use route params for detail pages: `/session/:id`, `/exercises/:slug`, `/history/:sessionId`.
-5. Add route tests for redirect behavior and empty states.
+5. Prefer routing legacy paths (`/log`, `/progress`, `/history`, `/settings`) to the current IA rather than resurrecting old tabs.
+6. Add route tests for redirect behavior and empty states.
 
 ### Logging a set
 1. Validate `weight_lb`, `reps`, optional `rpe`, `is_warmup`, `session_id`, and `exercise_id`.

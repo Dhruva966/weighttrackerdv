@@ -5,53 +5,32 @@
 - **Owner:** Dhruva Vutukury (`vutultadhruva@gmail.com`)
 - **Branch:** `cursor/mom-first-ui-e6b2`
 - **PR:** https://github.com/dhruva966/weighttrackerdv/pull/6
-- **Preview:** https://pulse-robots-coastal-ireland.trycloudflare.com (ephemeral Cloudflare quick tunnel; restart if dead)
+- **Preview:** Cloudflare quick tunnels are ephemeral; restart `pnpm preview` + `cloudflared tunnel --protocol http2 --url http://127.0.0.1:4173` as needed
 
 ## Locked product choices
 | Surface | Choice |
 |--------|--------|
-| Brand | **Aloo** (header, title, manifest) |
-| User name | **Dhruva** (not “Aloo” as person name) |
+| Brand | **Aloo** |
+| User name | **Dhruva** |
 | Theme | Soft gold + white |
-| Growth metaphor | **Pot of gold** (`goldDays`), not garden leaf |
+| Growth metaphor | Pot of gold (`goldDays`) |
 | Onboarding | Stashed |
 | Bottom nav | Today · Eat · Move · Grow · You |
 | Capture | Sticky universal text + mic bar |
-| Voice MVP | Web Speech API; Groq Whisper still queued |
-| Calories | Quiet macros; not leftover-calorie hero |
+| Voice MVP | Web Speech; Groq Whisper queued |
+| Calories | Quiet macros |
 
-## What is wired for real (local persistence)
-- **Body weight:** `diaryStore` — seed ~169 lb; NL “weighed 169” upserts
-- **Meals:** NL → confirm → `addMeal` persists to diary
-- **Movements / walks:** NL “walking 30 min” → `addMovement` (universal bar, Move, Session)
-- **Intentions:** add / toggle / remove on Goals; Today links “Add / edit”
-- **Gym sets/sessions:** `workoutStore` (real); charts use `buildLiftProgress` (no synthetic UI series)
+## Wired for real (local diary + gym store)
+- Body weight (~169 seed), meals, movements/walks → `diaryStore`
+- Intentions add/toggle/remove
+- Gym sessions/sets → `workoutStore` (+ Supabase when configured)
+- Charts → `buildLiftProgress` (no synthetic UI series)
+- Exercise search → flex sibling icon+input (overlap fixed)
 
-## Key files
-- Shell: `src/App.tsx`, `src/components/UniversalCommandBar.tsx`, `src/components/PotOfGold.tsx`
-- Diary: `src/stores/diaryStore.ts`, `src/lib/meal-from-text.ts`, `src/lib/movement-from-text.ts`
-- Session: `src/pages/Session.tsx`, `src/components/ExercisePicker.tsx`, `src/components/MovementLogger.tsx`
-- Theme: `tailwind.config.js`, `src/index.css`
-- Persist keys: `aloo-ui-v1`, `aloo-diary-v1`
+## Authoritative docs after this chat
+- `README.md`, `HANDOFF.md`, `CLAUDE.md`, `AGENTS.md`, `web/CLAUDE.md`
+- `decisions/2026-07-14-aloo-gold-diary.md` (current ADR)
+- `decisions/2026-07-13-garden-universal-voice.md` (voice/Lose It; greenery superseded)
 
-## Open / known issues (must resume)
-1. **Exercise search icon overlap:** Fixed by rewriting Session/Library search as a flex row (icon + input siblings) instead of absolute icon over `.field` padding. Hard-refresh to confirm.
-2. **Mic optical centering:** User previously said mic was high relative to the text box; last pass used shared grid row height — re-check after search fix.
-3. **Leaner buttons:** Partially done (Open Eat/Move + globals ~2rem). Session exercise rows still use `min-h-14` and feel fat.
-4. **Meals/macros:** Local-only estimates; no USDA / Supabase meals table yet.
-5. **Body weight / movements:** Not synced to Supabase `body_weight_logs` yet.
-6. **Groq Whisper edge:** Still “next” for iPhone installed PWA STT.
-7. **Context-save skill / gstack skills:** Not installed in this cloud environment; use `HANDOFF.md` + `decisions/` + this file as the substitute.
-
-## Latest commits on branch (high level)
-- Aloo gold rebrand + pot of gold + real diary seed
-- Slimmer command bar / buttons; remove header compounding label and Today lead copy
-- Editable intentions
-- Walk persistence + Session movement logger
-- Search padding class (may still need hard rewrite — see open issue #1)
-
-## Next agent actions (priority)
-1. Hard-fix ExercisePicker/Library search input so placeholder never intersects icon (avoid relying on `.field` + override).
-2. Slim Session exercise pick rows + End button.
-3. Optionally wire diary weight/meals/movements to Supabase when ready.
-4. Restart Cloudflare tunnel after ship; hard-refresh / clear SW cache when verifying UI.
+## Follow-ups
+- Sync diary to Supabase; Groq Whisper edge; USDA/photo meals; keep verifying preview with hard refresh / cleared SW
