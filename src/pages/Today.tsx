@@ -51,9 +51,9 @@ export function Today() {
           <div className="mt-4">
             <EncouragementLine />
           </div>
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             <Link className="button-primary" to="/eat">
-              <Utensils size={16} strokeWidth={1.5} className="block" />
+              <Utensils size={14} strokeWidth={1.5} className="block" />
               Open Eat
             </Link>
             <Link className="button-secondary" to="/move">
