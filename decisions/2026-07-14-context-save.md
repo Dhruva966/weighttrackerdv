@@ -35,7 +35,7 @@
 - Persist keys: `aloo-ui-v1`, `aloo-diary-v1`
 
 ## Open / known issues (must resume)
-1. **Exercise search icon overlap (ACTIVE):** User still reports “Search exercises to add” overlapping the magnifying glass on Session. Fix attempted via `.field-with-leading-icon { padding-left: 2.75rem }` after `.field`. Served CSS/JS on tunnel includes the class, but UI still appears broken in Cursor preview — **do not trust cascade; rewrite search input without sharing `.field` padding**, use inline `paddingLeft` or a self-contained input style, then visually verify. Same bug likely in `ExerciseLibrary.tsx`.
+1. **Exercise search icon overlap:** Fixed by rewriting Session/Library search as a flex row (icon + input siblings) instead of absolute icon over `.field` padding. Hard-refresh to confirm.
 2. **Mic optical centering:** User previously said mic was high relative to the text box; last pass used shared grid row height — re-check after search fix.
 3. **Leaner buttons:** Partially done (Open Eat/Move + globals ~2rem). Session exercise rows still use `min-h-14` and feel fat.
 4. **Meals/macros:** Local-only estimates; no USDA / Supabase meals table yet.

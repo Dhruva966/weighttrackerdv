@@ -25,10 +25,11 @@ export function ExerciseLibrary() {
         </Link>
       </div>
 
-      <label className="relative block">
-        <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fgMuted" size={18} />
+      <label className="flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-3 focus-within:border-accent">
+        <Search className="shrink-0 text-fgMuted" size={16} strokeWidth={1.5} aria-hidden />
+        <span className="sr-only">Search by exercise or equipment</span>
         <input
-          className="field field-with-leading-icon"
+          className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm leading-none text-fg outline-none placeholder:text-fgMuted"
           placeholder="Search by exercise or equipment"
           value={query}
           onChange={(event) => setQuery(event.target.value)}

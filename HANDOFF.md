@@ -57,7 +57,7 @@ Weight Tracker is a single-user gym PWA for owner `vutukurydhruva@gmail.com`. Th
 ## Open Handoff Notes
 - **Aloo shell (Jul 2026):** Brand is **Aloo**. Soft gold + white. Pot of gold grows with consistency (`goldDays`). User display name **Dhruva**. Bottom nav: Today · Eat · Move · Grow · You. Sticky universal command bar (Web Speech). Onboarding stashed.
 - Real data: body weight + meals + **movements/walks** via `diaryStore` (seeded weight ~169 lb). Lift charts use `buildLiftProgress` on real sets — no synthetic series in UI. Calendar/history built from workout + diary logs. Intentions are user-editable (add/remove).
-- **Open UI bug:** Session/Library exercise search still reported overlapping icon + placeholder in Cursor preview despite `.field-with-leading-icon`. Next fix should stop using shared `.field` padding and use a self-contained search input; verify visually.
+- **Open UI bug:** Session/Library exercise search overlapping icon is **fixed** by ditching absolute+padding hacks for a flex row (icon sibling + input). Verify with hard refresh.
 - Full pause snapshot: `decisions/2026-07-14-context-save.md`.
 - See also `decisions/2026-07-13-garden-universal-voice.md` (leaf metaphor superseded by pot of gold).
 - Gym session logging remains real via workout store + Supabase when configured.
