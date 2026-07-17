@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { exerciseToRow, goalToRow, sessionToRow, setToRow } from './supabase-mappers';
+import { mealLogRowSchema } from './diary-sync-schemas';
+import { exerciseToRow, goalToRow, mealToRow, rowToMeal, sessionToRow, setToRow } from './supabase-mappers';
 import { isUuid } from './supabase-sync';
 
 describe('isUuid', () => {
@@ -66,5 +67,33 @@ describe('supabase mappers', () => {
         createdAt: '2026-07-13T00:00:00.000Z',
       }),
     ).toMatchObject({ target_value: 225, target_unit: 'lb' });
+  });
+
+  it('maps diary meals to validated rows', () => {
+    const meal = {
+      id: 'de3c1f99-a64b-46c4-9f46-6afcc6d17f80',
+      loggedAt: '2026-07-17T06:30:00.000Z',
+      title: 'Fish and chapati',
+      summary: 'Fish and chapati',
+      raw: 'fish and chapati 900 calories',
+      calories: 900,
+      proteinG: 60,
+      carbsG: 70,
+      fatG: 30,
+    };
+    const row = mealLogRowSchema.parse(mealToRow(meal, 'text'));
+    expect(row.day_key).toBe('2026-07-16');
+    expect(row.calories).toBe(900);
+    expect(rowToMeal({
+      id: row.id,
+      logged_at: row.logged_at,
+      title: row.title,
+      summary: row.summary,
+      raw: row.raw,
+      calories: row.calories,
+      protein_g: row.protein_g,
+      carbs_g: row.carbs_g,
+      fat_g: row.fat_g,
+    }).proteinG).toBe(60);
   });
 });

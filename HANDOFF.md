@@ -49,7 +49,7 @@ Intentions `{ id, name, done }` — add/remove/toggle. `goldDays` / `tendGold`. 
 | ADRs | `decisions/2026-07-14-aloo-gold-diary.md`, `decisions/2026-07-14-context-save.md` |
 
 ## Open follow-ups
-- Wire diary + profile + intentions sync to Supabase `0003` tables
+- Apply `0003` migration on production Supabase (`supabase db push`)
 - Groq Whisper edge for iPhone installed-PWA STT
 - Optional USDA/meal DB; photo meal capture
 - Keep touch targets usable when slimming CTAs

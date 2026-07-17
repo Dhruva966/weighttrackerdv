@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { MealItemEstimate } from '../lib/meal-from-text';
 import type { MovementKind } from '../lib/movement-from-text';
+import type { CaptureSource } from '../lib/diary-sync-schemas';
+import { dayKeyFromLoggedAt, nowLoggedAt, todayKey } from '../lib/diary-day';
+
+export { DIARY_TIMEZONE, dayKeyFromLoggedAt, nowLoggedAt, todayKey } from '../lib/diary-day';
 
 export type BodyWeightLog = {
   id: string;
@@ -36,34 +41,31 @@ type DiaryState = {
   movements: MovementLog[];
   calorieTarget: number;
   upsertBodyWeight: (weightLb: number, loggedAt?: string) => BodyWeightLog;
-  addMeal: (meal: Omit<MealLog, 'id' | 'loggedAt'> & { loggedAt?: string }) => MealLog;
+  addMeal: (
+    meal: Omit<MealLog, 'id' | 'loggedAt'> & { loggedAt?: string },
+    options?: { items?: MealItemEstimate[]; captureSource?: CaptureSource },
+  ) => MealLog;
   addMovement: (
     movement: Omit<MovementLog, 'id' | 'loggedAt'> & { loggedAt?: string },
+    options?: { captureSource?: CaptureSource },
   ) => MovementLog;
   clearMealsForToday: () => void;
 };
 
-export const DIARY_TIMEZONE = 'America/Los_Angeles';
-
-export function todayKey(date = new Date(), timeZone = DIARY_TIMEZONE): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date);
+function newId(): string {
+  return crypto.randomUUID();
 }
 
-export function dayKeyFromLoggedAt(loggedAt: string, timeZone = DIARY_TIMEZONE): string {
-  return todayKey(new Date(loggedAt), timeZone);
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-export function nowLoggedAt(): string {
-  return new Date().toISOString();
-}
-
-function newId(prefix: string): string {
-  return `${prefix}-${crypto.randomUUID()}`;
+function queueDiarySync(
+  fn: (sync: typeof import('../lib/supabase-sync')) => void | Promise<void>,
+): void {
+  void import('../lib/supabase-sync').then((sync) => {
+    void fn(sync);
+  });
 }
 
 /** Dhruva’s current approximate body weight used as the first real weigh-in seed. */
@@ -86,19 +88,27 @@ export const useDiaryStore = create<DiaryState>()(
         const day = loggedAt ?? todayKey();
         const existing = get().bodyWeightLogs.find((log) => log.loggedAt === day);
         const next: BodyWeightLog = existing
-          ? { ...existing, weightLb }
-          : { id: newId('bw'), loggedAt: day, weightLb };
+          ? {
+              ...existing,
+              weightLb,
+              id: isUuid(existing.id) ? existing.id : newId(),
+            }
+          : { id: newId(), loggedAt: day, weightLb };
         set((state) => ({
           bodyWeightLogs: [
             next,
             ...state.bodyWeightLogs.filter((log) => log.loggedAt !== day),
           ].sort((a, b) => b.loggedAt.localeCompare(a.loggedAt)),
         }));
+        queueDiarySync(({ syncBodyWeight, syncConsistencyEvent }) => {
+          void syncBodyWeight(next);
+          void syncConsistencyEvent({ eventType: 'weight', sourceId: next.id, dayKey: day });
+        });
         return next;
       },
-      addMeal: (meal) => {
+      addMeal: (meal, options) => {
         const entry: MealLog = {
-          id: newId('meal'),
+          id: newId(),
           loggedAt: meal.loggedAt ?? nowLoggedAt(),
           title: meal.title,
           summary: meal.summary,
@@ -109,11 +119,20 @@ export const useDiaryStore = create<DiaryState>()(
           raw: meal.raw,
         };
         set((state) => ({ meals: [entry, ...state.meals] }));
+        const captureSource = options?.captureSource ?? 'text';
+        queueDiarySync(({ syncMeal, syncConsistencyEvent }) => {
+          void syncMeal(entry, { items: options?.items, captureSource });
+          void syncConsistencyEvent({
+            eventType: 'meal',
+            sourceId: entry.id,
+            dayKey: dayKeyFromLoggedAt(entry.loggedAt),
+          });
+        });
         return entry;
       },
-      addMovement: (movement) => {
+      addMovement: (movement, options) => {
         const entry: MovementLog = {
-          id: newId('move'),
+          id: newId(),
           loggedAt: movement.loggedAt ?? nowLoggedAt(),
           kind: movement.kind,
           title: movement.title,
@@ -122,6 +141,14 @@ export const useDiaryStore = create<DiaryState>()(
           raw: movement.raw,
         };
         set((state) => ({ movements: [entry, ...state.movements] }));
+        queueDiarySync(({ syncMovement, syncConsistencyEvent }) => {
+          void syncMovement(entry, options?.captureSource ?? 'text');
+          void syncConsistencyEvent({
+            eventType: 'movement',
+            sourceId: entry.id,
+            dayKey: dayKeyFromLoggedAt(entry.loggedAt),
+          });
+        });
         return entry;
       },
       clearMealsForToday: () => {

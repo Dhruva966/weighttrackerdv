@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { captureSourceFromLabel } from '../lib/diary-sync-schemas';
 import { useDiaryStore } from '../stores/diaryStore';
 import { useUiStore } from '../stores/uiStore';
 
@@ -64,15 +65,21 @@ export function MealConfirm() {
           type="button"
           onClick={() => {
             const title = draft.items[0]?.name || 'Meal';
-            addMeal({
-              title,
-              summary: draft.items.map((item) => item.name).join(' · ') || draft.raw,
-              calories: totals.calories,
-              proteinG: totals.proteinG,
-              carbsG: totals.carbsG,
-              fatG: totals.fatG,
-              raw: draft.raw,
-            });
+            addMeal(
+              {
+                title,
+                summary: draft.items.map((item) => item.name).join(' · ') || draft.raw,
+                calories: totals.calories,
+                proteinG: totals.proteinG,
+                carbsG: totals.carbsG,
+                fatG: totals.fatG,
+                raw: draft.raw,
+              },
+              {
+                items: draft.items,
+                captureSource: captureSourceFromLabel(draft.source),
+              },
+            );
             clearMealDraft();
             showPreviewNotice('Meal saved to today’s diary.');
             navigate('/');

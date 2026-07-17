@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { dayKeyFromLoggedAt, mealsForDay, type MealLog } from '../stores/diaryStore';
+import { dayKeyFromLoggedAt } from '../lib/diary-day';
+import { mealsForDay, type MealLog } from '../stores/diaryStore';
 import { estimateMealFromText, extractWeightLb } from './meal-from-text';
 
 describe('estimateMealFromText', () => {
