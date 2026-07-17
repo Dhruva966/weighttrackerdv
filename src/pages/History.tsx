@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { buildMonthGrid, buildSessionDayMap, toDayKey } from '../lib/calendar';
-import { mealsForDay, movementsForDay, useDiaryStore } from '../stores/diaryStore';
+import { dayKeyFromLoggedAt, mealsForDay, movementsForDay, useDiaryStore } from '../stores/diaryStore';
 import { useWorkoutStore } from '../stores/workoutStore';
 
 const kindStyles = {
@@ -72,10 +72,10 @@ export function History({ compact = false }: { compact?: boolean }) {
     dayKeys.add(log.loggedAt);
   }
   for (const meal of meals) {
-    dayKeys.add(meal.loggedAt.slice(0, 10));
+    dayKeys.add(dayKeyFromLoggedAt(meal.loggedAt));
   }
   for (const movement of movements) {
-    dayKeys.add(movement.loggedAt.slice(0, 10));
+    dayKeys.add(dayKeyFromLoggedAt(movement.loggedAt));
   }
   for (const session of sessions) {
     dayKeys.add(toDayKey(session.startedAt, timeZone));

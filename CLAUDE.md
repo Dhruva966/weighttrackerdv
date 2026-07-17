@@ -86,10 +86,17 @@ Use Supabase Postgres. Generate client-side UUIDs for offline writes and let Pos
 | Table | Key columns | Purpose | Required policies and indexes |
 |-------|-------------|---------|-------------------------------|
 | `exercises` | `id uuid`, `slug text unique`, `name text`, `muscle_group muscle_group`, `secondary_muscles text[]`, `equipment equipment_kind`, `instructions text[]`, `setup_notes text[]`, `image_url text`, `image_style image_style`, `source text`, `archived boolean`, `created_at`, `updated_at` | Shared exercise catalog seeded from the owner's board, Free Exercise DB matches, user-created exercises, and machine setup notes like seat level/pin/setting. | Index `muscle_group`, `archived`, and GIN full-text search on `name`. Touch `updated_at` on update. |
-| `sessions` | `id uuid`, `user_id uuid`, `started_at`, `ended_at`, `notes text` | One workout session. | Index `(user_id, started_at desc)`. Client uses the single hardcoded owner `USER_ID`. |
-| `sets` | `id uuid`, `session_id uuid`, `exercise_id uuid`, `set_number int`, `weight_lb numeric(6,2)`, `reps int`, `rpe numeric(3,1)`, `is_warmup boolean`, `is_pr boolean`, `created_at` | Logged lift sets. | Foreign key to `sessions` with cascade delete. Foreign key to `exercises`. Index `session_id` and `(exercise_id, created_at desc)`. Trigger marks PRs before insert. |
-| `body_weight_logs` | `id uuid`, `user_id uuid`, `logged_at date`, `weight_lb numeric(5,2)` | Body weight tracking for progress charts. | Unique `(user_id, logged_at)`. |
-| `goals` | `id uuid`, `user_id uuid`, `name text`, `target_value numeric`, `target_unit text`, `achieved boolean`, `achieved_at date`, `created_at` | Goal checklist imported from the board's Goals column. | Keep user scoped by `user_id`. |
+| `sessions` | `id uuid`, `user_id uuid`, `started_at`, `ended_at`, `notes text`, `title`, `planned_exercise_ids uuid[]`, `rest_timer_seconds`, `updated_at` | One workout session. | Index `(user_id, started_at desc)`. Client uses the single hardcoded owner `USER_ID`. |
+| `sets` | `id uuid`, `session_id uuid`, `exercise_id uuid`, `set_number int`, `weight_lb numeric(6,2)`, `reps int`, `rpe numeric(3,1)`, `is_warmup boolean`, `is_pr boolean`, `notes text`, `created_at` | Logged lift sets. | Foreign key to `sessions` with cascade delete. Foreign key to `exercises`. Index `session_id` and `(exercise_id, created_at desc)`. Trigger marks PRs before insert. |
+| `body_weight_logs` | `id uuid`, `user_id uuid`, `logged_at date`, `weight_lb numeric(5,2)`, `notes`, `capture_source`, `updated_at` | Body weight tracking for progress charts. | Unique `(user_id, logged_at)`. |
+| `goals` | `id uuid`, `user_id uuid`, `name text`, `target_value numeric`, `target_unit text`, `achieved boolean`, `achieved_at date`, `sort_order`, `archived`, `created_at`, `updated_at` | Goal checklist imported from the board's Goals column. | Keep user scoped by `user_id`. |
+| `user_profiles` | `user_id uuid`, `preferred_name`, `timezone`, `weight_unit`, `rest_timer_seconds`, `calorie_target`, `protein_target_g`, `focus`, `gold_days`, `onboarding_complete`, `created_at`, `updated_at` | Owner prefs and pot-of-gold state. | PK `user_id`. |
+| `meal_logs` | `id uuid`, `user_id uuid`, `logged_at timestamptz`, `day_key date`, `title`, `summary`, `raw`, macros, `capture_source`, `created_at`, `updated_at` | Diary meals from NL confirm. | Index `(user_id, day_key desc)`. Trigger sets `day_key` in LA timezone. |
+| `meal_items` | `id uuid`, `meal_id uuid`, `name`, `portion`, macros, `sort_order` | Parsed line items per meal. | FK `meal_logs` cascade delete. |
+| `movement_logs` | `id uuid`, `user_id uuid`, `logged_at`, `day_key`, `kind movement_kind`, `title`, `summary`, `raw`, `duration_min`, `distance_mi`, `calories_burned`, `capture_source`, timestamps | Walks/cardio diary. | Index `(user_id, day_key desc)`. |
+| `intentions` | `id uuid`, `user_id uuid`, `name`, `sort_order`, `archived`, timestamps | Daily intention templates. | Index `(user_id, archived, sort_order)`. |
+| `intention_completions` | `id uuid`, `intention_id uuid`, `user_id uuid`, `day_key date`, `done`, `completed_at` | Per-day intention checkoffs. | Unique `(intention_id, day_key)`. |
+| `consistency_events` | `id uuid`, `user_id uuid`, `day_key`, `event_type`, `source_id`, `note`, `created_at` | Pot-of-gold / show-up audit trail. | Index `(user_id, day_key desc)`. |
 
 Enums:
 
@@ -105,6 +112,12 @@ create type equipment_kind as enum (
 );
 
 create type image_style as enum ('photo','silhouette','name-only');
+
+create type movement_kind as enum ('walk','run','hike','cardio','other');
+create type capture_source as enum ('text','voice','photo','manual','import','seed');
+create type weight_unit as enum ('lb','kg');
+create type user_focus as enum ('meals','weight','both');
+create type consistency_event_type as enum ('meal','weight','movement','workout','intention','gold');
 ```
 
 PR rule: a non-warmup set is a PR when no previous non-warmup set for that exercise has a heavier weight, or the same weight with at least as many reps.

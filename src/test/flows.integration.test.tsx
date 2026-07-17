@@ -8,7 +8,7 @@ import { Goals } from '../pages/Goals';
 import { Session } from '../pages/Session';
 import { SettingsPage } from '../pages/Settings';
 import { starterExercises, starterGoals, starterSessions, starterSets } from '../data/catalog';
-import { useDiaryStore } from '../stores/diaryStore';
+import { mealsForDay, useDiaryStore } from '../stores/diaryStore';
 import { usePrStore } from '../stores/prStore';
 import { useUiStore } from '../stores/uiStore';
 import { useWorkoutStore } from '../stores/workoutStore';
@@ -111,6 +111,31 @@ describe('app shell', () => {
       within(screen.getByRole('main')).getByText(/I ate a sandwich about 600 calories/),
     ).toBeInTheDocument();
     expect(within(screen.getByRole('main')).getAllByText(/600 kcal/i).length).toBeGreaterThan(0);
+  });
+
+  it('saves meal with inferred macros to today diary', async () => {
+    renderApp('/');
+    fireEvent.change(screen.getByPlaceholderText(/log anything/i), {
+      target: {
+        value:
+          'fish and mutton 3 servings each and 1.5x chapati probably around 900 calories total',
+      },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /submit log/i }));
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /does this feel right/i })).toBeInTheDocument(),
+    );
+    expect(within(screen.getByRole('main')).getByText(/Protein [1-9]\d*g/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /save meal/i }));
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /your pot of gold is filling/i })).toBeInTheDocument(),
+    );
+    const savedToday = mealsForDay(useDiaryStore.getState().meals);
+    expect(savedToday).toHaveLength(1);
+    expect(savedToday[0]?.calories).toBe(900);
+    expect(savedToday[0]?.proteinG).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: /today’s diary/i })).toBeInTheDocument();
+    expect(within(screen.getByRole('main')).getByText(/900 kcal/)).toBeInTheDocument();
   });
 });
 

@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 import { bootstrapSupabaseSync } from '../lib/supabase-sync';
 
 export function useSupabaseBootstrap() {
-  const [status, setStatus] = useState({ configured: false, reachable: false, drained: 0 });
+  const [status, setStatus] = useState({
+    configured: false,
+    reachable: false,
+    drained: 0,
+    hydrated: false,
+  });
 
   useEffect(() => {
     let active = true;
