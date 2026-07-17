@@ -43,13 +43,23 @@ type DiaryState = {
   clearMealsForToday: () => void;
 };
 
-function todayKey(): string {
+export const DIARY_TIMEZONE = 'America/Los_Angeles';
+
+export function todayKey(date = new Date(), timeZone = DIARY_TIMEZONE): string {
   return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Los_Angeles',
+    timeZone,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }).format(new Date());
+  }).format(date);
+}
+
+export function dayKeyFromLoggedAt(loggedAt: string, timeZone = DIARY_TIMEZONE): string {
+  return todayKey(new Date(loggedAt), timeZone);
+}
+
+export function nowLoggedAt(): string {
+  return new Date().toISOString();
 }
 
 function newId(prefix: string): string {
@@ -89,7 +99,7 @@ export const useDiaryStore = create<DiaryState>()(
       addMeal: (meal) => {
         const entry: MealLog = {
           id: newId('meal'),
-          loggedAt: meal.loggedAt ?? new Date().toISOString(),
+          loggedAt: meal.loggedAt ?? nowLoggedAt(),
           title: meal.title,
           summary: meal.summary,
           calories: meal.calories,
@@ -104,7 +114,7 @@ export const useDiaryStore = create<DiaryState>()(
       addMovement: (movement) => {
         const entry: MovementLog = {
           id: newId('move'),
-          loggedAt: movement.loggedAt ?? new Date().toISOString(),
+          loggedAt: movement.loggedAt ?? nowLoggedAt(),
           kind: movement.kind,
           title: movement.title,
           durationMin: movement.durationMin,
@@ -117,7 +127,7 @@ export const useDiaryStore = create<DiaryState>()(
       clearMealsForToday: () => {
         const day = todayKey();
         set((state) => ({
-          meals: state.meals.filter((meal) => !meal.loggedAt.startsWith(day)),
+          meals: state.meals.filter((meal) => dayKeyFromLoggedAt(meal.loggedAt) !== day),
         }));
       },
     }),
@@ -154,11 +164,11 @@ export function getBodyWeightDelta(logs: BodyWeightLog[]): number | null {
 }
 
 export function mealsForDay(meals: MealLog[], day = todayKey()): MealLog[] {
-  return meals.filter((meal) => meal.loggedAt.slice(0, 10) === day);
+  return meals.filter((meal) => dayKeyFromLoggedAt(meal.loggedAt) === day);
 }
 
 export function movementsForDay(movements: MovementLog[], day = todayKey()): MovementLog[] {
-  return movements.filter((movement) => movement.loggedAt.slice(0, 10) === day);
+  return movements.filter((movement) => dayKeyFromLoggedAt(movement.loggedAt) === day);
 }
 
 export function sumMacros(meals: MealLog[]) {

@@ -3,7 +3,7 @@
 Use this file when one agent hands work to another. Keep it short, contract-focused, and current.
 
 ## Current Product Shape
-**Aloo** is a single-user PWA for owner Dhruva (`vutultadhruva@gmail.com`). Gym path uses hardcoded `USER_ID` + Supabase when configured. Diary (weight, meals, walks) and UI prefs are local-first Zustand (`aloo-diary-v1`, `aloo-ui-v1`). Soft gold + white shell; pot of gold grows with `goldDays`.
+**Aloo** is a single-user PWA for owner Dhruva (`vutultadhruva@gmail.com`). Gym path uses hardcoded `USER_ID` + Supabase when configured. Diary (weight, meals, walks) and UI prefs are local-first Zustand (`aloo-diary-v1`, `aloo-ui-v1`) with **schema ready** in `0003_diary_profile_enrichment.sql` for sync. Soft gold + white shell; pot of gold grows with `goldDays`.
 
 ## Nav & routes
 **Today · Eat · Move · Grow · You**  
@@ -14,15 +14,24 @@ Legacy redirects: `/log`→`/eat`, `/history`→`/grow`, `/progress`→`/grow`, 
 ### Gym (Supabase / workoutStore)
 | Contract | Notes |
 |----------|-------|
-| Exercise / Session / Set / Goal | Unchanged from init schema; client UUIDs for offline. |
+| Exercise / Session / Set / Goal | Init schema + `0003` enrichment (session title/plan/rest, set notes, goal sort/archive). |
 | PendingWrite | Dexie queue for Supabase writes. |
 
-### Diary (local `diaryStore` — not yet synced)
+### Diary (local `diaryStore` — schema in Supabase, client sync TBD)
 | Contract | Shape | Notes |
 |----------|-------|-------|
-| BodyWeightLog | `{ id, loggedAt, weightLb }` | Seeded ~169; NL “weighed N” upserts day |
-| MealLog | `{ id, loggedAt, title, summary, calories, proteinG, carbsG, fatG, raw }` | From meal confirm |
+| BodyWeightLog | `{ id, loggedAt, weightLb }` | Day = `America/Los_Angeles`; `mealsForDay` uses `dayKeyFromLoggedAt` |
+| MealLog | `{ id, loggedAt, title, summary, calories, proteinG, carbsG, fatG, raw }` | NL macros inferred when only calories given |
 | MovementLog | `{ id, loggedAt, kind, title, durationMin, summary, raw }` | “walking 30 min”, etc. |
+
+### Supabase diary tables (`0003`)
+| Table | Purpose |
+|-------|---------|
+| `user_profiles` | preferred_name, timezone, units, calorie/protein targets, gold_days, focus |
+| `meal_logs` + `meal_items` | Diary meals with macros + parsed line items |
+| `movement_logs` | Walks/cardio with duration, optional distance/calories |
+| `intentions` + `intention_completions` | Daily checklist template + per-day done state |
+| `consistency_events` | Pot-of-gold / show-up audit trail |
 
 ### UI (`uiStore`)
 Intentions `{ id, name, done }` — add/remove/toggle. `goldDays` / `tendGold`. Onboarding stashed.
@@ -35,11 +44,12 @@ Intentions `{ id, name, done }` — add/remove/toggle. `goldDays` / `tendGold`. 
 | Diary | `src/stores/diaryStore.ts` |
 | NL parsers | `src/lib/meal-from-text.ts`, `src/lib/movement-from-text.ts`, `src/lib/universal-command.ts` |
 | Session + search | `src/pages/Session.tsx`, `ExercisePicker.tsx`, `MovementLogger.tsx` |
+| DB migration | `supabase/migrations/0003_diary_profile_enrichment.sql` |
 | Theme | `tailwind.config.js`, `src/index.css` |
 | ADRs | `decisions/2026-07-14-aloo-gold-diary.md`, `decisions/2026-07-14-context-save.md` |
 
 ## Open follow-ups
-- Sync diary weight/meals/walks to Supabase when tables/policies ready
+- Wire diary + profile + intentions sync to Supabase `0003` tables
 - Groq Whisper edge for iPhone installed-PWA STT
 - Optional USDA/meal DB; photo meal capture
 - Keep touch targets usable when slimming CTAs

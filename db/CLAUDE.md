@@ -1,6 +1,6 @@
 # Database Subsystem
 
-Purpose: Own Supabase schema, storage, seed data, offline write contracts, and database-side rules for the **Aloo** PWA (gym path). Body weight / meals / walks currently also exist as **local** diary state in `src/stores/diaryStore.ts` — do not assume they are synced until a migration and client sync land.
+Purpose: Own Supabase schema, storage, seed data, offline write contracts, and database-side rules for the **Aloo** PWA. Gym path syncs today; diary/profile/intentions have tables in `0003_diary_profile_enrichment.sql` — client sync still local-first in `diaryStore` / `uiStore` until wired.
 
 Return to the root instructions before changing shared contracts: [../CLAUDE.md](../CLAUDE.md).
 
@@ -8,6 +8,7 @@ Return to the root instructions before changing shared contracts: [../CLAUDE.md]
 | What | Where |
 |------|-------|
 | Init migration | `../supabase/migrations/0001_init.sql` |
+| Diary + profile migration | `../supabase/migrations/0003_diary_profile_enrichment.sql` |
 | Supabase client | `../src/lib/supabase.ts` |
 | Single-user constant | `../src/lib/user.ts` |
 | Dexie schema | `../src/lib/db.ts` |
