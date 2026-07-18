@@ -62,9 +62,9 @@ flowchart LR
 5. Verify `exercises`, `sessions`, `sets`, `body_weight_logs`, and `goals` exist before running the app.
 
 ## Supabase Edge Function secrets
-Groq belongs in **Supabase secrets**, not Postgres tables.
+LLM keys belong in **Supabase secrets**, not Postgres tables and not `VITE_*` (browser) env.
 
-1. In `.env.local`, set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `GROQ_API_KEY` (or `VITE_GROQ_API_KEY`).
+1. In `.env.local`, set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and **`ANTHROPIC_API_KEY`** (preferred). Optionally also `GROQ_API_KEY` as fallback.
 2. Log in and link your project: `npx supabase login` then `npx supabase link --project-ref <ref>`.
 3. Push secrets to Supabase:
 
@@ -78,7 +78,9 @@ Groq belongs in **Supabase secrets**, not Postgres tables.
    pnpm supabase:deploy-functions
    ```
 
-Or manually in the Supabase dashboard: **Project Settings → Edge Functions → Secrets** → add `GROQ_API_KEY`.
+Or manually in the Supabase dashboard: **Project Settings → Edge Functions → Secrets** → add `ANTHROPIC_API_KEY` (and optionally `GROQ_API_KEY`).
+
+`parse-exercise-log` uses **Claude Haiku (`claude-haiku-4-5`)** first for messy set logs (number words, broken English), then Groq if Anthropic is unset/fails. The client commits the draft with Zod — no Anthropic key in the browser.
 
 `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are copied **from** Supabase API settings into Vercel/`.env.local`. They are not stored back into Supabase.
 
