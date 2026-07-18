@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { estimateMealFromText, extractWeightLb } from '../lib/meal-from-text';
 import { parseMovementText } from '../lib/movement-from-text';
 import { isWebSpeechAvailable, listenOnce } from '../lib/speech/web-speech';
+import { syncPotOfGold } from '../lib/sync-gold';
 import { parseUniversalCommand } from '../lib/universal-command';
 import { useDiaryStore } from '../stores/diaryStore';
 import { useUiStore } from '../stores/uiStore';
@@ -15,7 +16,6 @@ export function UniversalCommandBar() {
   const [hint, setHint] = useState<string | null>(null);
   const setMealDraft = useUiStore((state) => state.setMealDraft);
   const showPreviewNotice = useUiStore((state) => state.showPreviewNotice);
-  const tendGold = useUiStore((state) => state.tendGold);
   const upsertBodyWeight = useDiaryStore((state) => state.upsertBodyWeight);
   const addMovement = useDiaryStore((state) => state.addMovement);
 
@@ -50,14 +50,12 @@ export function UniversalCommandBar() {
         raw: parsed.raw,
         items: estimateMealFromText(parsed.raw),
       });
-      tendGold();
       navigate('/log/meal/confirm');
       setQuery('');
       return;
     }
 
     if (parsed.intent === 'workout') {
-      tendGold();
       showPreviewNotice(`${parsed.summary} Opening Move.`);
       navigate('/move');
       setQuery('');
@@ -74,14 +72,13 @@ export function UniversalCommandBar() {
           summary: movement.summary,
           raw: movement.raw,
         });
-        tendGold();
+        syncPotOfGold();
         showPreviewNotice(
           movement.durationMin
             ? `Logged ${movement.title.toLowerCase()} · ${movement.durationMin} min`
             : `Logged ${movement.title.toLowerCase()}`,
         );
       } else {
-        tendGold();
         showPreviewNotice(`${parsed.summary} Couldn’t read duration — try “walking 30 min”.`);
       }
       navigate('/move');
@@ -96,7 +93,7 @@ export function UniversalCommandBar() {
         return;
       }
       upsertBodyWeight(weightLb);
-      tendGold();
+      syncPotOfGold();
       showPreviewNotice(`Logged ${weightLb} lb.`);
       navigate('/');
       setQuery('');

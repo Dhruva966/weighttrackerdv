@@ -14,11 +14,13 @@ flowchart TD
   Intent -->|lift cue| Move[Move tab / Session]
   Today[Today] --> Eat[Eat]
   Today --> Move
-  Today --> Grow[Grow / history + pot]
+  Today --> Grow[Grow / pot + lift progress]
   Today --> You[You / settings]
-  Move --> Session[Active session]
+  Move --> Day[Calendar day detail]
+  Day --> Session[Active session]
   Session --> Pick[Add exercises / NL walk]
   Session --> Sets[NL set log]
+  Grow --> Charts[Per-exercise weight over time]
   Grow --> Recap[Workout recaps]
 ```
 
@@ -38,15 +40,15 @@ flowchart TD
 |-------|---------|
 | `/` | Today — weight, meal diary, intentions, pot of gold |
 | `/eat` | Meal logging (also via universal bar) |
-| `/move` | Walks + start gym session |
-| `/grow` | Pot of gold + real history calendar |
+| `/move` | Gym home — calendar, day detail, walks secondary |
+| `/grow` | Pot of gold + lift progress charts + gym feed |
 | `/you` | Settings / export |
 | `/session/new`, `/session/:id` | Active workout; NL walks + set logging |
 | `/exercises`, `/exercises/new`, `/exercises/:slug` | Library |
 | `/goals` | Editable daily intentions |
 | `/log` | Redirect → `/eat` |
 | `/history` | Redirect → `/grow` |
-| `/progress`, `/calendar`, `/settings`, `/onboarding` | Redirects into current IA |
+| `/progress`, `/calendar`, `/settings`, `/onboarding` | Redirects (`/calendar` → `/move`) |
 
 ## Local-first diary (not yet Supabase tables)
 Persisted under `aloo-diary-v1` / `aloo-ui-v1`:
