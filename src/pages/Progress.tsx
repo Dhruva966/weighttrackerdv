@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Bar, BarChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { BodyMap } from '../components/BodyMap';
-import { formatVolume } from '../lib/fmt';
+import { formatChartMonth, formatVolume } from '../lib/fmt';
 import { buildLiftProgress } from '../lib/liftImport';
 import { summarizeWeeklyVolume } from '../lib/volume';
 import { useWorkoutStore } from '../stores/workoutStore';
@@ -44,7 +44,14 @@ export function Progress() {
     return buildLiftProgress(selectedExercise.id, sets);
   }, [selectedExercise, sets]);
 
-  const liftLabelInterval = Math.max(1, Math.floor(liftProgress.length / 10));
+  const liftXDomain = useMemo((): [number, number] | undefined => {
+    if (liftProgress.length === 0) {
+      return undefined;
+    }
+    const min = liftProgress[0].t;
+    const max = Math.max(liftProgress[liftProgress.length - 1].t, Date.now());
+    return [min, max];
+  }, [liftProgress]);
 
   return (
     <div className="grid gap-4">
@@ -71,7 +78,9 @@ export function Progress() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-medium text-fg">Lift progress</h2>
-            <p className="text-sm text-fgMuted">Synthetic long-range history from 9th grade through today.</p>
+            <p className="text-sm text-fgMuted">
+              Working weight over time from logged sets (including board baseline).
+            </p>
           </div>
           <select
             className="field sm:max-w-xs"
@@ -89,16 +98,26 @@ export function Progress() {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={liftProgress} margin={{ top: 8, right: 12, left: 0, bottom: 28 }}>
               <XAxis
-                dataKey="label"
+                dataKey="t"
+                type="number"
+                domain={liftXDomain}
                 stroke="#999999"
                 tick={chartAxisTick}
-                interval={liftLabelInterval}
+                tickFormatter={(value: number) => formatChartMonth(value)}
                 angle={-32}
                 textAnchor="end"
                 height={56}
+                scale="time"
+                minTickGap={28}
               />
               <YAxis stroke="#999999" tick={chartAxisTick} width={42} />
-              <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E5E5', borderRadius: 8, color: '#4A3B2A' }} />
+              <Tooltip
+                labelFormatter={(_label, payload) => {
+                  const point = payload?.[0]?.payload as { date?: string } | undefined;
+                  return point?.date ? formatChartMonth(point.date) : '';
+                }}
+                contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E5E5', borderRadius: 8, color: '#4A3B2A' }}
+              />
               <Legend />
               <Line
                 type="linear"

@@ -1,7 +1,33 @@
+/**
+ * Board-imported exercise catalog + lift baseline for Grow charts.
+ *
+ * Current weights come from the owner’s board screenshot import (Jul 2026).
+ * Intermediate 9th/10th/11th points are documented grade baselines (via
+ * `buildSyntheticProgressRows`) so `buildLiftProgress` has real LoggedSet rows —
+ * not the old jagged UI-only chart series. Bump `BOARD_HISTORY_SEED_VERSION` in
+ * workoutStore when changing this seed so existing browsers re-merge.
+ *
+ * Baseline sessions exist only as FK anchors for starterSets. They are NOT loaded
+ * into workoutStore.sessions — otherwise Grow/Move calendar treat them as real gym days.
+ */
 import { USER_ID } from '../lib/user';
+import { buildSyntheticProgressRows } from '../lib/syntheticProgress';
 import type { EquipmentKind, Exercise, Goal, LoggedSet, MuscleGroup, WorkoutSession } from '../types';
 
 const importedAt = new Date('2026-07-11T12:00:00-07:00').toISOString();
+const sessionByGrade = {
+  '9th': 'session-synthetic-9th',
+  '10th': 'session-synthetic-10th',
+  '11th': 'session-synthetic-11th',
+  Current: 'session-current-board-import',
+} as const;
+
+/** Session IDs used only to attach baseline weight history — never real workouts. */
+export const BOARD_BASELINE_SESSION_IDS = new Set<string>(Object.values(sessionByGrade));
+
+export function isBoardBaselineSession(sessionId: string): boolean {
+  return BOARD_BASELINE_SESSION_IDS.has(sessionId);
+}
 
 function exercise(
   slug: string,
@@ -83,9 +109,114 @@ export const starterExercises: Exercise[] = [
   exercise('tricep-extension-home', 'Tricep Extension Home', 'triceps', 'other'),
 ];
 
-export const starterSessions: WorkoutSession[] = [];
+export const starterSessions: WorkoutSession[] = [
+  {
+    id: 'session-synthetic-9th',
+    userId: USER_ID,
+    startedAt: new Date('2022-09-01T12:00:00-07:00').toISOString(),
+    endedAt: new Date('2022-09-01T12:00:00-07:00').toISOString(),
+    notes: 'Synthetic baseline from 9th grade',
+  },
+  {
+    id: 'session-synthetic-10th',
+    userId: USER_ID,
+    startedAt: new Date('2023-09-01T12:00:00-07:00').toISOString(),
+    endedAt: new Date('2023-09-01T12:00:00-07:00').toISOString(),
+    notes: 'Synthetic baseline from 10th grade',
+  },
+  {
+    id: 'session-synthetic-11th',
+    userId: USER_ID,
+    startedAt: new Date('2024-09-01T12:00:00-07:00').toISOString(),
+    endedAt: new Date('2024-09-01T12:00:00-07:00').toISOString(),
+    notes: 'Synthetic baseline from 11th grade',
+  },
+  {
+    id: 'session-current-board-import',
+    userId: USER_ID,
+    startedAt: importedAt,
+    endedAt: importedAt,
+    notes: 'Imported current lifts from board screenshot',
+  },
+];
 
-export const starterSets: LoggedSet[] = [];
+const baselineRows: Array<{ slug: string; weightLb: number; reps?: number; progression?: number[] }> = [
+  { slug: 'shoulder-press-cable-machine', weightLb: 120 },
+  { slug: 'tricep-machine-extension', weightLb: 125 },
+  { slug: 'dumbbell-preacher-curl', weightLb: 42.5 },
+  { slug: 'slanted-lat-raise-dumbbell-seated', weightLb: 25 },
+  { slug: 'forearm-curl', weightLb: 57.5 },
+  { slug: 'straight-bar-tricep-extension-machine', weightLb: 170 },
+  { slug: 'bicep-curl', weightLb: 45, progression: [25, 30, 35, 45] },
+  { slug: 'rope-tricep-extension', weightLb: 72.5, progression: [47, 57, 65, 72.5] },
+  { slug: 'lat-raise', weightLb: 32, progression: [20, 25, 27.5, 32] },
+  { slug: 'preacher-curl-machine', weightLb: 115 },
+  { slug: 'shoulder-press', weightLb: 65, progression: [35, 45, 55, 65] },
+  { slug: 'lateral-raise-machine', weightLb: 20 },
+  { slug: 'tricep-rope-overhead-extension', weightLb: 60 },
+  { slug: 'reverse-bar-curl', weightLb: 80 },
+  { slug: 'rope-hammer-curl', weightLb: 67.5 },
+  { slug: 'seated-lateral-raise-padded-machine', weightLb: 130 },
+
+  { slug: 'squat-curved-stand', weightLb: 365 },
+  { slug: 'calf-raise-sitting', weightLb: 110 },
+  { slug: 'quad-extension', weightLb: 210 },
+  { slug: 'hamstring-curl-laying', weightLb: 150 },
+  { slug: 'ab-crunch-corner-machine', weightLb: 150 },
+  { slug: 'low-back-extension', weightLb: 125 },
+  { slug: 'leg-raise', weightLb: 15 },
+  { slug: 'hack-squat', weightLb: 205 },
+  { slug: 'leg-press-linear', weightLb: 150 },
+  { slug: 'calf-raise-standing-smith', weightLb: 100 },
+  { slug: 'hip-abductor', weightLb: 175 },
+
+  { slug: 'lat-pulldown', weightLb: 175 },
+  { slug: 'seated-row-machine', weightLb: 180 },
+  { slug: 'trap-row-gym', weightLb: 155 },
+  { slug: 'trap-row-dumbbells', weightLb: 80 },
+  { slug: 'lower-lat-row', weightLb: 80 },
+  { slug: 'seat-row-machine-low-lat', weightLb: 180 },
+  { slug: 'incline-machine-press', weightLb: 180 },
+  { slug: 'cable-chest-fly', weightLb: 165 },
+  { slug: 'bench-press', weightLb: 205, reps: 3 },
+  { slug: 'bench-press', weightLb: 185, reps: 6 },
+
+  { slug: 'low-row-machine', weightLb: 75 },
+  { slug: 'incline-press', weightLb: 75 },
+  { slug: 'smith-machine-bench', weightLb: 175 },
+  { slug: 'low-back-raise', weightLb: 100 },
+  { slug: 'abs-home', weightLb: 48 },
+  { slug: 'squat-press', weightLb: 400 },
+  { slug: 'tricep-extension-home', weightLb: 70 },
+];
+
+const setNumbersByExerciseAndSession = new Map<string, number>();
+
+export const starterSets: LoggedSet[] = baselineRows.flatMap((row, rowIndex) =>
+  buildSyntheticProgressRows({
+    slug: row.slug,
+    currentWeightLb: row.weightLb,
+    currentReps: row.reps,
+    progression: row.progression,
+  }).map((progressRow, gradeIndex) => {
+    const sessionId = sessionByGrade[progressRow.grade];
+    const key = `${row.slug}:${sessionId}`;
+    const setNumber = (setNumbersByExerciseAndSession.get(key) ?? 0) + 1;
+    setNumbersByExerciseAndSession.set(key, setNumber);
+
+    return {
+      id: `set-${progressRow.grade.toLowerCase()}-${row.slug}-${setNumber}-${rowIndex}`,
+      sessionId,
+      exerciseId: `ex-${row.slug}`,
+      setNumber,
+      weightLb: progressRow.weightLb,
+      reps: progressRow.reps,
+      isWarmup: false,
+      isPr: true,
+      createdAt: new Date(new Date(progressRow.date).getTime() + (rowIndex * 4 + gradeIndex) * 1000).toISOString(),
+    };
+  }),
+);
 
 export const starterGoals: Goal[] = [
   {

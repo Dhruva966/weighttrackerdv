@@ -22,7 +22,10 @@ type UiState = {
   intentions: Intention[];
   mealDraft: MealDraftPreview;
   previewNotice: string | null;
-  /** Days of consistency — drives pot-of-gold growth. */
+  /**
+   * Compounding consistency days for Pot of Gold (0–21).
+   * Recomputed by `syncPotOfGold` from weigh-ins, walks, and gym days — not meals.
+   */
   goldDays: number;
   setUnit: (unit: 'lb' | 'kg') => void;
   setRestSeconds: (seconds: number) => void;
@@ -35,7 +38,7 @@ type UiState = {
   clearMealDraft: () => void;
   showPreviewNotice: (message: string) => void;
   clearPreviewNotice: () => void;
-  tendGold: () => void;
+  setGoldDays: (days: number) => void;
 };
 
 const defaultIntentions: Intention[] = [
@@ -61,7 +64,7 @@ export const useUiStore = create<UiState>()(
       intentions: defaultIntentions,
       mealDraft: emptyDraft,
       previewNotice: null,
-      goldDays: 1,
+      goldDays: 0,
       setUnit: (unit) => set({ unit }),
       setRestSeconds: (restSeconds) => set({ restSeconds }),
       completeOnboarding: (input) =>
@@ -110,7 +113,11 @@ export const useUiStore = create<UiState>()(
       clearMealDraft: () => set({ mealDraft: emptyDraft }),
       showPreviewNotice: (message) => set({ previewNotice: message }),
       clearPreviewNotice: () => set({ previewNotice: null }),
-      tendGold: () => set((state) => ({ goldDays: Math.min(21, state.goldDays + 1) })),
+      setGoldDays: (days) =>
+        set((state) => {
+          const next = Math.max(0, Math.min(21, Math.floor(days)));
+          return state.goldDays === next ? state : { goldDays: next };
+        }),
     }),
     {
       name: 'aloo-ui-v1',

@@ -1,6 +1,7 @@
 import { Footprints } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { parseMovementText } from '../lib/movement-from-text';
+import { syncPotOfGold } from '../lib/sync-gold';
 import { useDiaryStore } from '../stores/diaryStore';
 import { useUiStore } from '../stores/uiStore';
 
@@ -14,7 +15,6 @@ export function MovementLogger({
   const [text, setText] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const addMovement = useDiaryStore((state) => state.addMovement);
-  const tendGold = useUiStore((state) => state.tendGold);
   const showPreviewNotice = useUiStore((state) => state.showPreviewNotice);
 
   function handleSubmit(event: FormEvent) {
@@ -32,7 +32,7 @@ export function MovementLogger({
       summary: parsed.summary,
       raw: parsed.raw,
     });
-    tendGold();
+    syncPotOfGold();
     const notice = parsed.durationMin
       ? `Logged ${parsed.title.toLowerCase()} · ${parsed.durationMin} min`
       : `Logged ${parsed.title.toLowerCase()}`;

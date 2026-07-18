@@ -54,13 +54,13 @@ export function Today() {
           <div className="mt-4">
             <EncouragementLine />
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link className="button-primary" to="/eat">
-              <Utensils size={14} strokeWidth={1.5} className="block" />
-              Open Eat
-            </Link>
-            <Link className="button-secondary" to="/move">
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Link className="button-primary min-h-11" to="/move">
               Open Move
+            </Link>
+            <Link className="text-link inline-flex min-h-11 items-center gap-1.5" to="/eat">
+              <Utensils size={14} strokeWidth={1.5} className="block" />
+              Eat
             </Link>
           </div>
         </div>
@@ -123,8 +123,8 @@ export function Today() {
           </div>
         )}
 
-        <Link className="text-link inline-flex items-center gap-1.5" to="/eat">
-          <Camera size={14} strokeWidth={1.5} /> Log a meal
+        <Link className="text-link inline-flex min-h-11 items-center gap-1.5" to="/eat">
+          <Camera size={14} strokeWidth={1.5} /> Log meal on Eat
         </Link>
       </section>
 
@@ -187,7 +187,7 @@ export function Today() {
                     .filter(Boolean)
                     .join(' · ')}
             </p>
-            <Link className="button-secondary mt-4 inline-flex" to="/move">
+            <Link className="button-secondary mt-4 inline-flex min-h-11" to="/move">
               Open Move
             </Link>
           </div>

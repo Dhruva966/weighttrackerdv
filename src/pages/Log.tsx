@@ -15,7 +15,6 @@ export function Log({ forcedType, hideIntro = false }: Props) {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const setMealDraft = useUiStore((state) => state.setMealDraft);
-  const tendGold = useUiStore((state) => state.tendGold);
   const type =
     forcedType ?? (params.get('type') === 'workout' ? 'workout' : 'meal');
   const capture = params.get('capture');
@@ -25,7 +24,6 @@ export function Log({ forcedType, hideIntro = false }: Props) {
 
   function goToConfirm(source: string, raw: string) {
     setMealDraft({ source, raw, items: estimateMealFromText(raw) });
-    tendGold();
     navigate('/log/meal/confirm');
   }
 

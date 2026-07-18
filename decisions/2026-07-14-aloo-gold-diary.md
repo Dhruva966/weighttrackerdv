@@ -12,7 +12,7 @@ Owner (Dhruva) wanted the product named **Aloo**, a soft golden/white look, a po
 | Brand | **Aloo** |
 | Display name | **Dhruva** |
 | Theme | Soft gold (`#C4A35A`) on white/cream paper |
-| Metaphor | Pot of gold (`goldDays`, `tendGold`) |
+| Metaphor | Pot of gold (`goldDays` from consistency streak; see `src/lib/gold.ts`) |
 | Nav | Today · Eat · Move · Grow · You |
 | Capture | Sticky universal text + mic bar |
 | Diary | Local Zustand `diaryStore`: weight, meals, movements |
