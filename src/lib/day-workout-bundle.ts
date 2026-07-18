@@ -160,11 +160,12 @@ function buildSessionBundle(
 
 /**
  * Reconstruct one calendar day's Move activity from events.
- * Returns `null` when the day has no completed gym sessions and no movements
+ * Returns `null` when the day has no gym sessions and no movements
  * (empty calendar cells stay blank — no day spine rows).
  *
- * Day keys use America/Los_Angeles by default. Only sessions with `endedAt`
- * count as gym. Session notes come from existing `sessions.notes` (no day_notes table).
+ * Day keys use America/Los_Angeles by default. Any session that started that
+ * day counts as gym (open or soft-ended). Session notes come from
+ * `sessions.notes` (no day_notes table).
  */
 export function getDayWorkoutBundle(
   date: string,
@@ -175,7 +176,7 @@ export function getDayWorkoutBundle(
   const exerciseNameById = new Map(input.exercises.map((exercise) => [exercise.id, exercise.name]));
 
   const sessions = input.sessions
-    .filter((session) => session.endedAt && toDayKey(session.startedAt, timeZone) === date)
+    .filter((session) => toDayKey(session.startedAt, timeZone) === date)
     .slice()
     .sort((a, b) => a.startedAt.localeCompare(b.startedAt))
     .map((session) => buildSessionBundle(session, input.sets, exerciseNameById));

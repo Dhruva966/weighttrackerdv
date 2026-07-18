@@ -1,11 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { starterExercises, starterGoals, starterSessions, starterSets } from '../data/catalog';
+import {
+  isBoardBaselineSession,
+  starterExercises,
+  starterGoals,
+  starterSets,
+} from '../data/catalog';
 import { slugify } from '../lib/fmt';
 import { formatImportedSessionNotes, parseBrainDump } from '../lib/liftImport';
 import { parseExerciseLogSmart } from '../lib/exercise-log-parse';
 import { isPersonalRecord } from '../lib/pr';
-import { syncExercise, syncGoal, syncSession, syncSet } from '../lib/supabase-sync';
+import { deleteSyncedSet, syncExercise, syncGoal, syncSession, syncSet } from '../lib/supabase-sync';
 import { USER_ID } from '../lib/user';
 import type { EquipmentKind, Exercise, Goal, LoggedSet, MuscleGroup, WorkoutSession } from '../types';
 import { usePrStore } from './prStore';
@@ -18,15 +23,28 @@ type ExerciseInput = {
   setupNotes?: string[];
 };
 
+/** Bump when re-introducing or changing board baseline seed so cleared browsers re-merge. */
+export const BOARD_HISTORY_SEED_VERSION = 3;
+
+function withoutBaselineSessions<T extends { id: string }>(sessions: T[]): T[] {
+  return sessions.filter((session) => !isBoardBaselineSession(session.id));
+}
+
 type WorkoutState = {
   exercises: Exercise[];
   goals: Goal[];
   sessions: WorkoutSession[];
   sets: LoggedSet[];
   historyCleared?: boolean;
-  createSession: () => WorkoutSession;
+  /** Tracks which board baseline seed is present; bump `BOARD_HISTORY_SEED_VERSION` to re-seed. */
+  boardHistorySeedVersion?: number;
+  createSession: (options?: { startedAt?: string }) => WorkoutSession;
   endSession: (sessionId: string) => void;
+  /** Clears endedAt so a day’s session can accept more sets (soft reopen). */
+  reopenSession: (sessionId: string) => void;
   addSet: (input: Omit<LoggedSet, 'id' | 'setNumber' | 'isPr' | 'createdAt'>) => LoggedSet;
+  /** Removes a logged set, renumbers remaining sets in that session+exercise, and refreshes PR flags. */
+  removeSet: (setId: string) => void;
   addExercise: (input: ExerciseInput) => Exercise;
   importLiftDump: (text: string) => { imported: number; notes: number; skipped: string[] };
   setSessionPlan: (sessionId: string, exerciseIds: string[]) => void;
@@ -79,10 +97,66 @@ function mergeSets(required: LoggedSet[], persisted: LoggedSet[] | undefined): L
   return [...required, ...customSets];
 }
 
-function hasLegacyStarterHistory(sessions: WorkoutSession[] | undefined): boolean {
-  return (sessions ?? []).some(
-    (session) => session.id.startsWith('session-synthetic') || session.id === 'session-current-board-import',
-  );
+export class InvalidSetInputError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidSetInputError';
+  }
+}
+
+function assertValidSetInput(input: Pick<LoggedSet, 'weightLb' | 'reps'>): void {
+  if (!Number.isFinite(input.weightLb) || input.weightLb <= 0) {
+    throw new InvalidSetInputError('Weight must be greater than zero.');
+  }
+
+  if (!Number.isFinite(input.reps) || input.reps <= 0 || !Number.isInteger(input.reps)) {
+    throw new InvalidSetInputError('Reps must be a whole number greater than zero.');
+  }
+}
+
+function renumberSessionExerciseSets(
+  sets: LoggedSet[],
+  sessionId: string,
+  exerciseId: string,
+): LoggedSet[] {
+  const ordered = sets
+    .filter((setItem) => setItem.sessionId === sessionId && setItem.exerciseId === exerciseId)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.setNumber - b.setNumber);
+  const numberById = new Map(ordered.map((setItem, index) => [setItem.id, index + 1]));
+
+  return sets.map((setItem) => {
+    const nextNumber = numberById.get(setItem.id);
+    return nextNumber !== undefined && nextNumber !== setItem.setNumber
+      ? { ...setItem, setNumber: nextNumber }
+      : setItem;
+  });
+}
+
+function recalculateExercisePrFlags(sets: LoggedSet[], exerciseId: string): LoggedSet[] {
+  const chronological = sets
+    .filter((setItem) => setItem.exerciseId === exerciseId)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.setNumber - b.setNumber);
+
+  const history: Array<{ weightLb: number; reps: number; isWarmup: boolean }> = [];
+  const prById = new Map<string, boolean>();
+
+  for (const setItem of chronological) {
+    const isPr = isPersonalRecord(
+      { weightLb: setItem.weightLb, reps: setItem.reps, isWarmup: setItem.isWarmup },
+      history,
+    );
+    prById.set(setItem.id, isPr);
+    history.push({
+      weightLb: setItem.weightLb,
+      reps: setItem.reps,
+      isWarmup: setItem.isWarmup,
+    });
+  }
+
+  return sets.map((setItem) => {
+    const nextPr = prById.get(setItem.id);
+    return nextPr !== undefined && nextPr !== setItem.isPr ? { ...setItem, isPr: nextPr } : setItem;
+  });
 }
 
 function findExerciseByName(exercises: Exercise[], name: string): Exercise | undefined {
@@ -99,14 +173,16 @@ export const useWorkoutStore = create<WorkoutState>()(
     (set, get) => ({
       exercises: starterExercises,
       goals: starterGoals,
-      sessions: starterSessions,
+      // Baseline weight history lives in `sets` only — no fake gym-day sessions.
+      sessions: [],
       sets: starterSets,
       historyCleared: false,
-      createSession: () => {
+      boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
+      createSession: (options) => {
         const session: WorkoutSession = {
           id: newId(),
           userId: USER_ID,
-          startedAt: new Date().toISOString(),
+          startedAt: options?.startedAt ?? new Date().toISOString(),
         };
         set((state) => ({ sessions: [session, ...state.sessions] }));
         void syncSession(session);
@@ -124,7 +200,25 @@ export const useWorkoutStore = create<WorkoutState>()(
           void syncSession({ ...session, endedAt });
         }
       },
+      reopenSession: (sessionId) => {
+        const session = get().sessions.find((item) => item.id === sessionId);
+        if (!session?.endedAt) {
+          return;
+        }
+        const reopened: WorkoutSession = {
+          id: session.id,
+          userId: session.userId,
+          startedAt: session.startedAt,
+          notes: session.notes,
+          plannedExerciseIds: session.plannedExerciseIds,
+        };
+        set((state) => ({
+          sessions: state.sessions.map((item) => (item.id === sessionId ? reopened : item)),
+        }));
+        void syncSession(reopened);
+      },
       addSet: (input) => {
+        assertValidSetInput(input);
         const state = get();
         const setNumber =
           state.sets.filter((setItem) => setItem.sessionId === input.sessionId && setItem.exerciseId === input.exerciseId)
@@ -157,6 +251,37 @@ export const useWorkoutStore = create<WorkoutState>()(
         }
 
         return loggedSet;
+      },
+      removeSet: (setId) => {
+        const state = get();
+        const target = state.sets.find((setItem) => setItem.id === setId);
+        if (!target) {
+          return;
+        }
+
+        let nextSets = state.sets.filter((setItem) => setItem.id !== setId);
+        nextSets = renumberSessionExerciseSets(nextSets, target.sessionId, target.exerciseId);
+        nextSets = recalculateExercisePrFlags(nextSets, target.exerciseId);
+        set({ sets: nextSets });
+
+        if (usePrStore.getState().lastPr?.id === setId) {
+          usePrStore.getState().clearPr();
+        }
+
+        void deleteSyncedSet(target.id);
+
+        for (const setItem of nextSets) {
+          if (setItem.exerciseId !== target.exerciseId) {
+            continue;
+          }
+          const previous = state.sets.find((item) => item.id === setItem.id);
+          if (
+            previous &&
+            (previous.setNumber !== setItem.setNumber || previous.isPr !== setItem.isPr)
+          ) {
+            void syncSet(setItem);
+          }
+        }
       },
       addExercise: (input) => {
         const slug = slugify(input.name);
@@ -282,6 +407,12 @@ export const useWorkoutStore = create<WorkoutState>()(
         let imported = 0;
 
         for (const entry of parsed.sets) {
+          try {
+            assertValidSetInput(entry);
+          } catch {
+            continue;
+          }
+
           get().addSet({
             sessionId,
             exerciseId,
@@ -306,7 +437,14 @@ export const useWorkoutStore = create<WorkoutState>()(
         return { imported, notes: parsed.notes };
       },
       clearHistory: () => {
-        set({ sessions: [], sets: [], historyCleared: true });
+        set({
+          sessions: [],
+          // Keep board baseline weights for Grow charts; drop real logged workouts only.
+          sets: starterSets,
+          historyCleared: true,
+          // Stay cleared for the current seed; a future version bump can re-seed intentionally.
+          boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
+        });
         usePrStore.getState().clearPr();
       },
       toggleGoal: (goalId) => {
@@ -331,17 +469,22 @@ export const useWorkoutStore = create<WorkoutState>()(
       name: 'weight-tracker-workouts',
       merge: (persisted, current) => {
         const stored = persisted as Partial<WorkoutState> | undefined;
-        const legacyStarterHistory = hasLegacyStarterHistory(stored?.sessions);
-        const useStarterHistory = !stored?.historyCleared && !legacyStarterHistory;
+        const storedSeedVersion = stored?.boardHistorySeedVersion ?? 0;
+        const needsReseed = storedSeedVersion < BOARD_HISTORY_SEED_VERSION;
+        // Re-merge board baseline when seed version bumps (e.g. after the Jul 13 clear),
+        // or when history was never explicitly cleared for the current seed.
+        const useStarterHistory = needsReseed || !stored?.historyCleared;
 
         return {
           ...current,
           ...stored,
-          historyCleared: stored?.historyCleared || legacyStarterHistory || false,
+          historyCleared: needsReseed ? false : Boolean(stored?.historyCleared),
+          boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
           exercises: mergeExercises(starterExercises, stored?.exercises),
           goals: mergeById(starterGoals, stored?.goals),
-          sessions: useStarterHistory ? mergeById(starterSessions, stored?.sessions) : legacyStarterHistory ? [] : (stored?.sessions ?? []),
-          sets: useStarterHistory ? mergeSets(starterSets, stored?.sets) : legacyStarterHistory ? [] : (stored?.sets ?? []),
+          // Never re-introduce baseline sessions as real gym history.
+          sessions: withoutBaselineSessions(stored?.sessions ?? []),
+          sets: useStarterHistory ? mergeSets(starterSets, stored?.sets) : (stored?.sets ?? []),
         };
       },
     },

@@ -80,7 +80,7 @@ describe('getDayWorkoutBundle', () => {
     expect(bundle?.movements).toEqual([]);
   });
 
-  it('marks PR days and ignores open sessions', () => {
+  it('marks PR days and includes open sessions', () => {
     const bundle = getDayWorkoutBundle('2026-07-12', {
       sessions: [
         {
@@ -120,9 +120,9 @@ describe('getDayWorkoutBundle', () => {
       exercises,
     });
 
-    expect(bundle?.sessions.map((session) => session.id)).toEqual(['done']);
+    expect(bundle?.sessions.map((session) => session.id)).toEqual(['open', 'done']);
     expect(bundle?.flags).toEqual({ hadGym: true, hadPr: true, hadCardio: false });
-    expect(bundle?.sessions[0]?.prCount).toBe(1);
+    expect(bundle?.sessions[1]?.prCount).toBe(1);
   });
 
   it('keys the day with America/Los_Angeles across the UTC date boundary', () => {

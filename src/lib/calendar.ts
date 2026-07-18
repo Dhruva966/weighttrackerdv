@@ -10,6 +10,86 @@ export type CalendarSetInput = {
   isWarmup?: boolean;
 };
 
+export type DayWorkoutSessionInput = CalendarSessionInput & {
+  notes?: string;
+};
+
+export type DayWorkoutSetInput = CalendarSetInput & {
+  id: string;
+  exerciseId: string;
+  setNumber: number;
+  weightLb: number;
+  reps: number;
+  rpe?: number;
+  createdAt: string;
+};
+
+export type DayWorkoutBundleSet = {
+  id: string;
+  sessionId: string;
+  exerciseId: string;
+  setNumber: number;
+  weightLb: number;
+  reps: number;
+  rpe?: number;
+  isWarmup: boolean;
+  isPr: boolean;
+  createdAt: string;
+};
+
+export type DayWorkoutBundleSession = {
+  session: {
+    id: string;
+    startedAt: string;
+    endedAt?: string;
+    notes?: string;
+  };
+  sets: DayWorkoutBundleSet[];
+  prCount: number;
+  volume: number;
+};
+
+export type DayWorkoutBundle = {
+  date: string;
+  activity?: DayActivity;
+  sessions: DayWorkoutBundleSession[];
+};
+
+export type DayWorkoutExerciseRef = {
+  id: string;
+  muscleGroup: string;
+};
+
+/** One calendar day → one workout surface (legacy multi-session days roll up). */
+export type DayWorkoutSummary = {
+  date: string;
+  /** Prefer in-progress session; otherwise earliest session that day. */
+  primarySessionId: string;
+  startedAt: string;
+  notes?: string;
+  inProgress: boolean;
+  /** Distinct muscle groups from exercises logged that day, stable order. */
+  muscleGroups: string[];
+};
+
+const MUSCLE_GROUP_ORDER = [
+  'chest',
+  'back',
+  'shoulders',
+  'arms',
+  'biceps',
+  'triceps',
+  'legs',
+  'quads',
+  'hamstrings',
+  'glutes',
+  'calves',
+  'core',
+  'forearms',
+  'full-body',
+  'cardio',
+] as const;
+
 export type DayActivity = {
   date: string;
   sessionIds: string[];
@@ -47,6 +127,30 @@ export function toDayKey(value: string | Date, timeZone: string): string {
   return isoDateFormatter(timeZone).format(value instanceof Date ? value : new Date(value));
 }
 
+/** ISO instant for a calendar day in `timeZone` (today → now; otherwise ~local noon). */
+export function calendarDayToStartedAt(
+  dayKey: string,
+  timeZone = 'America/Los_Angeles',
+  now = new Date(),
+): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dayKey)) {
+    return now.toISOString();
+  }
+
+  if (toDayKey(now, timeZone) === dayKey) {
+    return now.toISOString();
+  }
+
+  for (const hourUtc of [20, 19, 18, 17, 21, 16]) {
+    const candidate = new Date(`${dayKey}T${String(hourUtc).padStart(2, '0')}:00:00.000Z`);
+    if (toDayKey(candidate, timeZone) === dayKey) {
+      return candidate.toISOString();
+    }
+  }
+
+  return new Date(`${dayKey}T19:00:00.000Z`).toISOString();
+}
+
 function addDays(day: string, amount: number): string {
   const date = new Date(`${day}T12:00:00Z`);
   date.setUTCDate(date.getUTCDate() + amount);
@@ -70,10 +174,6 @@ export function buildSessionDayMap(
   const activityByDay = new Map<string, DayActivity>();
 
   for (const session of sessions) {
-    if (!session.endedAt) {
-      continue;
-    }
-
     const date = toDayKey(session.startedAt, timeZone);
     const existing =
       activityByDay.get(date) ??
@@ -95,7 +195,7 @@ export function buildSessionDayMap(
 
   for (const setItem of sets) {
     const session = sessions.find((item) => item.id === setItem.sessionId);
-    if (!session?.endedAt) {
+    if (!session) {
       continue;
     }
 
@@ -194,4 +294,129 @@ export function dayRangeAround(date: string, radius: number): string[] {
     values.push(addDays(date, offset));
   }
   return values;
+}
+
+export function getDayWorkoutBundle(
+  date: string,
+  sessions: DayWorkoutSessionInput[],
+  sets: DayWorkoutSetInput[],
+  options: CalendarOptions = {},
+): DayWorkoutBundle {
+  const timeZone = options.timeZone ?? 'America/Los_Angeles';
+  const activityByDay = buildSessionDayMap(sessions, sets, options);
+
+  const daySessions = sessions
+    .filter((session) => toDayKey(session.startedAt, timeZone) === date)
+    .slice()
+    .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+
+  const bundleSessions: DayWorkoutBundleSession[] = daySessions.map((session) => {
+    const sessionSets = sets
+      .filter((setItem) => setItem.sessionId === session.id)
+      .map(
+        (setItem): DayWorkoutBundleSet => ({
+          id: setItem.id,
+          sessionId: setItem.sessionId,
+          exerciseId: setItem.exerciseId,
+          setNumber: setItem.setNumber,
+          weightLb: setItem.weightLb,
+          reps: setItem.reps,
+          rpe: setItem.rpe,
+          isWarmup: setItem.isWarmup ?? false,
+          isPr: setItem.isPr,
+          createdAt: setItem.createdAt,
+        }),
+      );
+
+    const workingSets = sessionSets.filter((setItem) => !setItem.isWarmup);
+    const prCount = workingSets.filter((setItem) => setItem.isPr).length;
+    const volume = workingSets.reduce((total, setItem) => total + setItem.weightLb * setItem.reps, 0);
+
+    return {
+      session: {
+        id: session.id,
+        startedAt: session.startedAt,
+        endedAt: session.endedAt,
+        notes: session.notes,
+      },
+      sets: sessionSets,
+      prCount,
+      volume,
+    };
+  });
+
+  return {
+    date,
+    activity: activityByDay.get(date),
+    sessions: bundleSessions,
+  };
+}
+
+/**
+ * Roll every session that started on `date` into one day workout surface.
+ * Prefer the earliest in-progress session as the entry point; otherwise the earliest session.
+ * Muscle groups come from exercises that have sets logged that day (all sessions).
+ */
+export function summarizeDayWorkout(
+  date: string,
+  sessions: DayWorkoutSessionInput[],
+  sets: DayWorkoutSetInput[],
+  exercises: DayWorkoutExerciseRef[],
+  options: CalendarOptions = {},
+): DayWorkoutSummary | null {
+  const timeZone = options.timeZone ?? 'America/Los_Angeles';
+  const daySessions = sessions
+    .filter((session) => toDayKey(session.startedAt, timeZone) === date)
+    .slice()
+    .sort((a, b) => a.startedAt.localeCompare(b.startedAt));
+
+  if (daySessions.length === 0) {
+    return null;
+  }
+
+  const openSessions = daySessions.filter((session) => !session.endedAt);
+  const primary = openSessions[0] ?? daySessions[0]!;
+  const sessionIds = new Set(daySessions.map((session) => session.id));
+  const exerciseById = new Map(exercises.map((exercise) => [exercise.id, exercise.muscleGroup]));
+  const muscleSet = new Set<string>();
+
+  for (const setItem of sets) {
+    if (!sessionIds.has(setItem.sessionId)) {
+      continue;
+    }
+    const muscleGroup = exerciseById.get(setItem.exerciseId);
+    if (muscleGroup) {
+      muscleSet.add(muscleGroup);
+    }
+  }
+
+  const muscleGroups = MUSCLE_GROUP_ORDER.filter((group) => muscleSet.has(group));
+  for (const group of muscleSet) {
+    if (!muscleGroups.includes(group)) {
+      muscleGroups.push(group);
+    }
+  }
+
+  return {
+    date,
+    primarySessionId: primary.id,
+    startedAt: primary.startedAt,
+    notes: primary.notes ?? daySessions.find((session) => session.notes)?.notes,
+    inProgress: openSessions.length > 0,
+    muscleGroups,
+  };
+}
+
+/** Existing session for a calendar day, preferring in-progress then earliest. */
+export function findDaySession(
+  date: string,
+  sessions: DayWorkoutSessionInput[],
+  options: CalendarOptions = {},
+): DayWorkoutSessionInput | undefined {
+  const timeZone = options.timeZone ?? 'America/Los_Angeles';
+  const daySessions = sessions
+    .filter((session) => toDayKey(session.startedAt, timeZone) === date)
+    .slice()
+    .sort((a, b) => a.startedAt.localeCompare(b.startedAt));
+  return daySessions.find((session) => !session.endedAt) ?? daySessions[0];
 }

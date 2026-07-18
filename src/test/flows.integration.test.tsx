@@ -7,11 +7,11 @@ import { ExerciseCreate } from '../pages/ExerciseCreate';
 import { Goals } from '../pages/Goals';
 import { Session } from '../pages/Session';
 import { SettingsPage } from '../pages/Settings';
-import { starterExercises, starterGoals, starterSessions, starterSets } from '../data/catalog';
+import { starterExercises, starterGoals, starterSets } from '../data/catalog';
 import { useDiaryStore } from '../stores/diaryStore';
 import { usePrStore } from '../stores/prStore';
 import { useUiStore } from '../stores/uiStore';
-import { useWorkoutStore } from '../stores/workoutStore';
+import { BOARD_HISTORY_SEED_VERSION, useWorkoutStore } from '../stores/workoutStore';
 
 vi.mock('canvas-confetti', () => ({
   default: vi.fn(),
@@ -35,8 +35,10 @@ function resetStores() {
   useWorkoutStore.setState({
     exercises: starterExercises,
     goals: starterGoals,
-    sessions: starterSessions,
+    sessions: [],
     sets: starterSets,
+    historyCleared: false,
+    boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
   });
   usePrStore.getState().clearPr();
   useDiaryStore.setState({
@@ -124,7 +126,37 @@ describe('active session flow', () => {
     cleanup();
   });
 
-  it('logs a set and ends the workout from the session page', async () => {
+  it('adds a picked exercise to the session list', async () => {
+    const session = useWorkoutStore.getState().createSession();
+    const exercise = starterExercises[0];
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={[`/session/${session.id}`]}>
+          <Routes>
+            <Route path="/session/:sessionId" element={<Session />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByText(/no exercises yet/i)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText(/search exercises to add/i), {
+      target: { value: exercise.name },
+    });
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(exercise.name, 'i') }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/your exercises/i)).toBeInTheDocument();
+      expect(screen.getByText(/tap to log/i)).toBeInTheDocument();
+      expect(
+        useWorkoutStore.getState().sessions.find((item) => item.id === session.id)?.plannedExerciseIds,
+      ).toEqual([exercise.id]);
+    });
+  });
+
+  it('logs a set from the session page and returns via Done', async () => {
     const session = useWorkoutStore.getState().createSession();
     const exercise = starterExercises[0];
     useWorkoutStore.getState().setSessionPlan(session.id, [exercise.id]);
@@ -134,6 +166,7 @@ describe('active session flow', () => {
         <MemoryRouter initialEntries={[`/session/${session.id}`]}>
           <Routes>
             <Route path="/session/:sessionId" element={<Session />} />
+            <Route path="/move" element={<p>Move home</p>} />
           </Routes>
         </MemoryRouter>
       </QueryClientProvider>,
@@ -154,8 +187,8 @@ describe('active session flow', () => {
       expect(screen.getByText('95 lb x 8')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /^end$/i }));
-    await waitFor(() => expect(screen.getByText(/workout recap/i)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('link', { name: /^done$/i }));
+    await waitFor(() => expect(screen.getByText(/move home/i)).toBeInTheDocument());
   });
 });
 
