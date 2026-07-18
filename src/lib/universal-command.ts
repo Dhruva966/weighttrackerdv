@@ -19,7 +19,11 @@ export function parseUniversalCommand(rawInput: string): ParsedCommand {
     return { intent: 'weight', summary: `Weigh-in noted: “${raw}”`, raw };
   }
 
-  if (/\b(walk|walked|walking|run|ran|running|jog|jogged|jogging|steps|hike|hiked|hiking|cardio|bike|biking)\b/.test(q)) {
+  if (
+    /\b(walk|walked|walking|incline\s*walk|run|ran|running|jog|jogged|jogging|steps|hike|hiked|hiking|cardio|bike|biking|stairmaster|stair\s*master|stair\s*climber|stepmill)\b/.test(
+      q,
+    )
+  ) {
     return { intent: 'walk', summary: `Movement noted: “${raw}”`, raw };
   }
 
