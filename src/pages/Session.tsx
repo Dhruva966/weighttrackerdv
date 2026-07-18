@@ -1,11 +1,10 @@
-import { CheckCircle2, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ExercisePicker } from '../components/ExercisePicker';
 import { MovementLogger } from '../components/MovementLogger';
 import { NaturalLanguageSetLogger } from '../components/NaturalLanguageSetLogger';
 import { RestTimer } from '../components/RestTimer';
-import { SessionSummary } from '../components/SessionSummary';
 import { useWorkoutStore } from '../stores/workoutStore';
 import type { Exercise, MuscleGroup } from '../types';
 
@@ -32,13 +31,12 @@ export function Session() {
   const sessions = useWorkoutStore((state) => state.sessions);
   const sets = useWorkoutStore((state) => state.sets);
   const exercises = useWorkoutStore((state) => state.exercises);
-  const endSession = useWorkoutStore((state) => state.endSession);
+  const reopenSession = useWorkoutStore((state) => state.reopenSession);
   const setSessionPlan = useWorkoutStore((state) => state.setSessionPlan);
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
   const [lastSetKey, setLastSetKey] = useState('');
   const session = sessions.find((item) => item.id === sessionId);
   const sessionSets = sets.filter((setItem) => setItem.sessionId === sessionId);
-  const isEnded = Boolean(session?.endedAt);
 
   const plannedExercises = useMemo(() => {
     const plannedIds = session?.plannedExerciseIds ?? [];
@@ -61,6 +59,12 @@ export function Session() {
     }
     return [...groups.entries()];
   }, [plannedExercises]);
+
+  useEffect(() => {
+    if (session?.endedAt) {
+      reopenSession(session.id);
+    }
+  }, [reopenSession, session?.endedAt, session?.id]);
 
   useEffect(() => {
     const lastSet = sessionSets.at(-1);
@@ -99,48 +103,36 @@ export function Session() {
     <div className="grid gap-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="page-title">{isEnded ? 'Workout recap' : 'Today’s workout'}</h1>
+          <h1 className="page-title">Today’s workout</h1>
           <p className="mt-1 text-sm text-fgMuted">
-            {isEnded
-              ? 'Session complete.'
-              : 'Add exercises, then tap each one and log sets in plain English.'}
+            Add exercises, then tap each one and log sets in plain English. Come back any time to keep
+            logging.
           </p>
         </div>
-        {isEnded ? (
-          <Link className="button-secondary" to="/calendar">
-            Done
-          </Link>
-        ) : (
-          <button className="button-secondary" type="button" onClick={() => endSession(session.id)}>
-            <CheckCircle2 size={18} />
-            End
-          </button>
-        )}
+        <Link className="button-secondary min-h-11" to="/move">
+          Done
+        </Link>
       </div>
 
-      {!isEnded && sessionSets.length > 0 ? (
+      {sessionSets.length > 0 ? (
         <RestTimer activeKey={lastSetKey || sessionSets.at(-1)?.id || session.id} />
       ) : null}
 
-      {!isEnded ? (
-        <section className="grid gap-3">
-          <h2 className="text-lg font-medium text-fg">Log movement</h2>
-          <p className="text-sm text-fgMuted">
-            Walks and cardio go here in plain English — e.g. “walking 30 min”.
-          </p>
-          <MovementLogger compact />
-        </section>
-      ) : null}
+      <section className="grid gap-3">
+        <h2 className="text-lg font-medium text-fg">Log movement</h2>
+        <p className="text-sm text-fgMuted">
+          Walks and cardio go here in plain English — e.g. “walking 30 min”.
+        </p>
+        <MovementLogger compact />
+      </section>
 
-      {!isEnded ? (
-        <section className="grid gap-3">
-          <h2 className="text-lg font-medium text-fg">Add exercises for today</h2>
-          <ExercisePicker
-            excludeIds={plannedExercises.map((exercise) => exercise.id)}
-            onPick={addExercise}
-          />
-        </section>
-      ) : null}
+      <section className="grid gap-3">
+        <h2 className="text-lg font-medium text-fg">Add exercises for today</h2>
+        <ExercisePicker
+          excludeIds={plannedExercises.map((exercise) => exercise.id)}
+          onPick={addExercise}
+        />
+      </section>
 
       <section className="grid gap-4">
         <h2 className="text-lg font-medium text-fg">
@@ -177,24 +169,18 @@ export function Session() {
                         </div>
                         {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                       </button>
-                      {!isEnded ? (
-                        <button
-                          className="icon-button shrink-0"
-                          type="button"
-                          aria-label={`Remove ${exercise.name}`}
-                          onClick={() => removeExercise(exercise.id)}
-                        >
-                          <X size={16} />
-                        </button>
-                      ) : null}
+                      <button
+                        className="icon-button shrink-0"
+                        type="button"
+                        aria-label={`Remove ${exercise.name}`}
+                        onClick={() => removeExercise(exercise.id)}
+                      >
+                        <X size={16} />
+                      </button>
                     </div>
 
                     {isExpanded ? (
-                      <NaturalLanguageSetLogger
-                        disabled={isEnded}
-                        exercise={exercise}
-                        sessionId={session.id}
-                      />
+                      <NaturalLanguageSetLogger exercise={exercise} sessionId={session.id} />
                     ) : null}
                   </section>
                 );
@@ -203,8 +189,6 @@ export function Session() {
           ))
         )}
       </section>
-
-      {isEnded ? <SessionSummary sets={sessionSets} /> : null}
     </div>
   );
 }

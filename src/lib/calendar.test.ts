@@ -1,8 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { buildMonthGrid, buildSessionDayMap, formatMonthLabel, shiftMonth, summarizeMonth } from './calendar';
+import {
+  buildMonthGrid,
+  buildSessionDayMap,
+  calendarDayToStartedAt,
+  findDaySession,
+  formatMonthLabel,
+  getDayWorkoutBundle,
+  shiftMonth,
+  summarizeDayWorkout,
+  summarizeMonth,
+  toDayKey,
+} from './calendar';
 
 describe('buildSessionDayMap', () => {
-  it('marks gym days and progressive overload days from completed sessions', () => {
+  it('marks gym days from any session (open or ended) and tracks overload from sets', () => {
     const activityByDay = buildSessionDayMap(
       [
         {
@@ -24,6 +35,7 @@ describe('buildSessionDayMap', () => {
         { sessionId: 's1', isPr: false },
         { sessionId: 's1', isPr: true },
         { sessionId: 's2', isPr: false },
+        { sessionId: 's3', isPr: false },
       ],
       { timeZone: 'America/Los_Angeles' },
     );
@@ -41,7 +53,11 @@ describe('buildSessionDayMap', () => {
       setCount: 1,
       prCount: 0,
     });
-    expect(activityByDay.has('2026-07-13')).toBe(false);
+    expect(activityByDay.get('2026-07-13')).toMatchObject({
+      hadGymVisit: true,
+      setCount: 1,
+      sessionIds: ['s3'],
+    });
   });
 });
 
@@ -103,5 +119,263 @@ describe('calendar helpers', () => {
       overloadDays: 1,
       totalSets: 2,
     });
+  });
+});
+
+describe('getDayWorkoutBundle', () => {
+  const sessions = [
+    {
+      id: 's1',
+      startedAt: '2026-07-10T18:00:00-07:00',
+      endedAt: '2026-07-10T19:00:00-07:00',
+      notes: 'Bench focus',
+    },
+    {
+      id: 's2',
+      startedAt: '2026-07-10T20:00:00-07:00',
+      endedAt: '2026-07-10T21:00:00-07:00',
+    },
+    {
+      id: 's-open',
+      startedAt: '2026-07-11T18:00:00-07:00',
+    },
+  ];
+
+  const sets = [
+    {
+      id: 'set-1',
+      sessionId: 's1',
+      exerciseId: 'ex-1',
+      setNumber: 1,
+      weightLb: 135,
+      reps: 8,
+      isWarmup: false,
+      isPr: true,
+      createdAt: '2026-07-10T18:05:00-07:00',
+    },
+    {
+      id: 'set-2',
+      sessionId: 's1',
+      exerciseId: 'ex-1',
+      setNumber: 2,
+      weightLb: 95,
+      reps: 10,
+      isWarmup: true,
+      isPr: false,
+      createdAt: '2026-07-10T18:10:00-07:00',
+    },
+    {
+      id: 'set-3',
+      sessionId: 's2',
+      exerciseId: 'ex-2',
+      setNumber: 1,
+      weightLb: 50,
+      reps: 12,
+      isWarmup: false,
+      isPr: false,
+      createdAt: '2026-07-10T20:05:00-07:00',
+    },
+    {
+      id: 'set-open',
+      sessionId: 's-open',
+      exerciseId: 'ex-1',
+      setNumber: 1,
+      weightLb: 100,
+      reps: 5,
+      isWarmup: false,
+      isPr: false,
+      createdAt: '2026-07-11T18:05:00-07:00',
+    },
+  ];
+
+  it('returns sessions for a day with volume and PR counts', () => {
+    const bundle = getDayWorkoutBundle('2026-07-10', sessions, sets, {
+      timeZone: 'America/Los_Angeles',
+    });
+
+    expect(bundle.date).toBe('2026-07-10');
+    expect(bundle.activity).toMatchObject({
+      hadGymVisit: true,
+      hadProgressiveOverload: true,
+      prCount: 1,
+      setCount: 3,
+    });
+    expect(bundle.sessions).toHaveLength(2);
+    expect(bundle.sessions[0]?.session.id).toBe('s2');
+    expect(bundle.sessions[1]).toMatchObject({
+      session: { id: 's1', notes: 'Bench focus' },
+      prCount: 1,
+      volume: 1080,
+    });
+    expect(bundle.sessions[1]?.sets).toHaveLength(2);
+  });
+
+  it('includes open sessions for a day (no endedAt required)', () => {
+    const bundle = getDayWorkoutBundle('2026-07-11', sessions, sets, {
+      timeZone: 'America/Los_Angeles',
+    });
+
+    expect(bundle.sessions).toHaveLength(1);
+    expect(bundle.sessions[0]?.session.id).toBe('s-open');
+    expect(bundle.activity).toMatchObject({
+      hadGymVisit: true,
+      setCount: 1,
+      sessionIds: ['s-open'],
+    });
+  });
+});
+
+describe('calendarDayToStartedAt', () => {
+  it('uses now when the day key is today in LA', () => {
+    const now = new Date('2026-07-18T20:15:00.000Z');
+    const todayKey = toDayKey(now, 'America/Los_Angeles');
+    expect(calendarDayToStartedAt(todayKey, 'America/Los_Angeles', now)).toBe(now.toISOString());
+  });
+
+  it('anchors past days near local noon in LA', () => {
+    const startedAt = calendarDayToStartedAt('2026-07-10', 'America/Los_Angeles', new Date('2026-07-18T20:00:00Z'));
+    expect(toDayKey(startedAt, 'America/Los_Angeles')).toBe('2026-07-10');
+  });
+});
+
+describe('summarizeDayWorkout', () => {
+  const sessions = [
+    {
+      id: 's1',
+      startedAt: '2026-07-10T18:00:00-07:00',
+      endedAt: '2026-07-10T19:00:00-07:00',
+      notes: 'Bench focus',
+    },
+    {
+      id: 's2',
+      startedAt: '2026-07-10T20:00:00-07:00',
+      endedAt: '2026-07-10T21:00:00-07:00',
+    },
+    {
+      id: 's-open',
+      startedAt: '2026-07-11T18:00:00-07:00',
+      notes: 'Still going',
+    },
+    {
+      id: 's-open-late',
+      startedAt: '2026-07-11T20:00:00-07:00',
+    },
+  ];
+
+  const sets = [
+    {
+      id: 'set-1',
+      sessionId: 's1',
+      exerciseId: 'ex-chest',
+      setNumber: 1,
+      weightLb: 135,
+      reps: 8,
+      isWarmup: false,
+      isPr: true,
+      createdAt: '2026-07-10T18:05:00-07:00',
+    },
+    {
+      id: 'set-3',
+      sessionId: 's2',
+      exerciseId: 'ex-tri',
+      setNumber: 1,
+      weightLb: 50,
+      reps: 12,
+      isWarmup: false,
+      isPr: false,
+      createdAt: '2026-07-10T20:05:00-07:00',
+    },
+    {
+      id: 'set-open',
+      sessionId: 's-open',
+      exerciseId: 'ex-back',
+      setNumber: 1,
+      weightLb: 100,
+      reps: 5,
+      isWarmup: false,
+      isPr: false,
+      createdAt: '2026-07-11T18:05:00-07:00',
+    },
+  ];
+
+  const exercises = [
+    { id: 'ex-chest', muscleGroup: 'chest' },
+    { id: 'ex-tri', muscleGroup: 'triceps' },
+    { id: 'ex-back', muscleGroup: 'back' },
+  ];
+
+  it('rolls multiple completed sessions into one day summary with muscle groups', () => {
+    const summary = summarizeDayWorkout('2026-07-10', sessions, sets, exercises, {
+      timeZone: 'America/Los_Angeles',
+    });
+
+    expect(summary).toMatchObject({
+      date: '2026-07-10',
+      primarySessionId: 's1',
+      inProgress: false,
+      notes: 'Bench focus',
+      muscleGroups: ['chest', 'triceps'],
+    });
+  });
+
+  it('prefers the earliest in-progress session as the day entry point', () => {
+    const summary = summarizeDayWorkout('2026-07-11', sessions, sets, exercises, {
+      timeZone: 'America/Los_Angeles',
+    });
+
+    expect(summary).toMatchObject({
+      primarySessionId: 's-open',
+      inProgress: true,
+      muscleGroups: ['back'],
+    });
+  });
+
+  it('returns null when the day has no sessions', () => {
+    expect(
+      summarizeDayWorkout('2026-07-12', sessions, sets, exercises, {
+        timeZone: 'America/Los_Angeles',
+      }),
+    ).toBeNull();
+  });
+});
+
+describe('findDaySession', () => {
+  it('returns in-progress session before completed ones', () => {
+    const found = findDaySession(
+      '2026-07-18',
+      [
+        {
+          id: 'done',
+          startedAt: '2026-07-18T10:00:00-07:00',
+          endedAt: '2026-07-18T11:00:00-07:00',
+        },
+        {
+          id: 'open',
+          startedAt: '2026-07-18T14:00:00-07:00',
+        },
+      ],
+      { timeZone: 'America/Los_Angeles' },
+    );
+    expect(found?.id).toBe('open');
+  });
+
+  it('returns earliest completed session when none are open', () => {
+    const found = findDaySession(
+      '2026-07-18',
+      [
+        {
+          id: 'later',
+          startedAt: '2026-07-18T16:00:00-07:00',
+          endedAt: '2026-07-18T17:00:00-07:00',
+        },
+        {
+          id: 'earlier',
+          startedAt: '2026-07-18T10:00:00-07:00',
+          endedAt: '2026-07-18T11:00:00-07:00',
+        },
+      ],
+      { timeZone: 'America/Los_Angeles' },
+    );
+    expect(found?.id).toBe('earlier');
   });
 });

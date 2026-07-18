@@ -1,12 +1,15 @@
 import CountUp from 'react-countup';
 import { Flame } from 'lucide-react';
+import { isBoardBaselineSession } from '../data/catalog';
 import { calculateStreaks } from '../lib/streak';
 import { useWorkoutStore } from '../stores/workoutStore';
 
 export function StreakBadge() {
-  const sessions = useWorkoutStore((state) => state.sessions);
+  const sessions = useWorkoutStore((state) =>
+    state.sessions.filter((session) => !isBoardBaselineSession(session.id)),
+  );
   const streak = calculateStreaks(
-    sessions.filter((session) => session.endedAt).map((session) => session.startedAt),
+    sessions.map((session) => session.startedAt),
     { timeZone: 'America/Los_Angeles' },
   );
 

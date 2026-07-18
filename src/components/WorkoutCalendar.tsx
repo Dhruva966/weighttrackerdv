@@ -3,6 +3,15 @@ import type { CalendarCell } from '../lib/calendar';
 
 const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+function formatSelectedDateAnnouncement(date: string): string {
+  return new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${date}T12:00:00Z`));
+}
+
 type WorkoutCalendarProps = {
   monthLabel: string;
   cells: CalendarCell[];
@@ -21,7 +30,7 @@ export function WorkoutCalendar({
   onNextMonth,
 }: WorkoutCalendarProps) {
   return (
-    <section className="app-card grid gap-4">
+    <section className="app-card grid gap-4" aria-label="Workout calendar">
       <div className="flex items-center justify-between gap-3">
         <button className="icon-button" type="button" onClick={onPreviousMonth} aria-label="Previous month">
           <ChevronLeft size={18} />
@@ -32,13 +41,21 @@ export function WorkoutCalendar({
         </button>
       </div>
 
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {selectedDate ? `Selected ${formatSelectedDateAnnouncement(selectedDate)}` : 'No day selected'}
+      </div>
+
       <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium uppercase tracking-wide text-fgMuted">
         {weekdayLabels.map((label) => (
           <span key={label}>{label}</span>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1" role="grid" aria-label={`${monthLabel} workout days`}>
         {cells.map((cell, index) => {
           if (!cell.date || cell.day === null) {
             return <div key={`empty-${index}`} className="aspect-square" aria-hidden="true" />;
@@ -52,28 +69,31 @@ export function WorkoutCalendar({
             <button
               key={cell.date}
               type="button"
+              role="gridcell"
               onClick={() => onSelectDate(cell.date!)}
+              aria-pressed={isSelected}
+              aria-current={isSelected ? 'date' : undefined}
               className={`relative aspect-square rounded-md border text-sm transition ${
                 isSelected
-                  ? 'border-fg bg-fg text-bg'
+                  ? 'border-accent bg-accentSoft font-medium text-fg ring-2 ring-accent/35'
                   : hadGym
-                    ? 'border-accent/30 bg-accentSoft text-fg hover:border-fg/30'
+                    ? 'border-accent/30 bg-accentSoft text-fg hover:border-accent/50'
                     : 'border-border bg-bg text-fgMuted hover:border-fg/20 hover:bg-surface'
-              } ${cell.isToday && !isSelected ? 'ring-1 ring-fg/30' : ''}`}
-              aria-label={`${cell.day}${hadGym ? ', gym day' : ''}${hadOverload ? ', progressive overload' : ''}`}
+              } ${cell.isToday && !isSelected ? 'ring-1 ring-accent/40' : ''}`}
+              aria-label={`${cell.day}${hadGym ? ', gym day' : ''}${hadOverload ? ', progressive overload' : ''}${isSelected ? ', selected' : ''}`}
             >
               <span className="tabular font-medium">{cell.day}</span>
               {hadGym ? (
                 <span
                   className={`absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full ${
-                    isSelected ? 'bg-bg' : 'bg-fg/70'
+                    isSelected ? 'bg-accent' : 'bg-fg/70'
                   }`}
                 />
               ) : null}
               {hadOverload ? (
                 <span
                   className={`absolute right-1 top-1 text-[10px] font-bold leading-none ${
-                    isSelected ? 'text-bg' : 'text-accent'
+                    isSelected ? 'text-accent' : 'text-accent'
                   }`}
                 >
                   +

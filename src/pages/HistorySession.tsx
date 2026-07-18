@@ -1,38 +1,7 @@
-import { useParams } from 'react-router-dom';
-import { SessionSummary } from '../components/SessionSummary';
-import { SetRow } from '../components/SetRow';
-import { formatDateTime } from '../lib/fmt';
-import { useWorkoutStore } from '../stores/workoutStore';
+import { Navigate, useParams } from 'react-router-dom';
 
+/** Legacy recap route — workouts stay reopenable on the session surface. */
 export function HistorySession() {
   const { sessionId = '' } = useParams();
-  const sessions = useWorkoutStore((state) => state.sessions);
-  const sets = useWorkoutStore((state) => state.sets);
-  const session = sessions.find((item) => item.id === sessionId);
-  const sessionSets = sets.filter((setItem) => setItem.sessionId === sessionId);
-
-  if (!session) {
-    return <p className="text-fgMuted">Session not found.</p>;
-  }
-
-  return (
-    <div className="grid gap-4">
-      <div>
-        <h1 className="page-title">Session Recap</h1>
-        <p className="mt-1 text-sm text-fgMuted">{formatDateTime(session.startedAt)}</p>
-      </div>
-      <SessionSummary sets={sessionSets} />
-      {session.notes ? (
-        <section className="app-card grid gap-2">
-          <h2 className="text-lg font-medium text-fg">Session notes</h2>
-          <p className="whitespace-pre-wrap text-sm text-fgMuted">{session.notes}</p>
-        </section>
-      ) : null}
-      <div className="grid gap-2">
-        {sessionSets.map((setItem) => (
-          <SetRow key={setItem.id} setItem={setItem} />
-        ))}
-      </div>
-    </div>
-  );
+  return <Navigate to={`/session/${sessionId}`} replace />;
 }
