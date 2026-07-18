@@ -21,17 +21,18 @@ async function main() {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'llama-3.1-8b-instant',
+      model: 'llama-3.3-70b-versatile',
       temperature: 0,
       response_format: { type: 'json_object' },
       messages: [
         {
           role: 'system',
-          content: 'Return JSON only: {"sets":[{"weightLb":135,"reps":5}],"notes":[]}',
+          content:
+            'Return JSON only. Parse messy gym logs into {"sets":[{"weightLb":number,"reps":number}],"notes":[]}. Example: "110 for 2 sets for 6 reps then 7 reps" → two sets.',
         },
         {
           role: 'user',
-          content: 'Exercise: bench press\nAthlete log: 135 for 5',
+          content: 'Exercise: curl\nAthlete log: 110 for 2 sets for 6 reps then 7 reps',
         },
       ],
     }),
@@ -55,8 +56,10 @@ async function main() {
     throw new Error(`Groq JSON missing sets: ${content}`);
   }
 
-  console.log('ok groq llama-3.1-8b-instant');
-  console.log(`ok parsed sample set ${parsed.sets[0].weightLb} lb x ${parsed.sets[0].reps}`);
+  console.log('ok groq llama-3.3-70b-versatile');
+  console.log(
+    `ok parsed ${parsed.sets.length} sets: ${parsed.sets.map((setItem) => `${setItem.weightLb}x${setItem.reps}`).join(', ')}`,
+  );
   console.log(`remaining-requests ${response.headers.get('x-ratelimit-remaining-requests') ?? 'n/a'}`);
   console.log(`remaining-tokens ${response.headers.get('x-ratelimit-remaining-tokens') ?? 'n/a'}`);
 }

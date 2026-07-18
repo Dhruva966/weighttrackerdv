@@ -24,17 +24,36 @@ function projectRefFromEnv(): string | undefined {
   return url.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
 }
 
-async function main() {
-  const groqKey = requireValue(
-    'GROQ_API_KEY or VITE_GROQ_API_KEY',
-    process.env.GROQ_API_KEY ?? process.env.VITE_GROQ_API_KEY,
-  );
-  const projectRef = requireValue('SUPABASE_PROJECT_REF or VITE_SUPABASE_URL', projectRefFromEnv());
+function quote(value: string): string {
+  return value.replaceAll('"', '\\"');
+}
 
-  const command = `npx --yes supabase@latest secrets set GROQ_API_KEY="${groqKey.replaceAll('"', '\\"')}" --project-ref "${projectRef}"`;
+async function main() {
+  const projectRef = requireValue('SUPABASE_PROJECT_REF or VITE_SUPABASE_URL', projectRefFromEnv());
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY ?? process.env.VITE_GROQ_API_KEY;
+
+  if (!anthropicKey && !groqKey) {
+    throw new Error('Set ANTHROPIC_API_KEY (preferred) and/or GROQ_API_KEY in .env.local');
+  }
+
+  const pairs: string[] = [];
+  if (anthropicKey) {
+    pairs.push(`ANTHROPIC_API_KEY="${quote(anthropicKey)}"`);
+  }
+  if (groqKey) {
+    pairs.push(`GROQ_API_KEY="${quote(groqKey)}"`);
+  }
+
+  const command = `npx --yes supabase@latest secrets set ${pairs.join(' ')} --project-ref "${projectRef}"`;
   execSync(command, { stdio: 'inherit' });
 
-  console.log('ok pushed GROQ_API_KEY to Supabase Edge Function secrets');
+  if (anthropicKey) {
+    console.log('ok pushed ANTHROPIC_API_KEY to Supabase Edge Function secrets');
+  }
+  if (groqKey) {
+    console.log('ok pushed GROQ_API_KEY to Supabase Edge Function secrets (fallback)');
+  }
   console.log('next: deploy the function with `pnpm supabase:deploy-functions`');
 }
 

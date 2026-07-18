@@ -1,5 +1,5 @@
 import type { LoggedSet } from '../types';
-import { formatDate } from './fmt';
+import { formatChartMonth } from './fmt';
 import { estimateOneRepMax } from './pr';
 
 export type ParsedLiftSet = {
@@ -22,7 +22,12 @@ export type ParsedBrainDump = {
 };
 
 export type LiftProgressPoint = {
+  /** Month + 2-digit year (e.g. Sep 22) for axis ticks. */
   label: string;
+  /** ISO timestamp of the set — used for time-scale chart domain. */
+  date: string;
+  /** Epoch ms for Recharts numeric / time X axis. */
+  t: number;
   weightLb: number;
   reps: number;
   oneRm: number;
@@ -36,10 +41,20 @@ const bareRepsPattern = /(\d+)\s*reps?\b/gi;
 const trailingWeightPattern = /(?:and|at|@|for)\s*(\d+(?:\.\d+)?)\s*(?:lb|lbs)?\s*$/i;
 const repSequencePattern =
   /^(.+?)\s+((?:\d{1,2}\s*(?:,|and)?\s*)+)(?:at|@|for)\s*(\d+(?:\.\d+)?)\s*(?:lb|lbs)?\s*$/i;
-const weightForRepsPattern = /(\d+(?:\.\d+)?)\s+for\s+(\d+)(?:\s*reps?)?/gi;
+/** Do not treat "for 2 sets" as "for 2 reps". */
+const weightForRepsPattern = /(\d+(?:\.\d+)?)\s+for\s+(\d+)(?!\s*sets?\b)(?:\s*reps?)?/gi;
 const weightForRepListPattern = /^(\d+(?:\.\d+)?)\s+for\s+((?:\d{1,2}\s*)+)$/;
+/** "110 for 2 sets for 6 reps then 7 reps" / "110lbs for 2 sets of 6 and 7" */
+const weightForSetsPattern =
+  /^(\d+(?:\.\d+)?)\s*(?:lb|lbs)?\s+for\s+(\d+)\s*sets?\b(?:\s*(?:for|of|at|:))?\s*(.*)$/i;
 const noteIndicatorPattern =
   /\b(helped|spotter|friend|assisted|assistance|failed|tired|sore|felt|felt like|maybe|remember|note|notes|grindy|slow|fast|easy|hard|pain|hurt|skipped|missed|almost|barely|struggled|good set|bad set|warmup|warm up|stretch|recover|recovery)\b/i;
+/** Minimal cleanup only — messy English belongs to the LLM, not regex. */
+const fillerWordPattern =
+  /\b(like|literally|basically|just|only|about|around|roughly|maybe|kinda|kind of|sort of|did|got|hit|went|completed|finished)\b/gi;
+/** Clean shorthand the on-device parser is trusted to handle without an LLM. */
+const cleanShorthandPattern =
+  /^(?:\d+(?:\.\d+)?\s*(?:lb|lbs)?\s*[x×]\s*\d+\s*)+$|^\d+(?:\.\d+)?\s+for\s+(?:\d{1,2}\s*)+$|^\d+(?:\.\d+)?\s+for\s+\d+(?:\s*reps?)?$/i;
 
 function cleanExerciseName(value: string): string {
   return value
@@ -268,6 +283,84 @@ function parseWeightForRepList(raw: string, exerciseName: string): ParsedLiftSet
   }));
 }
 
+function extractRepSequenceFromTail(tail: string): number[] {
+  const cleaned = tail.replace(/^(?:for|of|at|:)\s*/i, '').trim();
+  if (!cleaned) {
+    return [];
+  }
+
+  resetRegex(bareRepsPattern);
+  const labeled = [...cleaned.matchAll(bareRepsPattern)].map((match) => Number(match[1]));
+  if (labeled.length > 0) {
+    return labeled.filter((value) => value > 0);
+  }
+
+  resetRegex(ordinalSetPattern);
+  const ordinals = [...cleaned.matchAll(ordinalSetPattern)].map((match) => Number(match[1]));
+  if (ordinals.length > 0) {
+    return ordinals.filter((value) => value > 0);
+  }
+
+  return [...cleaned.matchAll(/\d{1,2}/g)]
+    .map((match) => Number(match[0]))
+    .filter((value) => value > 0 && value <= 50);
+}
+
+function parseWeightForSetsWithReps(raw: string, exerciseName: string): ParsedLiftSet[] | null {
+  const match = raw.trim().match(weightForSetsPattern);
+  if (!match) {
+    return null;
+  }
+
+  const weightLb = Number(match[1]);
+  const setCount = Number(match[2]);
+  let reps = extractRepSequenceFromTail(match[3] ?? '');
+
+  if (!Number.isFinite(weightLb) || weightLb <= 0 || !Number.isFinite(setCount) || setCount <= 0) {
+    return null;
+  }
+
+  if (reps.length === 0) {
+    return null;
+  }
+
+  if (reps.length === 1 && setCount > 1) {
+    reps = Array.from({ length: setCount }, () => reps[0]!);
+  }
+
+  return reps.map((repCount) => ({
+    exerciseName,
+    weightLb,
+    reps: repCount,
+    raw,
+  }));
+}
+
+/** Light cleanup so offline fallback can still hit structured patterns. */
+export function normalizeExerciseLogText(text: string): string {
+  return text
+    .replace(fillerWordPattern, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * True for compact gym shorthand the local parser should handle without an LLM
+ * (`205 x 3`, `115 for 8 7 7`, `110 for 2`). Everything else is LLM-first when configured.
+ */
+export function isCleanExerciseLogShorthand(text: string): boolean {
+  return cleanShorthandPattern.test(text.trim());
+}
+
+/** Inverse of isCleanExerciseLogShorthand — anything that should go LLM-first when configured. */
+export function isProseOrAmbiguousExerciseLog(text: string): boolean {
+  const probe = text.trim();
+  if (!probe) {
+    return false;
+  }
+  return !isCleanExerciseLogShorthand(probe);
+}
+
 function parseWeightForRepsLine(raw: string, defaultExerciseName?: string): ParsedLiftSet[] | null {
   resetRegex(weightForRepsPattern);
   const matches = [...raw.matchAll(weightForRepsPattern)];
@@ -291,53 +384,81 @@ function parseWeightForRepsLine(raw: string, defaultExerciseName?: string): Pars
   }));
 }
 
-function parseLiftSegment(raw: string, defaultExerciseName?: string): ParsedLiftSet[] {
+function parseStructuredLiftSegment(
+  candidate: string,
+  raw: string,
+  defaultExerciseName?: string,
+): ParsedLiftSet[] | null {
   if (defaultExerciseName) {
-    const repList = parseWeightForRepList(raw, defaultExerciseName);
+    const setList = parseWeightForSetsWithReps(candidate, defaultExerciseName);
+    if (setList) {
+      return setList;
+    }
+
+    const repList = parseWeightForRepList(candidate, defaultExerciseName);
     if (repList) {
       return repList;
     }
   }
 
   resetRegex(weightRepsPattern);
-  const multiMatches = [...raw.matchAll(weightRepsPattern)];
+  const multiMatches = [...candidate.matchAll(weightRepsPattern)];
   if (multiMatches.length > 0) {
     const exerciseName = cleanExerciseName(
-      defaultExerciseName ?? raw.slice(0, multiMatches[0].index).trim(),
+      defaultExerciseName ?? candidate.slice(0, multiMatches[0].index).trim(),
     );
-    if (!exerciseName) {
-      return [];
+    if (exerciseName) {
+      return multiMatches.map((match) => ({
+        exerciseName,
+        weightLb: Number(match[1]),
+        reps: Number(match[2]),
+        raw,
+      }));
     }
-
-    return multiMatches.map((match) => ({
-      exerciseName,
-      weightLb: Number(match[1]),
-      reps: Number(match[2]),
-      raw,
-    }));
   }
 
-  const weightForReps = parseWeightForRepsLine(raw, defaultExerciseName);
+  const weightForReps = parseWeightForRepsLine(candidate, defaultExerciseName);
   if (weightForReps) {
     return weightForReps;
   }
 
-  const proseSets = parseProseLiftLine(raw);
-  if (proseSets) {
-    return proseSets;
-  }
-
-  const repSequenceSets = parseRepSequenceLine(raw);
+  const repSequenceSets = parseRepSequenceLine(candidate);
   if (repSequenceSets) {
     return repSequenceSets;
   }
 
-  const bareMatch = raw.match(bareWeightPattern);
+  return null;
+}
+
+function parseLiftSegment(raw: string, defaultExerciseName?: string): ParsedLiftSet[] {
+  const trimmed = raw.trim();
+  const normalized = normalizeExerciseLogText(trimmed);
+  // Prefer normalized first so filler words do not unlock a wrong prose parse.
+  const candidates = normalized === trimmed ? [trimmed] : [normalized, trimmed];
+
+  for (const candidate of candidates) {
+    const structured = parseStructuredLiftSegment(candidate, raw, defaultExerciseName);
+    if (structured) {
+      return structured;
+    }
+  }
+
+  // Prose heuristics only after structured patterns fail (brain-dump / offline).
+  for (const candidate of candidates) {
+    const proseSets = parseProseLiftLine(candidate);
+    if (proseSets) {
+      return proseSets;
+    }
+  }
+
+  const bareMatch = trimmed.match(bareWeightPattern);
   if (!bareMatch || bareMatch.index === undefined) {
     return [];
   }
 
-  const exerciseName = cleanExerciseName(raw.slice(0, bareMatch.index).trim());
+  const exerciseName = cleanExerciseName(
+    defaultExerciseName ?? trimmed.slice(0, bareMatch.index).trim(),
+  );
   if (!exerciseName) {
     return [];
   }
@@ -511,10 +632,15 @@ export function buildLiftProgress(exerciseId: string, sets: LoggedSet[]): LiftPr
   return sets
     .filter((setItem) => setItem.exerciseId === exerciseId && !setItem.isWarmup)
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-    .map((setItem) => ({
-      label: formatDate(setItem.createdAt),
-      weightLb: setItem.weightLb,
-      reps: setItem.reps,
-      oneRm: estimateOneRepMax(setItem.weightLb, setItem.reps),
-    }));
+    .map((setItem) => {
+      const t = new Date(setItem.createdAt).getTime();
+      return {
+        label: formatChartMonth(setItem.createdAt),
+        date: setItem.createdAt,
+        t,
+        weightLb: setItem.weightLb,
+        reps: setItem.reps,
+        oneRm: estimateOneRepMax(setItem.weightLb, setItem.reps),
+      };
+    });
 }

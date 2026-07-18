@@ -54,10 +54,10 @@ export function SettingsPage() {
         </p>
         <p className="text-sm text-fgMuted">
           {isSupabaseLlmConfigured()
-            ? 'Groq runs through Supabase Edge Functions (key stored in Supabase secrets, not the browser). On-device parsing runs first.'
+            ? 'LLM-first: Claude Haiku via Supabase Edge (ANTHROPIC_API_KEY in secrets; Groq optional fallback). Clean shorthand stays on-device.'
             : isExerciseLogLlmConfigured()
-              ? 'Browser Groq fallback is configured. Prefer storing GROQ_API_KEY in Supabase secrets instead.'
-              : 'Add Supabase URL + anon key, then run `pnpm supabase:secrets` to store GROQ_API_KEY in Supabase.'}
+              ? 'Browser Groq fallback is configured. Prefer ANTHROPIC_API_KEY in Supabase secrets (never in VITE_*).'
+              : 'Add Supabase URL + anon key, then run `pnpm supabase:secrets` to store ANTHROPIC_API_KEY.'}
         </p>
       </section>
       <section className="app-card grid gap-3">
