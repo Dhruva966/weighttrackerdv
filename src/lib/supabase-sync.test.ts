@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import type { LoggedSet } from '../types';
 import { exerciseToRow, goalToRow, sessionToRow, setToRow } from './supabase-mappers';
-import { isUuid } from './supabase-sync';
+import { deleteSyncedSet, isUuid, syncSet } from './supabase-sync';
 
 describe('isUuid', () => {
   it('accepts RFC4122 ids and rejects starter catalog ids', () => {
@@ -66,5 +67,29 @@ describe('supabase mappers', () => {
         createdAt: '2026-07-13T00:00:00.000Z',
       }),
     ).toMatchObject({ target_value: 225, target_unit: 'lb' });
+  });
+});
+
+describe('syncSet', () => {
+  it('no-ops for starter catalog exercise ids without throwing', async () => {
+    const setItem: LoggedSet = {
+      id: crypto.randomUUID(),
+      sessionId: crypto.randomUUID(),
+      exerciseId: 'ex-lat-pulldown',
+      setNumber: 1,
+      weightLb: 175,
+      reps: 8,
+      isWarmup: false,
+      isPr: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    await expect(syncSet(setItem)).resolves.toBeUndefined();
+  });
+});
+
+describe('deleteSyncedSet', () => {
+  it('no-ops for non-UUID set ids without throwing', async () => {
+    await expect(deleteSyncedSet('set-current-1')).resolves.toBeUndefined();
   });
 });

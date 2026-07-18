@@ -19,13 +19,22 @@ export async function drainQueue(): Promise<number> {
   let drained = 0;
 
   for (const write of writes) {
-    if (write.op !== 'insert' && write.op !== 'upsert') {
+    let error: { message: string } | null = null;
+
+    if (write.op === 'delete') {
+      const payload = write.payload as { id?: string };
+      if (!payload.id) {
+        continue;
+      }
+      ({ error } = await supabase.from(write.table).delete().eq('id', payload.id));
+    } else if (write.op === 'insert' || write.op === 'upsert') {
+      ({ error } = await supabase.from(write.table).upsert(write.payload as Record<string, unknown>));
+    } else {
       continue;
     }
 
-    const { error } = await supabase.from(write.table).upsert(write.payload as Record<string, unknown>);
     if (error) {
-      break;
+      continue;
     }
 
     if (write.id !== undefined) {

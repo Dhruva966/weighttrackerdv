@@ -26,6 +26,19 @@ async function persistUpsert(table: string, payload: Record<string, unknown>): P
   }
 }
 
+async function persistDelete(table: string, id: string): Promise<void> {
+  const supabase = getSupabase();
+  if (!supabase || !navigator.onLine) {
+    await enqueueWrite({ table, op: 'delete', payload: { id } });
+    return;
+  }
+
+  const { error } = await supabase.from(table).delete().eq('id', id);
+  if (error) {
+    await enqueueWrite({ table, op: 'delete', payload: { id } });
+  }
+}
+
 export async function syncSession(session: WorkoutSession): Promise<void> {
   if (!isUuid(session.id)) {
     return;
@@ -35,11 +48,20 @@ export async function syncSession(session: WorkoutSession): Promise<void> {
 }
 
 export async function syncSet(setItem: LoggedSet): Promise<void> {
+  // Starter catalog ids (`ex-${slug}`) stay local-only until a UUID migration; never drop local sets.
   if (!isUuid(setItem.id) || !isUuid(setItem.sessionId) || !isUuid(setItem.exerciseId)) {
     return;
   }
 
   await persistUpsert('sets', setToRow(setItem));
+}
+
+export async function deleteSyncedSet(setId: string): Promise<void> {
+  if (!isUuid(setId)) {
+    return;
+  }
+
+  await persistDelete('sets', setId);
 }
 
 export async function syncExercise(exercise: Exercise): Promise<void> {
