@@ -6,9 +6,11 @@ describe('parseUniversalCommand', () => {
     expect(parseUniversalCommand('I ate bhagara rice with sarakha kura').intent).toBe('meal');
   });
 
-  it('routes walks', () => {
+  it('routes walks and cardio machines', () => {
     expect(parseUniversalCommand('walked 20 minutes').intent).toBe('walk');
     expect(parseUniversalCommand('walking 30 min').intent).toBe('walk');
+    expect(parseUniversalCommand('stairmaster level 10 for 10 min').intent).toBe('walk');
+    expect(parseUniversalCommand('incline walk 20 min').intent).toBe('walk');
   });
 
   it('routes lifts', () => {

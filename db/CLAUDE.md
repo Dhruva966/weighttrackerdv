@@ -104,3 +104,5 @@ await supabase.from('sets').delete().neq('id', '')
 - Do not make image backfill fail the whole run when Free Exercise DB has no match.
 - Do not store private notes, credentials, or raw upload metadata in public-readable tables or buckets.
 - Do not claim RLS protection exists in MVP until policies are enabled and verified.
+- Do not add a `day_spine` / blank-date table for calendar reconstruction — Move days are derived from `sessions` (+ local movements). Session narrative stays on `sessions.notes`; no `day_notes` or set-notes columns unless a later migration explicitly adds them.
+- Do not invent per-lift calorie burn in schema or sync payloads; cardio kcal estimates are client-only (`src/lib/cardio-calories.ts`) over local movement logs.

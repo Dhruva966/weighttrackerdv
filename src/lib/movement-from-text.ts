@@ -1,4 +1,12 @@
-export type MovementKind = 'walk' | 'run' | 'hike' | 'cardio' | 'other';
+export type MovementKind =
+  | 'walk'
+  | 'incline_walk'
+  | 'hike'
+  | 'run'
+  | 'stairmaster'
+  | 'bike'
+  | 'cardio'
+  | 'other';
 
 export type ParsedMovement = {
   kind: MovementKind;
@@ -9,9 +17,46 @@ export type ParsedMovement = {
 };
 
 const kindPattern =
-  /\b(walk(?:ing|ed)?|run(?:ning)?|ran|jog(?:ging|ged)?|hike(?:d|ing)?|steps|cardio|bike|biking|cycle|cycling|swim(?:ming|med)?)\b/i;
+  /\b(incline\s*walk(?:ing)?|treadmill\s*incline|stair\s*master|stairmaster|stair\s*climber|stepmill|walk(?:ing|ed)?|run(?:ning)?|ran|jog(?:ging|ged)?|hike(?:d|ing)?|steps|cardio|bike|biking|cycle|cycling|swim(?:ming|med)?)\b/i;
 
-/** Parse movement phrases like “walking 30 min” or “ran 2 miles”. */
+const titles: Record<MovementKind, string> = {
+  walk: 'Walk',
+  incline_walk: 'Incline walk',
+  hike: 'Hike',
+  run: 'Run',
+  stairmaster: 'Stairmaster',
+  bike: 'Bike',
+  cardio: 'Cardio',
+  other: 'Movement',
+};
+
+function classifyKind(token: string): MovementKind {
+  const normalized = token.toLowerCase().replace(/\s+/g, ' ').trim();
+  if (/incline\s*walk|treadmill\s*incline/.test(normalized)) {
+    return 'incline_walk';
+  }
+  if (/stair\s*master|stairmaster|stair\s*climber|stepmill/.test(normalized)) {
+    return 'stairmaster';
+  }
+  if (/walk|steps/.test(normalized)) {
+    return 'walk';
+  }
+  if (/run|ran|jog/.test(normalized)) {
+    return 'run';
+  }
+  if (/hike/.test(normalized)) {
+    return 'hike';
+  }
+  if (/bike|cycle|swim/.test(normalized)) {
+    return 'bike';
+  }
+  if (/cardio/.test(normalized)) {
+    return 'cardio';
+  }
+  return 'other';
+}
+
+/** Parse movement phrases like “walking 30 min” or “stairmaster level 10 for 10 min”. */
 export function parseMovementText(rawInput: string): ParsedMovement | null {
   const raw = rawInput.trim();
   if (!raw) {
@@ -23,17 +68,7 @@ export function parseMovementText(rawInput: string): ParsedMovement | null {
     return null;
   }
 
-  const token = kindMatch[1]!.toLowerCase();
-  let kind: MovementKind = 'other';
-  if (/walk|steps/.test(token)) {
-    kind = 'walk';
-  } else if (/run|ran|jog/.test(token)) {
-    kind = 'run';
-  } else if (/hike/.test(token)) {
-    kind = 'hike';
-  } else if (/cardio|bike|cycle|swim/.test(token)) {
-    kind = 'cardio';
-  }
+  const kind = classifyKind(kindMatch[1]!);
 
   const durationMatch = raw.match(
     /(\d+(?:\.\d+)?)\s*(min|mins|minutes?|hour|hours|hrs?)\b/i,
@@ -45,20 +80,19 @@ export function parseMovementText(rawInput: string): ParsedMovement | null {
     durationMin = /hour|hr/.test(unit) ? Math.round(value * 60) : Math.round(value);
   }
 
-  const title =
-    kind === 'walk'
-      ? 'Walk'
-      : kind === 'run'
-        ? 'Run'
-        : kind === 'hike'
-          ? 'Hike'
-          : kind === 'cardio'
-            ? 'Cardio'
-            : 'Movement';
+  const levelMatch = raw.match(/\blevel\s*(\d+(?:\.\d+)?)\b/i);
+  const level = levelMatch ? levelMatch[1] : null;
 
-  const summary = durationMin
-    ? `${durationMin} min`
-    : raw.replace(/\s+/g, ' ').slice(0, 80);
+  const title = titles[kind];
+  const parts: string[] = [];
+  if (level) {
+    parts.push(`level ${level}`);
+  }
+  if (durationMin != null) {
+    parts.push(`${durationMin} min`);
+  }
+  const summary =
+    parts.length > 0 ? parts.join(' · ') : raw.replace(/\s+/g, ' ').slice(0, 80);
 
   return { kind, title, durationMin, summary, raw };
 }
