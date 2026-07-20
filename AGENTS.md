@@ -142,6 +142,13 @@ Every non-trivial task:
 Parallel dispatch: use only for independent files with no shared state. Sequential dispatch: use when tasks touch schema, shared hooks, offline queue, app shell, routing, or package configuration.
 
 ## Common Task Patterns
+### Adding LLM-backed UI
+1. Use `ANTHROPIC_API_KEY` as the primary LLM key through Supabase Edge or another server-side boundary. Do not expose Anthropic keys in `VITE_*` variables or browser code.
+2. Keep LLM flows two-stage: first ask the model for a constrained draft/intent shape, then run a deterministic TypeScript/Zod commit step that validates, normalizes, and produces UI-ready data.
+3. Render UI only from the committed shaped response, never from raw model prose. Preserve raw drafts only for debugging when they do not leak secrets or private notes.
+4. Keep clean shorthand and obvious local cases on-device when deterministic parsing is reliable; send messy prose, number words, and ambiguous commands through the Anthropic-first path.
+5. Add tests for both stages: draft commit edge cases and the UI behavior that consumes the shaped output.
+
 ### Adding a route
 1. Add the page under `src/pages/`.
 2. Register the route in `src/App.tsx`.
