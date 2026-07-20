@@ -360,11 +360,16 @@ describe('workoutStore', () => {
     it('imports parsed sets into a completed import session', () => {
       const beforeSets = useWorkoutStore.getState().sets.length;
       const result = useWorkoutStore.getState().importLiftDump('Lat pulldown 175 lbs\nBench 205 x 3');
+      const importSession = useWorkoutStore.getState().sessions[0]!;
+      const importedSets = useWorkoutStore
+        .getState()
+        .sets.filter((setItem) => setItem.sessionId === importSession.id);
 
       expect(result.imported).toBe(2);
       expect(useWorkoutStore.getState().sets).toHaveLength(beforeSets + 2);
-      expect(useWorkoutStore.getState().sessions[0].notes).toBe('Imported from brain dump');
-      expect(useWorkoutStore.getState().sessions[0].endedAt).toBeTruthy();
+      expect(importSession.notes).toBe('Imported from brain dump');
+      expect(importSession.endedAt).toBeTruthy();
+      expect(importedSets.map((setItem) => setItem.setNumber)).toEqual([1, 1]);
     });
 
     it('creates exercises for unknown lift names', () => {

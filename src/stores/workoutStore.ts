@@ -348,7 +348,10 @@ export const useWorkoutStore = create<WorkoutState>()(
               continue;
             }
 
-            const exerciseSets = nextSets.filter((setItem) => setItem.exerciseId === exercise.id);
+            const exerciseSets = nextSets.filter(
+              (setItem) =>
+                setItem.sessionId === importSession.id && setItem.exerciseId === exercise.id,
+            );
             const history = exerciseSets.map((setItem) => ({
               weightLb: setItem.weightLb,
               reps: setItem.reps,

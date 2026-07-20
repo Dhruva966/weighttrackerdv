@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
 import { ExerciseCreate } from '../pages/ExerciseCreate';
 import { Goals } from '../pages/Goals';
+import { History } from '../pages/History';
 import { Session } from '../pages/Session';
 import { SettingsPage } from '../pages/Settings';
 import { starterExercises, starterGoals, starterSets } from '../data/catalog';
@@ -86,6 +87,39 @@ describe('app shell', () => {
     expect(screen.getByText('169')).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/log anything/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /speak to log/i })).toBeInTheDocument();
+  });
+
+  it('does not count board baseline sets as today training', () => {
+    renderApp('/');
+
+    expect(screen.getByText(/no lifts or walks yet/i)).toBeInTheDocument();
+    expect(screen.queryByText(/sets today/i)).not.toBeInTheDocument();
+  });
+
+  it('shows Training log above Today diary and omits Intentions on Today', () => {
+    renderApp('/');
+
+    const mainText = screen.getByRole('main').textContent ?? '';
+    expect(mainText.indexOf('Training log')).toBeLessThan(mainText.indexOf('Today’s diary'));
+    expect(screen.queryByRole('heading', { name: /^Intentions$/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Morning weigh-in/i)).not.toBeInTheDocument();
+  });
+
+  it('counts only real sets from today in the Today training summary', () => {
+    const session = useWorkoutStore.getState().createSession();
+    const exercise = starterExercises[0]!;
+    useWorkoutStore.getState().addSet({
+      sessionId: session.id,
+      exerciseId: exercise.id,
+      weightLb: 95,
+      reps: 8,
+      isWarmup: false,
+    });
+
+    renderApp('/');
+
+    expect(screen.getByText(/1 set today/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 open workout/i)).toBeInTheDocument();
   });
 
   it('navigates Eat Move Grow tabs', async () => {
@@ -189,6 +223,84 @@ describe('active session flow', () => {
 
     fireEvent.click(screen.getByRole('link', { name: /^done$/i }));
     await waitFor(() => expect(screen.getByText(/move home/i)).toBeInTheDocument());
+  });
+});
+
+describe('history day rollups', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    resetStores();
+    useDiaryStore.setState({
+      bodyWeightLogs: [],
+      meals: [],
+      movements: [],
+      calorieTarget: 2400,
+    });
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('renders one workout item for multiple sessions on the same day', () => {
+    const chest = starterExercises.find((exercise) => exercise.muscleGroup === 'chest')!;
+    const back = starterExercises.find((exercise) => exercise.muscleGroup === 'back')!;
+    const first = useWorkoutStore
+      .getState()
+      .createSession({ startedAt: '2026-07-18T18:00:00-07:00' });
+    const second = useWorkoutStore
+      .getState()
+      .createSession({ startedAt: '2026-07-18T20:00:00-07:00' });
+
+    useWorkoutStore.getState().addSet({
+      sessionId: first.id,
+      exerciseId: chest.id,
+      weightLb: 135,
+      reps: 8,
+      isWarmup: false,
+    });
+    useWorkoutStore.getState().addSet({
+      sessionId: second.id,
+      exerciseId: back.id,
+      weightLb: 100,
+      reps: 10,
+      isWarmup: false,
+    });
+
+    render(
+      <MemoryRouter>
+        <History compact showCalendar={false} gymOnly />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getAllByRole('article')).toHaveLength(1);
+    expect(screen.getAllByText(/^Workout$/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Chest · Back|Back · Chest/)).toBeInTheDocument();
+    expect(screen.queryByText(/135 lb|100 lb|2 sets/i)).not.toBeInTheDocument();
+  });
+
+  it('renders ISO timestamp weigh-ins in the normalized day feed', () => {
+    useDiaryStore.setState({
+      bodyWeightLogs: [
+        {
+          id: 'bw-late',
+          loggedAt: '2026-07-19T06:30:00.000Z',
+          weightLb: 170,
+        },
+      ],
+      meals: [],
+      movements: [],
+      calorieTarget: 2400,
+    });
+
+    render(
+      <MemoryRouter>
+        <History compact showCalendar={false} />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('170 lb')).toBeInTheDocument();
+    expect(screen.getByText(/Body weight/i)).toBeInTheDocument();
   });
 });
 

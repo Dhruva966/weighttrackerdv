@@ -35,6 +35,18 @@ const committedLogSchema = z.object({
   notes: z.array(z.string()).default([]),
 });
 
+function normalizeCommittedSets(
+  sets: Array<{ weightLb?: number; reps?: number }> | undefined,
+): ParsedExerciseLog['sets'] {
+  return (sets ?? [])
+    .filter(
+      (setItem): setItem is { weightLb: number; reps: number } =>
+        typeof setItem.weightLb === 'number' &&
+        typeof setItem.reps === 'number',
+    )
+    .map((setItem) => ({ weightLb: setItem.weightLb, reps: setItem.reps }));
+}
+
 /**
  * Shared with the Supabase edge function — keep in sync.
  * Stage 1 only: interpret messy NL into a draft. Stage 2 is deterministic code.
@@ -81,14 +93,17 @@ export function commitExerciseLogDraft(raw: unknown): ParsedExerciseLog | null {
     if (!legacy.success) {
       return null;
     }
-    return legacy.data;
+    return {
+      sets: normalizeCommittedSets(legacy.data.sets),
+      notes: legacy.data.notes,
+    };
   }
 
   const draft = parsed.data;
   const notes = draft.notes ?? [];
 
   if (draft.sets && draft.sets.length > 0) {
-    return { sets: draft.sets, notes };
+    return { sets: normalizeCommittedSets(draft.sets), notes };
   }
 
   const weightLb = draft.weightLb;

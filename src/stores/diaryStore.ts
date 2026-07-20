@@ -44,12 +44,20 @@ type DiaryState = {
 };
 
 function todayKey(): string {
+  return dayKeyForTimestamp(new Date().toISOString());
+}
+
+function dayKeyForTimestamp(value: string): string {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Los_Angeles',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }).format(new Date());
+  }).format(new Date(value));
 }
 
 function newId(prefix: string): string {
@@ -73,7 +81,7 @@ export const useDiaryStore = create<DiaryState>()(
       movements: [],
       calorieTarget: 2400,
       upsertBodyWeight: (weightLb, loggedAt) => {
-        const day = loggedAt ?? todayKey();
+        const day = loggedAt ? dayKeyForTimestamp(loggedAt) : todayKey();
         const existing = get().bodyWeightLogs.find((log) => log.loggedAt === day);
         const next: BodyWeightLog = existing
           ? { ...existing, weightLb }
@@ -117,7 +125,7 @@ export const useDiaryStore = create<DiaryState>()(
       clearMealsForToday: () => {
         const day = todayKey();
         set((state) => ({
-          meals: state.meals.filter((meal) => !meal.loggedAt.startsWith(day)),
+          meals: state.meals.filter((meal) => dayKeyForTimestamp(meal.loggedAt) !== day),
         }));
       },
     }),
@@ -154,11 +162,11 @@ export function getBodyWeightDelta(logs: BodyWeightLog[]): number | null {
 }
 
 export function mealsForDay(meals: MealLog[], day = todayKey()): MealLog[] {
-  return meals.filter((meal) => meal.loggedAt.slice(0, 10) === day);
+  return meals.filter((meal) => dayKeyForTimestamp(meal.loggedAt) === day);
 }
 
 export function movementsForDay(movements: MovementLog[], day = todayKey()): MovementLog[] {
-  return movements.filter((movement) => movement.loggedAt.slice(0, 10) === day);
+  return movements.filter((movement) => dayKeyForTimestamp(movement.loggedAt) === day);
 }
 
 export function sumMacros(meals: MealLog[]) {

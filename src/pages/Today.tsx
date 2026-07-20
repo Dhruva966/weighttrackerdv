@@ -2,6 +2,8 @@ import { Camera, ClipboardList, Scale, Utensils } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EncouragementLine } from '../components/EncouragementLine';
 import { PotOfGold } from '../components/PotOfGold';
+import { isBoardBaselineSession } from '../data/catalog';
+import { toDayKey } from '../lib/calendar';
 import {
   getBodyWeightDelta,
   getLatestBodyWeight,
@@ -23,8 +25,6 @@ function formatTime(iso: string): string {
 
 export function Today() {
   const preferredName = useUiStore((state) => state.preferredName);
-  const intentions = useUiStore((state) => state.intentions);
-  const toggleIntention = useUiStore((state) => state.toggleIntention);
   const goldDays = useUiStore((state) => state.goldDays);
 
   const bodyWeightLogs = useDiaryStore((state) => state.bodyWeightLogs);
@@ -40,10 +40,25 @@ export function Today() {
   const todayMovements = movementsForDay(movements);
   const macros = sumMacros(todayMeals);
   const remaining = calorieTarget - macros.calories;
-  const doneCount = intentions.filter((goal) => goal.done).length;
-  const openSessions = sessions.filter((session) => !session.endedAt).length;
-  const setCount = sets.length;
+  const todayKey = toDayKey(new Date(), 'America/Los_Angeles');
+  const todaySessions = sessions.filter(
+    (session) =>
+      !isBoardBaselineSession(session.id) &&
+      toDayKey(session.startedAt, 'America/Los_Angeles') === todayKey,
+  );
+  const todaySessionIds = new Set(todaySessions.map((session) => session.id));
+  const openSessions = todaySessions.filter((session) => !session.endedAt).length;
+  const setCount = sets.filter((setItem) => todaySessionIds.has(setItem.sessionId)).length;
   const greeting = preferredName ? `Hi ${preferredName}` : 'Welcome back';
+  const trainingDetails = [
+    setCount > 0 ? `${setCount} set${setCount === 1 ? '' : 's'} today` : null,
+    openSessions > 0
+      ? `${openSessions} open workout${openSessions === 1 ? '' : 's'}`
+      : null,
+    todayMovements.length > 0
+      ? `${todayMovements.length} movement${todayMovements.length === 1 ? '' : 's'} today`
+      : null,
+  ].filter(Boolean);
 
   return (
     <div className="grid animate-rise gap-9">
@@ -96,6 +111,23 @@ export function Today() {
         )}
       </section>
 
+      <section className="rounded-2xl border border-dashed border-border/80 bg-mist/40 px-5 py-5">
+        <div className="flex items-start gap-3">
+          <ClipboardList className="mt-0.5 text-fgMuted" size={18} strokeWidth={1.5} />
+          <div className="flex-1">
+            <p className="font-medium text-fg">Training log</p>
+            <p className="mt-1 text-sm leading-relaxed text-fgMuted">
+              {trainingDetails.length === 0
+                ? 'No lifts or walks yet — try “walking 30 min” in the bar or open Move.'
+                : trainingDetails.join(' · ')}
+            </p>
+            <Link className="button-secondary mt-4 inline-flex min-h-11" to="/move">
+              Open Move
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="grid gap-4">
         <div>
           <h2 className="text-xl font-medium text-fg">Today’s diary</h2>
@@ -126,72 +158,6 @@ export function Today() {
         <Link className="text-link inline-flex min-h-11 items-center gap-1.5" to="/eat">
           <Camera size={14} strokeWidth={1.5} /> Log meal on Eat
         </Link>
-      </section>
-
-      <hr className="section-rule" />
-
-      <section className="grid gap-3">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-medium text-fg">Intentions</h2>
-            <p className="mt-1 text-sm text-fgMuted">
-              {doneCount} of {intentions.length} done
-            </p>
-          </div>
-          <Link className="text-link" to="/goals">
-            Add / edit
-          </Link>
-        </div>
-        <div className="grid gap-2">
-          {intentions.slice(0, 5).map((goal) => (
-            <button
-              key={goal.id}
-              type="button"
-              onClick={() => toggleIntention(goal.id)}
-              className={`flex min-h-12 items-center gap-3 rounded-2xl border px-4 text-left transition ${
-                goal.done ? 'border-accent/15 bg-accentSoft' : 'border-border/70 bg-surface/70'
-              }`}
-            >
-              <span
-                className={`grid h-7 w-7 place-items-center rounded-full border text-[10px] ${
-                  goal.done ? 'border-accent bg-accent text-bg' : 'border-border text-transparent'
-                }`}
-                aria-hidden
-              >
-                ✓
-              </span>
-              <p className={`text-sm ${goal.done ? 'text-fg' : 'text-fgMuted'}`}>
-                {goal.done ? `${goal.name} — done` : goal.name}
-              </p>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-dashed border-border/80 bg-mist/40 px-5 py-5">
-        <div className="flex items-start gap-3">
-          <ClipboardList className="mt-0.5 text-fgMuted" size={18} strokeWidth={1.5} />
-          <div className="flex-1">
-            <p className="font-medium text-fg">Training log</p>
-            <p className="mt-1 text-sm leading-relaxed text-fgMuted">
-              {setCount === 0 && todayMovements.length === 0
-                ? 'No lifts or walks yet — try “walking 30 min” in the bar or open Move.'
-                : [
-                    setCount > 0
-                      ? `${setCount} sets · ${openSessions} open session${openSessions === 1 ? '' : 's'}`
-                      : null,
-                    todayMovements.length > 0
-                      ? `${todayMovements.length} movement${todayMovements.length === 1 ? '' : 's'} today`
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
-            </p>
-            <Link className="button-secondary mt-4 inline-flex min-h-11" to="/move">
-              Open Move
-            </Link>
-          </div>
-        </div>
       </section>
     </div>
   );

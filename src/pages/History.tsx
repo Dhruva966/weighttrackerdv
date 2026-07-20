@@ -4,6 +4,7 @@ import { toDayKey } from '../lib/calendar';
 import { mealsForDay, movementsForDay, useDiaryStore } from '../stores/diaryStore';
 import { useWorkoutStore } from '../stores/workoutStore';
 import { InteractiveGymCalendar, MOVE_TIMEZONE } from '../components/InteractiveGymCalendar';
+import type { MuscleGroup } from '../types';
 
 const kindStyles = {
   weight: 'border-accent/15 bg-accentSoft text-fg',
@@ -13,9 +14,28 @@ const kindStyles = {
 } as const;
 
 type HistoryItem = {
+  id: string;
   kind: keyof typeof kindStyles;
   label: string;
   detail: string;
+};
+
+const muscleGroupLabels: Record<MuscleGroup, string> = {
+  chest: 'Chest',
+  back: 'Back',
+  shoulders: 'Shoulders',
+  arms: 'Arms',
+  biceps: 'Biceps',
+  triceps: 'Triceps',
+  legs: 'Legs',
+  quads: 'Quads',
+  hamstrings: 'Hamstrings',
+  glutes: 'Glutes',
+  calves: 'Calves',
+  core: 'Core',
+  forearms: 'Forearms',
+  'full-body': 'Full body',
+  cardio: 'Cardio',
 };
 
 function groupLabel(dayKey: string, todayKey: string): string {
@@ -59,7 +79,7 @@ export function History({
 
   const dayKeys = new Set<string>();
   for (const log of bodyWeightLogs) {
-    dayKeys.add(log.loggedAt);
+    dayKeys.add(toDayKey(log.loggedAt, timeZone));
   }
   if (!gymOnly) {
     for (const meal of meals) {
@@ -78,13 +98,19 @@ export function History({
   const grouped = recentDays
     .map((day) => {
       const items: HistoryItem[] = [];
-      const weight = bodyWeightLogs.find((log) => log.loggedAt === day);
+      const weight = bodyWeightLogs.find((log) => toDayKey(log.loggedAt, timeZone) === day);
       if (weight) {
-        items.push({ kind: 'weight', label: `${weight.weightLb} lb`, detail: 'Body weight' });
+        items.push({
+          id: weight.id,
+          kind: 'weight',
+          label: `${weight.weightLb} lb`,
+          detail: 'Body weight',
+        });
       }
       if (!gymOnly) {
         for (const meal of mealsForDay(meals, day)) {
           items.push({
+            id: meal.id,
             kind: 'meal',
             label: meal.title,
             detail: meal.summary || meal.raw || `${meal.calories} kcal`,
@@ -93,25 +119,31 @@ export function History({
       }
       for (const movement of movementsForDay(movements, day)) {
         items.push({
+          id: movement.id,
           kind: 'walk',
           label: movement.title,
           detail: movement.summary || movement.raw,
         });
       }
-      const daySessions = sessions.filter((session) => toDayKey(session.startedAt, timeZone) === day);
-      for (const session of daySessions) {
-        const sessionSets = sets.filter((setItem) => setItem.sessionId === session.id);
-        const names = [
+      const daySessionIds = new Set(
+        sessions
+          .filter((session) => toDayKey(session.startedAt, timeZone) === day)
+          .map((session) => session.id),
+      );
+      if (daySessionIds.size > 0) {
+        const muscleGroups = [
           ...new Set(
-            sessionSets.map(
-              (setItem) => exercises.find((exercise) => exercise.id === setItem.exerciseId)?.name ?? 'Exercise',
-            ),
+            sets
+              .filter((setItem) => daySessionIds.has(setItem.sessionId))
+              .map((setItem) => exercises.find((exercise) => exercise.id === setItem.exerciseId)?.muscleGroup)
+              .filter((muscleGroup): muscleGroup is MuscleGroup => Boolean(muscleGroup)),
           ),
-        ].slice(0, 3);
+        ].map((muscleGroup) => muscleGroupLabels[muscleGroup]);
         items.push({
+          id: `${day}-workout`,
           kind: 'workout',
           label: 'Workout',
-          detail: names.length ? names.join(' · ') : `${sessionSets.length} sets`,
+          detail: muscleGroups.length ? muscleGroups.join(' · ') : 'Open to keep logging',
         });
       }
       return { day, dateLabel: groupLabel(day, todayKey), items };
@@ -140,7 +172,7 @@ export function History({
               <h2 className="text-xs font-medium uppercase tracking-[0.12em] text-fgMuted">{group.dateLabel}</h2>
               {group.items.map((item) => (
                 <article
-                  key={`${group.day}-${item.kind}-${item.label}-${item.detail}`}
+                  key={`${group.day}-${item.kind}-${item.id}`}
                   className={`rounded-2xl border px-4 py-3.5 ${kindStyles[item.kind]}`}
                 >
                   <div className="flex items-baseline justify-between gap-3">

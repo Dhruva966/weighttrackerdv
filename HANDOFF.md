@@ -61,7 +61,7 @@ Removed: blind `tendGold()` +1 (also fired on meal draft / “open Move”).
 | Gym calendar map | `src/lib/calendar.ts` (`DayActivity`, `getDayWorkoutBundle`, `calendarDayToStartedAt`) |
 | Interactive gym calendar UI | `src/components/InteractiveGymCalendar.tsx` + `WorkoutCalendar` + `DayWorkoutPanel` |
 | NL parsers | `src/lib/meal-from-text.ts`, `src/lib/movement-from-text.ts`, `src/lib/universal-command.ts` |
-| Exercise NL sets | Two-stage: Supabase `parse-exercise-log` (Anthropic `claude-haiku-4-5` first, Groq fallback) → draft JSON → `commitExerciseLogDraft` in `src/lib/exercise-log-parse.ts`. Key: `ANTHROPIC_API_KEY` in Supabase secrets only (not `VITE_*`). Clean shorthand stays on-device. |
+| Exercise NL sets | Two-stage LLM-to-UI pattern: Supabase `parse-exercise-log` (Anthropic `claude-haiku-4-5` first, Groq fallback) → constrained draft JSON → deterministic `commitExerciseLogDraft` in `src/lib/exercise-log-parse.ts` → UI-ready sets/notes. Key: `ANTHROPIC_API_KEY` in Supabase secrets only (not `VITE_*`). Clean shorthand stays on-device. |
 | Session + search | `src/pages/Session.tsx`, `ExercisePicker.tsx`, `MovementLogger.tsx` |
 | Theme | `tailwind.config.js`, `src/index.css` |
 | ADRs | `decisions/2026-07-14-aloo-gold-diary.md`, `decisions/2026-07-14-context-save.md` |

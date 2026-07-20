@@ -390,7 +390,7 @@ export function summarizeDayWorkout(
     }
   }
 
-  const muscleGroups = MUSCLE_GROUP_ORDER.filter((group) => muscleSet.has(group));
+  const muscleGroups: string[] = MUSCLE_GROUP_ORDER.filter((group) => muscleSet.has(group));
   for (const group of muscleSet) {
     if (!muscleGroups.includes(group)) {
       muscleGroups.push(group);
