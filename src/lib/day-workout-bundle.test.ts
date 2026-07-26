@@ -57,7 +57,6 @@ describe('getDayWorkoutBundle', () => {
 
     expect(bundle).toMatchObject({
       date: '2026-07-10',
-      cardioCalories: 0,
       flags: { hadGym: true, hadPr: false, hadCardio: false },
     });
     expect(bundle?.sessions).toHaveLength(1);
@@ -160,15 +159,17 @@ describe('getDayWorkoutBundle', () => {
           raw: 'stairmaster level 10 for 10 min',
         },
       ],
-      bodyWeightLb: 169,
     });
 
     expect(bundle).not.toBeNull();
     expect(bundle?.date).toBe('2026-07-11');
     expect(bundle?.flags.hadGym).toBe(true);
     expect(bundle?.flags.hadCardio).toBe(true);
-    expect(bundle?.movements[0]?.estimatedCalories).toBe(121);
-    expect(bundle?.cardioCalories).toBe(121);
+    expect(bundle?.movements[0]).toMatchObject({
+      id: 'move-1',
+      kind: 'stairmaster',
+      durationMin: 10,
+    });
 
     expect(
       getDayWorkoutBundle('2026-07-12', {
@@ -192,7 +193,6 @@ describe('getDayWorkoutBundle', () => {
             raw: 'stairmaster level 10 for 10 min',
           },
         ],
-        bodyWeightLb: 169,
       }),
     ).toBeNull();
   });
@@ -213,12 +213,10 @@ describe('getDayWorkoutBundle', () => {
           raw: 'incline walk 20 min',
         },
       ],
-      bodyWeightLb: 169,
     });
 
     expect(bundle?.flags).toEqual({ hadGym: false, hadPr: false, hadCardio: true });
     expect(bundle?.sessions).toEqual([]);
     expect(bundle?.movements).toHaveLength(1);
-    expect(bundle?.cardioCalories).toBeGreaterThan(0);
   });
 });

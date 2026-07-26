@@ -1,6 +1,6 @@
 # Aloo PWA
 
-Mobile-first personal health PWA for **Dhruva** — body weight, food logging, walks/cardio, and gym sessions in one app. Built with Vite + React + TypeScript, Supabase-backed where wired, local-first Zustand for diary/UI, installable from iPhone Safari.
+Mobile-first personal health PWA for **Dhruva** — body weight, walks/cardio, and gym sessions in one app. Food, meal, macro, and calorie logging are archived for a later pass. Built with Vite + React + TypeScript, Supabase-backed where wired, local-first Zustand for diary/UI, installable from iPhone Safari.
 
 **Brand:** Aloo · **Theme:** soft gold + white · **Progress metaphor:** pot of gold that fills with consistency
 
@@ -8,11 +8,9 @@ Mobile-first personal health PWA for **Dhruva** — body weight, food logging, w
 ```mermaid
 flowchart TD
   Bar[Universal text + mic bar] --> Intent{Intent}
-  Intent -->|meal| Confirm[Meal confirm]
   Intent -->|weight| BW[Body weight diary]
   Intent -->|walk| MoveLog[Movement diary]
   Intent -->|lift cue| Move[Move tab / Session]
-  Today[Today] --> Eat[Eat]
   Today --> Move
   Today --> Grow[Grow / pot + lift progress]
   Today --> You[You / settings]
@@ -38,25 +36,25 @@ flowchart TD
 ## Routes
 | Route | Purpose |
 |-------|---------|
-| `/` | Today — weight, meal diary, intentions, pot of gold |
-| `/eat` | Meal logging (also via universal bar) |
+| `/` | Today — weight, training summary, pot of gold |
 | `/move` | Gym home — calendar, day detail, walks secondary |
 | `/grow` | Pot of gold + lift progress charts + gym feed |
 | `/you` | Settings / export |
 | `/session/new`, `/session/:id` | Active workout; NL walks + set logging |
 | `/exercises`, `/exercises/new`, `/exercises/:slug` | Library |
 | `/goals` | Editable daily intentions |
-| `/log` | Redirect → `/eat` |
+| `/log` | Redirect → `/move` |
 | `/history` | Redirect → `/grow` |
 | `/progress`, `/calendar`, `/settings`, `/onboarding` | Redirects (`/calendar` → `/move`) |
 
 ## Local-first diary (not yet Supabase tables)
 Persisted under `aloo-diary-v1` / `aloo-ui-v1`:
 - Body weight logs (seeded ~169 lb for Dhruva)
-- Meals from NL confirm
 - Movements from “walking 30 min”, etc.
 - Intentions (add / toggle / remove)
 - `goldDays` for pot-of-gold growth
+
+Food archive lives under `archive/food/` and is not imported by the active app.
 
 ## Scripts
 | Command | Purpose |
@@ -87,4 +85,4 @@ Persisted under `aloo-diary-v1` / `aloo-ui-v1`:
 | `wiki/README.md` | Long-form notes index |
 
 ## Current Status (Jul 2026)
-Shipped on branch `cursor/mom-first-ui-e6b2` (PR #6): Aloo gold shell, pot of gold, universal NL/voice bar, walks/meals/weight local diary, editable intentions, real lift charts (no synthetic UI series), exercise search flex-row fix. Onboarding stashed. Meals/macros and walks are local; gym sessions sync to Supabase when configured.
+Current active shape: Aloo gold shell, pot of gold, universal NL/voice bar, walks/weight local diary, editable intentions, real lift charts, and gym sessions that sync to Supabase when configured. Food, meal, macro, and calorie UI is archived under `archive/food/`.
