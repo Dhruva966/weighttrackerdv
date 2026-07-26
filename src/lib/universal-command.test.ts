@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { parseUniversalCommand } from './universal-command';
 
 describe('parseUniversalCommand', () => {
-  it('routes meals', () => {
-    expect(parseUniversalCommand('I ate bhagara rice with sarakha kura').intent).toBe('meal');
+  it('leaves food text unrouted while meal logging is archived', () => {
+    expect(parseUniversalCommand('I ate bhagara rice with sarakha kura').intent).toBe('unknown');
   });
 
   it('routes walks and cardio machines', () => {

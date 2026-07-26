@@ -1,6 +1,6 @@
 # Web Subsystem
 
-Purpose: Build the mobile-first React PWA (**Aloo**) for diary-style weight/food/walk logging plus gym sessions, with offline-tolerant gym sync.
+Purpose: Build the mobile-first React PWA (**Aloo**) for diary-style weight/walk logging plus gym sessions, with offline-tolerant gym sync. Food/meal UI is archived under `archive/food/`.
 
 Return to the root instructions before changing shared contracts: [../CLAUDE.md](../CLAUDE.md).
 
@@ -15,7 +15,7 @@ Return to the root instructions before changing shared contracts: [../CLAUDE.md]
 | UI / intentions / goldDays | `../src/stores/uiStore.ts` |
 | Workout store | `../src/stores/workoutStore.ts` |
 | Styles (gold theme) | `../src/index.css`, `../tailwind.config.js` |
-| Pages | `../src/pages/` (Today, Log/Eat/Move, Session, History/Grow, Goals, Settings/You, Library) |
+| Pages | `../src/pages/` (Today, Move, Session, History/Grow, Goals, Settings/You, Library) |
 | Hooks / lib | `../src/hooks/`, `../src/lib/` |
 | Static/PWA assets | `../public/` (manifest name **Aloo**) |
 | Deployment guide | `../DEPLOYMENT.md` |
@@ -63,7 +63,7 @@ if (!slug) return <Navigate to="/exercises" replace />
 ```
 
 ### Design for iPhone Safari first
-Use fixed bottom navigation (**Today · Eat · Move · Grow · You**), safe-area padding, and usable touch targets. Prefer lean CTAs over oversized cards on secondary chrome; keep log-path targets comfortable.
+Use fixed bottom navigation (**Today · Move · Grow · You**), safe-area padding, and usable touch targets. Prefer lean CTAs over oversized cards on secondary chrome; keep log-path targets comfortable.
 ## Forbidden Patterns
 ### Do not animate the log path
 Animations are reserved for delight moments, not repeated input.

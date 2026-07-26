@@ -1,11 +1,11 @@
 import { Mic, Send } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { estimateMealFromText, extractWeightLb } from '../lib/meal-from-text';
 import { parseMovementText } from '../lib/movement-from-text';
 import { isWebSpeechAvailable, listenOnce } from '../lib/speech/web-speech';
 import { syncPotOfGold } from '../lib/sync-gold';
 import { parseUniversalCommand } from '../lib/universal-command';
+import { extractWeightLb } from '../lib/weight-from-text';
 import { useDiaryStore } from '../stores/diaryStore';
 import { useUiStore } from '../stores/uiStore';
 
@@ -14,7 +14,6 @@ export function UniversalCommandBar() {
   const [query, setQuery] = useState('');
   const [listening, setListening] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
-  const setMealDraft = useUiStore((state) => state.setMealDraft);
   const showPreviewNotice = useUiStore((state) => state.showPreviewNotice);
   const upsertBodyWeight = useDiaryStore((state) => state.upsertBodyWeight);
   const addMovement = useDiaryStore((state) => state.addMovement);
@@ -28,7 +27,7 @@ export function UniversalCommandBar() {
     }
 
     setListening(true);
-    setHint('Listening… speak a meal, walk, lift, or weigh-in.');
+    setHint('Listening… speak a walk, lift, or weigh-in.');
     try {
       const transcript = await listenOnce();
       setQuery(transcript);
@@ -43,17 +42,6 @@ export function UniversalCommandBar() {
   function submit(raw: string) {
     const parsed = parseUniversalCommand(raw);
     setHint(parsed.summary);
-
-    if (parsed.intent === 'meal') {
-      setMealDraft({
-        source: 'Universal command (text or voice)',
-        raw: parsed.raw,
-        items: estimateMealFromText(parsed.raw),
-      });
-      navigate('/log/meal/confirm');
-      setQuery('');
-      return;
-    }
 
     if (parsed.intent === 'workout') {
       showPreviewNotice(`${parsed.summary} Opening Move.`);
@@ -128,7 +116,7 @@ export function UniversalCommandBar() {
                 setHint(null);
               }
             }}
-            placeholder="Log anything — meal, walk, lift, weigh-in…"
+            placeholder="Log a walk, lift, or weigh-in…"
           />
         </label>
         <button

@@ -1,5 +1,4 @@
 import { toDayKey } from './calendar';
-import { estimateCardioCalories } from './cardio-calories';
 import type { MovementKind } from './movement-from-text';
 
 export const DAY_WORKOUT_TIMEZONE = 'America/Los_Angeles';
@@ -74,16 +73,12 @@ export type DayWorkoutBundleMovement = {
   summary: string;
   raw: string;
   loggedAt: string;
-  /** Cardio/movement estimate only — never derived from gym lifts. */
-  estimatedCalories: number | null;
 };
 
 export type DayWorkoutBundle = {
   date: string;
   sessions: DayWorkoutBundleSession[];
   movements: DayWorkoutBundleMovement[];
-  /** Sum of movement `estimatedCalories` (cardio section only). */
-  cardioCalories: number;
   flags: {
     hadGym: boolean;
     hadPr: boolean;
@@ -97,8 +92,6 @@ export type GetDayWorkoutBundleInput = {
   sets: DayWorkoutSetInput[];
   exercises: DayWorkoutExerciseInput[];
   movements?: DayWorkoutMovementInput[];
-  /** Latest known body weight (lb) for cardio calorie estimates. */
-  bodyWeightLb?: number | null;
 };
 
 export type GetDayWorkoutBundleOptions = {
@@ -185,38 +178,24 @@ export function getDayWorkoutBundle(
     .filter((movement) => toDayKey(movement.loggedAt, timeZone) === date)
     .slice()
     .sort((a, b) => a.loggedAt.localeCompare(b.loggedAt))
-    .map((movement) => {
-      const estimatedCalories = estimateCardioCalories({
-        kind: movement.kind,
-        durationMin: movement.durationMin,
-        bodyWeightLb: input.bodyWeightLb,
-      });
-      return {
-        id: movement.id,
-        kind: movement.kind,
-        title: movement.title,
-        durationMin: movement.durationMin,
-        summary: movement.summary,
-        raw: movement.raw,
-        loggedAt: movement.loggedAt,
-        estimatedCalories,
-      } satisfies DayWorkoutBundleMovement;
-    });
+    .map((movement) => ({
+      id: movement.id,
+      kind: movement.kind,
+      title: movement.title,
+      durationMin: movement.durationMin,
+      summary: movement.summary,
+      raw: movement.raw,
+      loggedAt: movement.loggedAt,
+    }));
 
   if (sessions.length === 0 && movements.length === 0) {
     return null;
   }
 
-  const cardioCalories = movements.reduce(
-    (total, movement) => total + (movement.estimatedCalories ?? 0),
-    0,
-  );
-
   return {
     date,
     sessions,
     movements,
-    cardioCalories,
     flags: {
       hadGym: sessions.length > 0,
       hadPr: sessions.some((session) => session.prCount > 0),

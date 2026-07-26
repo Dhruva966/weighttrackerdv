@@ -1,6 +1,6 @@
 # Database Subsystem
 
-Purpose: Own Supabase schema, storage, seed data, offline write contracts, and database-side rules for the **Aloo** PWA (gym path). Body weight / meals / walks currently also exist as **local** diary state in `src/stores/diaryStore.ts` — do not assume they are synced until a migration and client sync land.
+Purpose: Own Supabase schema, storage, seed data, offline write contracts, and database-side rules for the **Aloo** PWA (gym path). Body weight / walks currently also exist as **local** diary state in `src/stores/diaryStore.ts` — do not assume they are synced until a migration and client sync land. Food/meal UI is archived under `archive/food/`.
 
 Return to the root instructions before changing shared contracts: [../CLAUDE.md](../CLAUDE.md).
 
@@ -105,4 +105,4 @@ await supabase.from('sets').delete().neq('id', '')
 - Do not store private notes, credentials, or raw upload metadata in public-readable tables or buckets.
 - Do not claim RLS protection exists in MVP until policies are enabled and verified.
 - Do not add a `day_spine` / blank-date table for calendar reconstruction — Move days are derived from `sessions` (+ local movements). Session narrative stays on `sessions.notes`; no `day_notes` or set-notes columns unless a later migration explicitly adds them.
-- Do not invent per-lift calorie burn in schema or sync payloads; cardio kcal estimates are client-only (`src/lib/cardio-calories.ts`) over local movement logs.
+- Do not invent per-lift or movement calorie burn in schema or sync payloads while calorie tracking is archived.

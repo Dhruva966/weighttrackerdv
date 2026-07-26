@@ -1,7 +1,7 @@
 # Aloo (Weight Tracker PWA)
 
 ## What This Is
-**Aloo** is a single-user, mobile-first PWA for owner Dhruva: body weight, food, walks/cardio, and gym logging. Soft gold + white chrome; a pot of gold grows with consistency (`goldDays`). Lose It–inspired diary + universal text/voice bar. Supabase backs gym data; weight/meals/walks are local-first Zustand until synced. Works from iPhone Safari / PWA; Capacitor later.
+**Aloo** is a single-user, mobile-first PWA for owner Dhruva: body weight, walks/cardio, and gym logging. Soft gold + white chrome; a pot of gold grows with consistency (`goldDays`). Food, meal, macro, and calorie UI is archived under `archive/food/` for a later pass. Supabase backs gym data; weight/walks are local-first Zustand until synced. Works from iPhone Safari / PWA; Capacitor later.
 
 ## Tech Stack
 | Layer | Technology |
@@ -31,7 +31,7 @@
 |   |-- hooks/                   # React Query and app state hooks.
 |   |-- stores/                  # Zustand stores for PR events and UI preferences.
 |   |-- components/              # App shell, exercise cards, set logger, rest timer, charts, badges.
-|   `-- pages/                   # Today, Eat/Move (Log), Session, Library, Grow/History, Goals, You/Settings.
+|   `-- pages/                   # Today, Move, Session, Library, Grow/History, Goals, You/Settings.
 |-- public/                      # PWA manifest, icons, body-map SVG, static assets.
 |-- supabase/migrations/         # Planned database migrations. Do not hand-edit applied migrations.
 |-- scripts/                     # Planned seed, image backfill, and board import utilities.
@@ -62,7 +62,7 @@ Escalate only when the lower tier fails with a concrete reasoning gap. Keep the 
 | App shell and router | `src/App.tsx` |
 | Universal NL + mic bar | `src/components/UniversalCommandBar.tsx` |
 | Pot of gold | `src/components/PotOfGold.tsx` |
-| Diary (weight/meals/walks) | `src/stores/diaryStore.ts` |
+| Diary (weight/walks) | `src/stores/diaryStore.ts` |
 | UI prefs / intentions / goldDays | `src/stores/uiStore.ts` |
 | Supabase client | `src/lib/supabase.ts` |
 | Single-user constant | `src/lib/user.ts` |
@@ -152,7 +152,7 @@ Parallel dispatch: use only for independent files with no shared state. Sequenti
 ### Adding a route
 1. Add the page under `src/pages/`.
 2. Register the route in `src/App.tsx`.
-3. Add navigation only if it belongs in the five-tab shell: **Today, Eat, Move, Grow, You**.
+3. Add navigation only if it belongs in the four-tab shell: **Today, Move, Grow, You**.
 4. Use route params for detail pages: `/session/:id`, `/exercises/:slug`, `/history/:sessionId`.
 5. Prefer routing legacy paths (`/log`, `/progress`, `/history`, `/settings`) to the current IA rather than resurrecting old tabs.
 6. Add route tests for redirect behavior and empty states.

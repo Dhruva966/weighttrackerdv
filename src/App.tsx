@@ -1,4 +1,4 @@
-import { Dumbbell, Home, Sparkles, User, Utensils } from 'lucide-react';
+import { Dumbbell, Home, Sparkles, User } from 'lucide-react';
 import { useEffect } from 'react';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { LiftProgress } from './components/LiftProgress';
@@ -15,8 +15,6 @@ import { ExerciseLibrary } from './pages/ExerciseLibrary';
 import { Goals } from './pages/Goals';
 import { History } from './pages/History';
 import { HistorySession } from './pages/HistorySession';
-import { Log } from './pages/Log';
-import { MealConfirm } from './pages/MealConfirm';
 import { Move } from './pages/Move';
 import { Session } from './pages/Session';
 import { SettingsPage } from './pages/Settings';
@@ -61,28 +59,14 @@ function GrowPage() {
   );
 }
 
-function EatPage() {
-  return (
-    <div className="grid animate-rise gap-4">
-      <div>
-        <h1 className="page-title">Eat</h1>
-        <p className="page-lead mt-3">Log food in your words — type or voice in the bar above.</p>
-      </div>
-      <Log forcedType="meal" />
-    </div>
-  );
-}
-
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Today />} />
-      <Route path="/eat" element={<EatPage />} />
       <Route path="/move" element={<Move />} />
       <Route path="/grow" element={<GrowPage />} />
       <Route path="/you" element={<SettingsPage />} />
-      <Route path="/log" element={<Navigate to="/eat" replace />} />
-      <Route path="/log/meal/confirm" element={<MealConfirm />} />
+      <Route path="/log" element={<Navigate to="/move" replace />} />
       <Route path="/history" element={<Navigate to="/grow" replace />} />
       <Route path="/history/sessions" element={<WorkoutHistory />} />
       <Route path="/history/:sessionId" element={<HistorySession />} />
@@ -130,7 +114,6 @@ export function App() {
           { to: '/', label: 'Today', icon: Home },
           { to: '/move', label: 'Move', icon: Dumbbell },
           { to: '/grow', label: 'Grow', icon: Sparkles },
-          { to: '/eat', label: 'Eat', icon: Utensils },
           { to: '/you', label: 'You', icon: User },
         ]}
       />

@@ -1,4 +1,4 @@
-export type CommandIntent = 'meal' | 'workout' | 'walk' | 'weight' | 'unknown';
+export type CommandIntent = 'workout' | 'walk' | 'weight' | 'unknown';
 
 export type ParsedCommand = {
   intent: CommandIntent;
@@ -12,7 +12,7 @@ export function parseUniversalCommand(rawInput: string): ParsedCommand {
   const q = raw.toLowerCase();
 
   if (!raw) {
-    return { intent: 'unknown', summary: 'Say or type a meal, walk, lift, or weigh-in.', raw };
+    return { intent: 'unknown', summary: 'Say or type a walk, lift, or weigh-in.', raw };
   }
 
   if (/\b(weigh|weighed|weight|lb|lbs|kg)\b/.test(q) && /\d/.test(q)) {
@@ -34,13 +34,9 @@ export function parseUniversalCommand(rawInput: string): ParsedCommand {
     return { intent: 'workout', summary: `Lift / session noted: “${raw}”`, raw };
   }
 
-  if (/\b(ate|eat|had|meal|rice|roti|dal|chai|sandwich|idli|calories|protein|katori|thali)\b/.test(q)) {
-    return { intent: 'meal', summary: `Meal noted: “${raw}”`, raw };
-  }
-
   return {
     intent: 'unknown',
-    summary: `Heard you — add a hint like “ate…”, “walked…”, or “weighed…” so we know where it belongs.`,
+    summary: `Heard you — add a hint like “walked…”, “lifted…”, or “weighed…” so we know where it belongs.`,
     raw,
   };
 }

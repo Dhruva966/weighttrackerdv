@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom';
 import { isBoardBaselineSession } from '../data/catalog';
 import { toDayKey } from '../lib/calendar';
-import { mealsForDay, movementsForDay, useDiaryStore } from '../stores/diaryStore';
+import { movementsForDay, useDiaryStore } from '../stores/diaryStore';
 import { useWorkoutStore } from '../stores/workoutStore';
 import { InteractiveGymCalendar, MOVE_TIMEZONE } from '../components/InteractiveGymCalendar';
 import type { MuscleGroup } from '../types';
 
 const kindStyles = {
   weight: 'border-accent/15 bg-accentSoft text-fg',
-  meal: 'border-border/70 bg-surface/90 text-fg',
   workout: 'border-border/60 bg-mist/50 text-fgMuted',
   walk: 'border-accent/10 bg-mist/60 text-fg',
 } as const;
@@ -62,7 +61,7 @@ export function History({
 }: {
   compact?: boolean;
   showCalendar?: boolean;
-  /** When true, skip meal chips (Grow keeps Eat tucked). */
+  /** When true, show only gym sessions and hide weight/movement context. */
   gymOnly?: boolean;
 }) {
   const sessions = useWorkoutStore((state) =>
@@ -71,23 +70,19 @@ export function History({
   const sets = useWorkoutStore((state) => state.sets);
   const exercises = useWorkoutStore((state) => state.exercises);
   const bodyWeightLogs = useDiaryStore((state) => state.bodyWeightLogs);
-  const meals = useDiaryStore((state) => state.meals);
   const movements = useDiaryStore((state) => state.movements);
 
   const timeZone = MOVE_TIMEZONE;
   const todayKey = toDayKey(new Date(), timeZone);
 
   const dayKeys = new Set<string>();
-  for (const log of bodyWeightLogs) {
-    dayKeys.add(toDayKey(log.loggedAt, timeZone));
-  }
   if (!gymOnly) {
-    for (const meal of meals) {
-      dayKeys.add(toDayKey(meal.loggedAt, timeZone));
+    for (const log of bodyWeightLogs) {
+      dayKeys.add(toDayKey(log.loggedAt, timeZone));
     }
-  }
-  for (const movement of movements) {
-    dayKeys.add(toDayKey(movement.loggedAt, timeZone));
+    for (const movement of movements) {
+      dayKeys.add(toDayKey(movement.loggedAt, timeZone));
+    }
   }
   for (const session of sessions) {
     dayKeys.add(toDayKey(session.startedAt, timeZone));
@@ -99,7 +94,7 @@ export function History({
     .map((day) => {
       const items: HistoryItem[] = [];
       const weight = bodyWeightLogs.find((log) => toDayKey(log.loggedAt, timeZone) === day);
-      if (weight) {
+      if (!gymOnly && weight) {
         items.push({
           id: weight.id,
           kind: 'weight',
@@ -108,22 +103,14 @@ export function History({
         });
       }
       if (!gymOnly) {
-        for (const meal of mealsForDay(meals, day)) {
+        for (const movement of movementsForDay(movements, day)) {
           items.push({
-            id: meal.id,
-            kind: 'meal',
-            label: meal.title,
-            detail: meal.summary || meal.raw || `${meal.calories} kcal`,
+            id: movement.id,
+            kind: 'walk',
+            label: movement.title,
+            detail: movement.summary || movement.raw,
           });
         }
-      }
-      for (const movement of movementsForDay(movements, day)) {
-        items.push({
-          id: movement.id,
-          kind: 'walk',
-          label: movement.title,
-          detail: movement.summary || movement.raw,
-        });
       }
       const daySessionIds = new Set(
         sessions
@@ -156,7 +143,7 @@ export function History({
         <div>
           <h1 className="page-title">This week</h1>
           <p className="page-lead mt-3">
-            Weight, meals, and movement from your real logs — no synthetic filler.
+            Weight, movement, and workouts from your real logs — no synthetic filler.
           </p>
         </div>
       )}

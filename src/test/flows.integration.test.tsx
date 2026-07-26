@@ -44,9 +44,7 @@ function resetStores() {
   usePrStore.getState().clearPr();
   useDiaryStore.setState({
     bodyWeightLogs: [{ id: 'bw-seed-dhruva', loggedAt: '2026-07-13', weightLb: 169 }],
-    meals: [],
     movements: [],
-    calorieTarget: 2400,
   });
   useUiStore.setState({
     onboardingComplete: true,
@@ -85,7 +83,7 @@ describe('app shell', () => {
     expect(screen.getByRole('heading', { name: /your pot of gold is filling/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /body weight/i })).toBeInTheDocument();
     expect(screen.getByText('169')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/log anything/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/walk, lift, or weigh-in/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /speak to log/i })).toBeInTheDocument();
   });
 
@@ -96,11 +94,12 @@ describe('app shell', () => {
     expect(screen.queryByText(/sets today/i)).not.toBeInTheDocument();
   });
 
-  it('shows Training log above Today diary and omits Intentions on Today', () => {
+  it('shows Training log on Today and omits food diary and Intentions', () => {
     renderApp('/');
 
     const mainText = screen.getByRole('main').textContent ?? '';
-    expect(mainText.indexOf('Training log')).toBeLessThan(mainText.indexOf('Today’s diary'));
+    expect(mainText).toContain('Training log');
+    expect(mainText).not.toMatch(/today’s diary|kcal|calorie|meal|eat/i);
     expect(screen.queryByRole('heading', { name: /^Intentions$/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/Morning weigh-in/i)).not.toBeInTheDocument();
   });
@@ -122,31 +121,29 @@ describe('app shell', () => {
     expect(screen.getByText(/1 open workout/i)).toBeInTheDocument();
   });
 
-  it('navigates Eat Move Grow tabs', async () => {
+  it('navigates Move Grow You tabs without an Eat tab', async () => {
     renderApp('/');
-    clickBottomNav(/^eat$/i);
-    await waitFor(() => expect(screen.getByRole('heading', { name: /^eat$/i })).toBeInTheDocument());
+    expect(within(screen.getByRole('navigation')).queryByRole('link', { name: /^eat$/i })).toBeNull();
 
     clickBottomNav(/^move$/i);
     await waitFor(() => expect(screen.getByRole('heading', { name: /^move$/i })).toBeInTheDocument());
 
     clickBottomNav(/^grow$/i);
     await waitFor(() => expect(screen.getByRole('heading', { name: /your pot of gold/i })).toBeInTheDocument());
+
+    clickBottomNav(/^you$/i);
+    await waitFor(() => expect(screen.getByRole('heading', { name: /^you$/i })).toBeInTheDocument());
   });
 
-  it('routes meal text from the universal bar into confirm', async () => {
+  it('does not route food text from the universal bar while meal logging is archived', async () => {
     renderApp('/');
-    fireEvent.change(screen.getByPlaceholderText(/log anything/i), {
+    fireEvent.change(screen.getByPlaceholderText(/walk, lift, or weigh-in/i), {
       target: { value: 'I ate a sandwich about 600 calories' },
     });
     fireEvent.click(screen.getByRole('button', { name: /submit log/i }));
-    await waitFor(() =>
-      expect(screen.getByRole('heading', { name: /does this feel right/i })).toBeInTheDocument(),
-    );
-    expect(
-      within(screen.getByRole('main')).getByText(/I ate a sandwich about 600 calories/),
-    ).toBeInTheDocument();
-    expect(within(screen.getByRole('main')).getAllByText(/600 kcal/i).length).toBeGreaterThan(0);
+    await waitFor(() => expect(screen.getAllByText(/add a hint like/i).length).toBeGreaterThan(0));
+    expect(screen.queryByRole('heading', { name: /does this feel right/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/600 kcal/i)).not.toBeInTheDocument();
   });
 });
 
@@ -232,9 +229,7 @@ describe('history day rollups', () => {
     resetStores();
     useDiaryStore.setState({
       bodyWeightLogs: [],
-      meals: [],
       movements: [],
-      calorieTarget: 2400,
     });
   });
 
@@ -288,9 +283,7 @@ describe('history day rollups', () => {
           weightLb: 170,
         },
       ],
-      meals: [],
       movements: [],
-      calorieTarget: 2400,
     });
 
     render(
@@ -363,10 +356,10 @@ describe('goals and settings', () => {
     );
 
     fireEvent.change(screen.getByPlaceholderText(/add an intention/i), {
-      target: { value: 'Hit protein target' },
+      target: { value: 'Stretch tonight' },
     });
     fireEvent.click(screen.getByRole('button', { name: /^add$/i }));
-    expect(useUiStore.getState().intentions.some((item) => item.name === 'Hit protein target')).toBe(
+    expect(useUiStore.getState().intentions.some((item) => item.name === 'Stretch tonight')).toBe(
       true,
     );
   });

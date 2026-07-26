@@ -1,4 +1,4 @@
-import { Camera, ClipboardList, Scale, Utensils } from 'lucide-react';
+import { ClipboardList, Scale } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EncouragementLine } from '../components/EncouragementLine';
 import { PotOfGold } from '../components/PotOfGold';
@@ -7,39 +7,24 @@ import { toDayKey } from '../lib/calendar';
 import {
   getBodyWeightDelta,
   getLatestBodyWeight,
-  mealsForDay,
   movementsForDay,
-  sumMacros,
   useDiaryStore,
 } from '../stores/diaryStore';
 import { useUiStore } from '../stores/uiStore';
 import { useWorkoutStore } from '../stores/workoutStore';
-
-function formatTime(iso: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: 'America/Los_Angeles',
-  }).format(new Date(iso));
-}
 
 export function Today() {
   const preferredName = useUiStore((state) => state.preferredName);
   const goldDays = useUiStore((state) => state.goldDays);
 
   const bodyWeightLogs = useDiaryStore((state) => state.bodyWeightLogs);
-  const meals = useDiaryStore((state) => state.meals);
   const movements = useDiaryStore((state) => state.movements);
-  const calorieTarget = useDiaryStore((state) => state.calorieTarget);
   const sessions = useWorkoutStore((state) => state.sessions);
   const sets = useWorkoutStore((state) => state.sets);
 
   const latestWeight = getLatestBodyWeight(bodyWeightLogs);
   const weightDelta = getBodyWeightDelta(bodyWeightLogs);
-  const todayMeals = mealsForDay(meals);
   const todayMovements = movementsForDay(movements);
-  const macros = sumMacros(todayMeals);
-  const remaining = calorieTarget - macros.calories;
   const todayKey = toDayKey(new Date(), 'America/Los_Angeles');
   const todaySessions = sessions.filter(
     (session) =>
@@ -72,10 +57,6 @@ export function Today() {
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Link className="button-primary min-h-11" to="/move">
               Open Move
-            </Link>
-            <Link className="text-link inline-flex min-h-11 items-center gap-1.5" to="/eat">
-              <Utensils size={14} strokeWidth={1.5} className="block" />
-              Eat
             </Link>
           </div>
         </div>
@@ -126,38 +107,6 @@ export function Today() {
             </Link>
           </div>
         </div>
-      </section>
-
-      <section className="grid gap-4">
-        <div>
-          <h2 className="text-xl font-medium text-fg">Today’s diary</h2>
-          <p className="mt-1 text-sm leading-relaxed text-fgMuted">
-            {macros.calories} of {calorieTarget} kcal · {remaining} left · protein {macros.proteinG}g
-          </p>
-        </div>
-
-        {todayMeals.length === 0 ? (
-          <p className="border-y border-border/80 py-6 text-sm leading-relaxed text-fgMuted">
-            No meals logged yet. Type or speak something like “ate a sandwich, 600 calories, 40g protein.”
-          </p>
-        ) : (
-          <div className="grid gap-0 divide-y divide-border/80 border-y border-border/80">
-            {todayMeals.map((meal) => (
-              <article key={meal.id} className="py-3.5">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="font-medium text-fg">{meal.title}</p>
-                  <p className="tabular text-sm text-fgMuted">{meal.calories || '—'} kcal</p>
-                </div>
-                <p className="mt-1 text-sm leading-relaxed text-fgMuted">{meal.summary || meal.raw}</p>
-                <p className="mt-1 text-xs text-fgMuted/80">{formatTime(meal.loggedAt)}</p>
-              </article>
-            ))}
-          </div>
-        )}
-
-        <Link className="text-link inline-flex min-h-11 items-center gap-1.5" to="/eat">
-          <Camera size={14} strokeWidth={1.5} /> Log meal on Eat
-        </Link>
       </section>
     </div>
   );

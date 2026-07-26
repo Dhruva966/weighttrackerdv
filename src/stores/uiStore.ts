@@ -1,16 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { MealItemEstimate } from '../lib/meal-from-text';
 
 export type Intention = { id: string; name: string; done: boolean };
 
-export type MealDraftPreview = {
-  source: string;
-  raw: string;
-  items: MealItemEstimate[];
-};
-
-type Focus = 'meals' | 'weight' | 'both';
+type Focus = 'weight' | 'training' | 'both';
 
 type UiState = {
   unit: 'lb' | 'kg';
@@ -20,11 +13,10 @@ type UiState = {
   preferredName: string;
   focus: Focus;
   intentions: Intention[];
-  mealDraft: MealDraftPreview;
   previewNotice: string | null;
   /**
    * Compounding consistency days for Pot of Gold (0–21).
-   * Recomputed by `syncPotOfGold` from weigh-ins, walks, and gym days — not meals.
+   * Recomputed by `syncPotOfGold` from weigh-ins, walks, and gym days.
    */
   goldDays: number;
   setUnit: (unit: 'lb' | 'kg') => void;
@@ -34,8 +26,6 @@ type UiState = {
   toggleIntention: (id: string) => void;
   addIntention: (name: string) => Intention | null;
   removeIntention: (id: string) => void;
-  setMealDraft: (draft: Partial<MealDraftPreview> & { source: string; raw: string }) => void;
-  clearMealDraft: () => void;
   showPreviewNotice: (message: string) => void;
   clearPreviewNotice: () => void;
   setGoldDays: (days: number) => void;
@@ -47,12 +37,6 @@ const defaultIntentions: Intention[] = [
   { id: 'g3', name: 'Better than yesterday', done: false },
 ];
 
-const emptyDraft: MealDraftPreview = {
-  source: 'Universal command',
-  raw: '',
-  items: [],
-};
-
 export const useUiStore = create<UiState>()(
   persist(
     (set) => ({
@@ -62,7 +46,6 @@ export const useUiStore = create<UiState>()(
       preferredName: 'Dhruva',
       focus: 'both',
       intentions: defaultIntentions,
-      mealDraft: emptyDraft,
       previewNotice: null,
       goldDays: 0,
       setUnit: (unit) => set({ unit }),
@@ -102,15 +85,6 @@ export const useUiStore = create<UiState>()(
         set((state) => ({
           intentions: state.intentions.filter((item) => item.id !== id),
         })),
-      setMealDraft: (draft) =>
-        set((state) => ({
-          mealDraft: {
-            source: draft.source,
-            raw: draft.raw,
-            items: draft.items ?? state.mealDraft.items,
-          },
-        })),
-      clearMealDraft: () => set({ mealDraft: emptyDraft }),
       showPreviewNotice: (message) => set({ previewNotice: message }),
       clearPreviewNotice: () => set({ previewNotice: null }),
       setGoldDays: (days) =>
