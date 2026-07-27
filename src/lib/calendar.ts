@@ -1,3 +1,5 @@
+import { getDeviceTimeZone } from './local-day';
+
 export type CalendarSessionInput = {
   id: string;
   startedAt: string;
@@ -130,7 +132,7 @@ export function toDayKey(value: string | Date, timeZone: string): string {
 /** ISO instant for a calendar day in `timeZone` (today → now; otherwise ~local noon). */
 export function calendarDayToStartedAt(
   dayKey: string,
-  timeZone = 'America/Los_Angeles',
+  timeZone = getDeviceTimeZone(),
   now = new Date(),
 ): string {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dayKey)) {
@@ -170,7 +172,7 @@ export function buildSessionDayMap(
   sets: CalendarSetInput[],
   options: CalendarOptions = {},
 ): Map<string, DayActivity> {
-  const timeZone = options.timeZone ?? 'America/Los_Angeles';
+  const timeZone = options.timeZone ?? getDeviceTimeZone();
   const activityByDay = new Map<string, DayActivity>();
 
   for (const session of sessions) {
@@ -228,7 +230,7 @@ export function buildMonthGrid(
   activityByDay: Map<string, DayActivity>,
   options: CalendarOptions = {},
 ): CalendarCell[] {
-  const timeZone = options.timeZone ?? 'America/Los_Angeles';
+  const timeZone = options.timeZone ?? getDeviceTimeZone();
   const today = options.today ?? toDayKey(new Date(), timeZone);
   const monthPrefix = `${year}-${String(month).padStart(2, '0')}`;
   const firstDate = `${monthPrefix}-01`;
@@ -302,7 +304,7 @@ export function getDayWorkoutBundle(
   sets: DayWorkoutSetInput[],
   options: CalendarOptions = {},
 ): DayWorkoutBundle {
-  const timeZone = options.timeZone ?? 'America/Los_Angeles';
+  const timeZone = options.timeZone ?? getDeviceTimeZone();
   const activityByDay = buildSessionDayMap(sessions, sets, options);
 
   const daySessions = sessions
@@ -364,7 +366,7 @@ export function summarizeDayWorkout(
   exercises: DayWorkoutExerciseRef[],
   options: CalendarOptions = {},
 ): DayWorkoutSummary | null {
-  const timeZone = options.timeZone ?? 'America/Los_Angeles';
+  const timeZone = options.timeZone ?? getDeviceTimeZone();
   const daySessions = sessions
     .filter((session) => toDayKey(session.startedAt, timeZone) === date)
     .slice()
@@ -413,7 +415,7 @@ export function findDaySession(
   sessions: DayWorkoutSessionInput[],
   options: CalendarOptions = {},
 ): DayWorkoutSessionInput | undefined {
-  const timeZone = options.timeZone ?? 'America/Los_Angeles';
+  const timeZone = options.timeZone ?? getDeviceTimeZone();
   const daySessions = sessions
     .filter((session) => toDayKey(session.startedAt, timeZone) === date)
     .slice()

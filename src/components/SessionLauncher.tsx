@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { calendarDayToStartedAt, findDaySession, toDayKey } from '../lib/calendar';
+import { getDeviceTimeZone } from '../lib/local-day';
 import { useWorkoutStore } from '../stores/workoutStore';
 
-const MOVE_TIMEZONE = 'America/Los_Angeles';
+const MOVE_TIMEZONE = getDeviceTimeZone();
 
 export function SessionLauncher() {
   const createSession = useWorkoutStore((state) => state.createSession);

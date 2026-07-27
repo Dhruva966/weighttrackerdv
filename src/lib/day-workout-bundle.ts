@@ -1,7 +1,8 @@
 import { toDayKey } from './calendar';
+import { getDeviceTimeZone } from './local-day';
 import type { MovementKind } from './movement-from-text';
 
-export const DAY_WORKOUT_TIMEZONE = 'America/Los_Angeles';
+export const DAY_WORKOUT_TIMEZONE = getDeviceTimeZone();
 
 export type DayWorkoutSessionInput = {
   id: string;
@@ -156,7 +157,7 @@ function buildSessionBundle(
  * Returns `null` when the day has no gym sessions and no movements
  * (empty calendar cells stay blank — no day spine rows).
  *
- * Day keys use America/Los_Angeles by default. Any session that started that
+ * Day keys use the device's local timezone by default. Any session that started that
  * day counts as gym (open or soft-ended). Session notes come from
  * `sessions.notes` (no day_notes table).
  */

@@ -1,3 +1,5 @@
+import { getDeviceTimeZone } from './local-day';
+
 export type StreakOptions = {
   today?: string;
   timeZone?: string;
@@ -31,7 +33,7 @@ function addDays(day: string, amount: number): string {
 }
 
 export function calculateStreaks(sessionStarts: string[], options: StreakOptions = {}): StreakSummary {
-  const timeZone = options.timeZone ?? 'America/Los_Angeles';
+  const timeZone = options.timeZone ?? getDeviceTimeZone();
   const today = options.today ?? toDayKey(new Date().toISOString(), timeZone);
   const days = [...new Set(sessionStarts.map((start) => toDayKey(start, timeZone)))].sort();
 

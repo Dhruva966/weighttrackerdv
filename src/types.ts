@@ -41,6 +41,10 @@ export type WorkoutSession = {
   endedAt?: string;
   notes?: string;
   plannedExerciseIds?: string[];
+  /** Calendar day (YYYY-MM-DD) this session belongs to, in `timezone`. */
+  localDate?: string;
+  /** IANA timezone the session was created in (device-local at creation time). */
+  timezone?: string;
 };
 
 export type LoggedSet = {
