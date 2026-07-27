@@ -9,7 +9,7 @@ Use this file when one agent hands work to another. Keep it short, contract-focu
 **Today · Move · Grow · You**
 `/` Today · `/move` · `/grow` · `/you` · `/session/:id` · `/exercises*` · `/goals`
 Legacy redirects: `/log`→`/move`, `/history`→`/grow`, `/progress`→`/grow`, `/settings`→`/you`, `/onboarding`→`/`, `/calendar`→`/move`
-**Move (`/move`):** primary gym home — `InteractiveGymCalendar` + day panel (LA datetimes) + walks secondary. Empty day → `/session/new?date=YYYY-MM-DD` (backdates `startedAt` via `calendarDayToStartedAt`). Session Done → `/move`.  
+**Move (`/move`):** primary gym home — always-visible resume-banner/start-empty-workout (`TodayWorkoutBanner`) above `InteractiveGymCalendar` + day panel (device-local datetimes) + walks secondary. Empty day → `/session/new?date=YYYY-MM-DD` (backdates `startedAt` via `calendarDayToStartedAt`). Session Done → `/move`.  
 **Grow (`/grow`):** pot + `LiftProgress` (`buildLiftProgress` on real `LoggedSet` rows) + gym-only recent feed. Board baseline seed lives in `starterSessions` / `starterSets` (`src/data/catalog.ts`); bump `BOARD_HISTORY_SEED_VERSION` in `workoutStore` to re-merge after a clear. No jagged synthetic UI series.
 
 ## Data contracts
@@ -28,7 +28,11 @@ Legacy redirects: `/log`→`/move`, `/history`→`/grow`, `/progress`→`/grow`,
 | `hydrateFromRemote(remote)` | Pulls exercises/sessions/sets/goals down from Supabase on boot (`src/lib/supabase-hydrate.ts` fetch → `workoutStore.hydrateFromRemote` merge). Remote **only fills gaps** — union by id, local always wins on conflict, safe to call repeatedly. Runs in `useSupabaseBootstrap` after queue drain. Closes the old one-way-up sync gap (new device / cleared storage now recovers real history). |
 
 ### Gym calendar day panel (`src/lib/calendar.ts`)
-UI calendar uses **`getDayWorkoutBundle(date, sessions, sets, { timeZone })`** — gym-only, completed sessions (`endedAt`), volume/PR per session. Powers `DayWorkoutPanel` on Move. Open (unended) sessions for the selected day are passed separately and link to `/session/:id`. Display times use `formatDateTimeInZone(..., 'America/Los_Angeles')`.
+UI calendar uses **`getDayWorkoutBundle(date, sessions, sets, { timeZone })`** — gym-only, completed sessions (`endedAt`), volume/PR per session. Powers `DayWorkoutPanel` on Move. Open (unended) sessions for the selected day are passed separately and link to `/session/:id`. Display times use `formatDateTimeInZone(value)`, default timezone is now device-local (see below), not a literal.
+
+### Timezone (`src/lib/local-day.ts`) — device-local, no longer hardcoded LA
+`getDeviceTimeZone()` (`Intl.DateTimeFormat().resolvedOptions().timeZone`, falls back to `'America/Los_Angeles'` only if that throws) is now the default `timeZone` param everywhere that used to hardcode `'America/Los_Angeles'`: `calendar.ts`, `day-workout-bundle.ts`, `gold.ts`, `streak.ts`, `fmt.ts`, `diaryStore.ts` (which gained a `timeZone` param it never had before), `InteractiveGymCalendar.tsx`'s `MOVE_TIMEZONE`, `SessionLauncher.tsx`, `StreakBadge.tsx`, `Today.tsx`, and `templateStore.ts`'s `MOVE_TIMEZONE`. Sessions now stamp `localDate`/`timezone` on `createSession` (and `reopenSession` preserves them — easy to drop by accident if you ever rewrite either). Tests intentionally still pin `'America/Los_Angeles'` explicitly where they're testing that specific case, alongside new non-LA + DST-transition (2026-03-08 / 2026-11-01) coverage.
+**Known residual limitation, not a regression:** `calendarDayToStartedAt`'s UTC-anchor-hour heuristic was tuned around a US-Pacific-ish offset and is verified for LA/NY/Kolkata but not exhaustively for extreme offsets (e.g. UTC+14). It was equally untested for non-LA zones before this change since the app only ever ran in LA — flag if the owner ever travels somewhere extreme and day-bucketing looks off by one.
 
 ### Move day reconstruction (`src/lib/day-workout-bundle.ts`) — separate helper
 Richer Move-day shape (sessions + movements). **Not** what the calendar panel imports today. Empty days return `null`; LA day keys. Do not mix archived food code into either bundle.
@@ -86,7 +90,6 @@ Removed: blind `tendGold()` +1.
 - Optional freeform custom movement categories beyond the fixed kind list
 - Groq Whisper edge for iPhone installed-PWA STT
 - Rebuild food/meal logging from `archive/food/` when ready
-- `sessions.local_date`/`timezone` columns exist but the app still hardcodes `America/Los_Angeles` in ~10 files — device-local tz swap still to do
 - Templates has no explicit "delete session" UI path — cleaning up a stray test session during this work required a direct Supabase delete + localStorage patch; fine for now since sessions are meant to be day-scoped and reopenable, not deleted, but flag if that assumption changes
 - Exercise PDF/manifest import (Free Exercise DB match, `image_style: 'name-only'` fallback, never Strong's proprietary icons) not yet run — extracted page images sit in `tmp/pdfs/aloo-exercises/extracted-images/` (gitignored, local only)
 
