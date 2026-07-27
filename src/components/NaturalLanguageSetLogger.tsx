@@ -75,6 +75,18 @@ export function NaturalLanguageSetLogger({
 
   return (
     <form className="grid gap-3 border-t border-border pt-3" onSubmit={handleSubmit}>
+      {exercise.setupNotes?.length ? (
+        <ul className="grid gap-1.5">
+          {exercise.setupNotes.map((note) => (
+            <li
+              key={note}
+              className="w-fit rounded-lg border border-accent/20 bg-accentSoft px-2.5 py-1 text-xs font-semibold text-accent"
+            >
+              {note}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <label className="grid gap-2">
         <span className="label">Log in your own words</span>
         <textarea
