@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { calendarDayToStartedAt, findDaySession, toDayKey } from '../lib/calendar';
+import { getDeviceTimeZone } from '../lib/local-day';
 import type { RemoteTemplateSnapshot } from '../lib/supabase-hydrate';
 import {
   deleteSyncedTemplate,
@@ -12,7 +13,7 @@ import { USER_ID } from '../lib/user';
 import type { Template, TemplateExercise } from '../types';
 import { useWorkoutStore } from './workoutStore';
 
-const MOVE_TIMEZONE = 'America/Los_Angeles';
+const MOVE_TIMEZONE = getDeviceTimeZone();
 
 function newId(): string {
   return crypto.randomUUID();

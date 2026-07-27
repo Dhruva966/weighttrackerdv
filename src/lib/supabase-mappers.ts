@@ -31,6 +31,8 @@ type SessionRow = {
   started_at: string;
   ended_at: string | null;
   notes: string | null;
+  local_date: string | null;
+  timezone: string | null;
 };
 
 type SetRow = {
@@ -100,6 +102,8 @@ export function sessionToRow(session: WorkoutSession) {
     started_at: session.startedAt,
     ended_at: session.endedAt ?? null,
     notes: session.notes ?? null,
+    local_date: session.localDate ?? null,
+    timezone: session.timezone ?? null,
   };
 }
 
@@ -178,6 +182,8 @@ export function rowToSession(row: SessionRow): WorkoutSession {
     startedAt: row.started_at,
     endedAt: row.ended_at ?? undefined,
     notes: row.notes ?? undefined,
+    localDate: row.local_date ?? undefined,
+    timezone: row.timezone ?? undefined,
   };
 }
 

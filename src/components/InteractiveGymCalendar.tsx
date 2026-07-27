@@ -9,13 +9,14 @@ import {
   summarizeMonth,
   toDayKey,
 } from '../lib/calendar';
+import { getDeviceTimeZone } from '../lib/local-day';
 import { isBoardBaselineSession } from '../data/catalog';
 import { useWorkoutStore } from '../stores/workoutStore';
 import { DayWorkoutPanel } from './DayWorkoutPanel';
 import { StatCard } from './StatCard';
 import { WorkoutCalendar } from './WorkoutCalendar';
 
-export const MOVE_TIMEZONE = 'America/Los_Angeles';
+export const MOVE_TIMEZONE = getDeviceTimeZone();
 
 function currentMonthParts(timeZone: string): { year: number; month: number } {
   const now = new Date();

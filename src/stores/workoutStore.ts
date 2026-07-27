@@ -6,7 +6,9 @@ import {
   starterGoals,
   starterSets,
 } from '../data/catalog';
+import { toDayKey } from '../lib/calendar';
 import { slugify } from '../lib/fmt';
+import { getDeviceTimeZone } from '../lib/local-day';
 import { formatImportedSessionNotes, parseBrainDump } from '../lib/liftImport';
 import { parseExerciseLogSmart } from '../lib/exercise-log-parse';
 import { isPersonalRecord } from '../lib/pr';
@@ -193,10 +195,14 @@ export const useWorkoutStore = create<WorkoutState>()(
       historyCleared: false,
       boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
       createSession: (options) => {
+        const startedAt = options?.startedAt ?? new Date().toISOString();
+        const timezone = getDeviceTimeZone();
         const session: WorkoutSession = {
           id: newId(),
           userId: USER_ID,
-          startedAt: options?.startedAt ?? new Date().toISOString(),
+          startedAt,
+          localDate: toDayKey(startedAt, timezone),
+          timezone,
         };
         set((state) => ({ sessions: [session, ...state.sessions] }));
         void syncSession(session);
@@ -225,6 +231,8 @@ export const useWorkoutStore = create<WorkoutState>()(
           startedAt: session.startedAt,
           notes: session.notes,
           plannedExerciseIds: session.plannedExerciseIds,
+          localDate: session.localDate,
+          timezone: session.timezone,
         };
         set((state) => ({
           sessions: state.sessions.map((item) => (item.id === sessionId ? reopened : item)),

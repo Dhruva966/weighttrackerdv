@@ -1,6 +1,7 @@
 import CountUp from 'react-countup';
 import { Flame } from 'lucide-react';
 import { isBoardBaselineSession } from '../data/catalog';
+import { getDeviceTimeZone } from '../lib/local-day';
 import { calculateStreaks } from '../lib/streak';
 import { useWorkoutStore } from '../stores/workoutStore';
 
@@ -10,7 +11,7 @@ export function StreakBadge() {
   );
   const streak = calculateStreaks(
     sessions.map((session) => session.startedAt),
-    { timeZone: 'America/Los_Angeles' },
+    { timeZone: getDeviceTimeZone() },
   );
 
   return (

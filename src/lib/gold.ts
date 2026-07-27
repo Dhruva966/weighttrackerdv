@@ -1,7 +1,9 @@
-/** Pot-of-gold consistency: consecutive LA days with a weigh-in, walk, or gym sets. */
+/** Pot-of-gold consistency: consecutive device-local days with a weigh-in, walk, or gym sets. */
+
+import { getDeviceTimeZone } from './local-day';
 
 export const GOLD_CAP = 21;
-export const GOLD_TIME_ZONE = 'America/Los_Angeles';
+export const GOLD_TIME_ZONE = getDeviceTimeZone();
 
 export type GoldOptions = {
   today?: string;
