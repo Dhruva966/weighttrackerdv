@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { fetchRemoteSnapshot } from '../lib/supabase-hydrate';
+import { fetchRemoteSnapshot, fetchTemplateSnapshot } from '../lib/supabase-hydrate';
 import { bootstrapSupabaseSync } from '../lib/supabase-sync';
+import { useTemplateStore } from '../stores/templateStore';
 import { useWorkoutStore } from '../stores/workoutStore';
 
 export function useSupabaseBootstrap() {
@@ -15,10 +16,13 @@ export function useSupabaseBootstrap() {
       // (pull remote down) only after, so a fresh device sees this device's own just-drained writes too.
       let hydrated = false;
       if (result.reachable) {
-        const remote = await fetchRemoteSnapshot();
+        const [remote, remoteTemplates] = await Promise.all([fetchRemoteSnapshot(), fetchTemplateSnapshot()]);
         if (remote) {
           useWorkoutStore.getState().hydrateFromRemote(remote);
           hydrated = true;
+        }
+        if (remoteTemplates) {
+          useTemplateStore.getState().hydrateFromRemote(remoteTemplates);
         }
       }
       if (active) {

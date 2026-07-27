@@ -1,3 +1,4 @@
+import { LayoutList } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MovementLogger } from '../components/MovementLogger';
 import { InteractiveGymCalendar } from '../components/InteractiveGymCalendar';
@@ -5,11 +6,17 @@ import { InteractiveGymCalendar } from '../components/InteractiveGymCalendar';
 export function Move() {
   return (
     <div className="grid animate-rise gap-6">
-      <div>
-        <h1 className="page-title">Move</h1>
-        <p className="page-lead mt-3">
-          Pick a day, see what you logged, and keep training on the calendar.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="page-title">Move</h1>
+          <p className="page-lead mt-3">
+            Pick a day, see what you logged, and keep training on the calendar.
+          </p>
+        </div>
+        <Link className="button-secondary min-h-11 shrink-0 gap-1.5 px-3 text-sm" to="/templates">
+          <LayoutList size={16} strokeWidth={1.75} />
+          Templates
+        </Link>
       </div>
 
       <InteractiveGymCalendar showMonthStats />

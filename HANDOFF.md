@@ -13,6 +13,10 @@ Legacy redirects: `/log`→`/move`, `/history`→`/grow`, `/progress`→`/grow`,
 **Grow (`/grow`):** pot + `LiftProgress` (`buildLiftProgress` on real `LoggedSet` rows) + gym-only recent feed. Board baseline seed lives in `starterSessions` / `starterSets` (`src/data/catalog.ts`); bump `BOARD_HISTORY_SEED_VERSION` in `workoutStore` to re-merge after a clear. No jagged synthetic UI series.
 
 ## Data contracts
+### Templates (Supabase / templateStore) — new
+`useTemplateStore` (`src/stores/templateStore.ts`), persisted key `weight-tracker-templates`. `templates` + `templateExercises` (ordered by `position`), synced the same UUID-gated way as workoutStore. `createTemplate/updateTemplateName/deleteTemplate/duplicateTemplate/setTemplateExercises` (one atomic reconcile: adds/removes/repositions — no separate add/remove/reorder calls). `startWorkoutFromTemplate(templateId)` and the standalone `startWorkoutWithExercises(exerciseIds)` both reuse **today's open session** via `findDaySession`/`calendarDayToStartedAt` (Move is day-centric) and merge into `plannedExerciseIds` rather than creating a second session or clobbering an existing plan. `saveSessionAsTemplate(sessionId, name)` builds a template from a session's logged sets in first-logged order, falling back to `plannedExerciseIds` if nothing's logged yet. Read-only `exampleTemplates` (`src/data/example-templates.ts`, generic Push/Pull/Leg split, not copied from any third-party app) resolve against the live catalog and start a workout via `startWorkoutWithExercises` **without** ever creating a Template record — only an explicit "Save as template" (wired into `Session.tsx`) or `/templates/new` materializes one. UI: `Templates.tsx` (list), `TemplateEditorPage.tsx` (create/edit, shared route component, up/down reorder — no drag-and-drop dependency), `TemplateCard.tsx`, `TemplateMenu.tsx`. Entry point: "Templates" button on `Move.tsx`.
+**Gotcha if you touch `TemplateCard.tsx` again:** the exercise-list line needs `min-w-0` at *every* nested flex/grid level down to the `truncate` `<p>` (card root, the flex row, the text wrapper) — Tailwind's `truncate` silently fails to clip and the card visibly overflows its column if any one level in that chain is missing `min-w-0`. This is the standard CSS grid/flexbox "min-content sizing" gotcha, not specific to this component.
+
 ### Gym (Supabase / workoutStore)
 | Contract | Notes |
 |----------|-------|
@@ -82,8 +86,8 @@ Removed: blind `tendGold()` +1.
 - Optional freeform custom movement categories beyond the fixed kind list
 - Groq Whisper edge for iPhone installed-PWA STT
 - Rebuild food/meal logging from `archive/food/` when ready
-- `templates`/`template_exercises` tables exist but have no store or UI — CRUD, start-from-template, save-session-as-template still to build
 - `sessions.local_date`/`timezone` columns exist but the app still hardcodes `America/Los_Angeles` in ~10 files — device-local tz swap still to do
+- Templates has no explicit "delete session" UI path — cleaning up a stray test session during this work required a direct Supabase delete + localStorage patch; fine for now since sessions are meant to be day-scoped and reopenable, not deleted, but flag if that assumption changes
 - Exercise PDF/manifest import (Free Exercise DB match, `image_style: 'name-only'` fallback, never Strong's proprietary icons) not yet run — extracted page images sit in `tmp/pdfs/aloo-exercises/extracted-images/` (gitignored, local only)
 
 ## Verification

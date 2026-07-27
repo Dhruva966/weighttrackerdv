@@ -66,3 +66,22 @@ export type Goal = {
   achievedAt?: string;
   createdAt: string;
 };
+
+export type Template = {
+  id: string;
+  userId: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TemplateExercise = {
+  id: string;
+  templateId: string;
+  exerciseId: string;
+  position: number;
+  targetSets?: number;
+  targetReps?: number;
+  targetWeightLb?: number;
+  createdAt: string;
+};

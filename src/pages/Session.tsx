@@ -1,10 +1,12 @@
 import { ChevronDown, ChevronUp, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ExercisePicker } from '../components/ExercisePicker';
 import { MovementLogger } from '../components/MovementLogger';
 import { NaturalLanguageSetLogger } from '../components/NaturalLanguageSetLogger';
 import { RestTimer } from '../components/RestTimer';
+import { useTemplateStore } from '../stores/templateStore';
+import { useUiStore } from '../stores/uiStore';
 import { useWorkoutStore } from '../stores/workoutStore';
 import type { Exercise, MuscleGroup } from '../types';
 
@@ -33,8 +35,12 @@ export function Session() {
   const exercises = useWorkoutStore((state) => state.exercises);
   const reopenSession = useWorkoutStore((state) => state.reopenSession);
   const setSessionPlan = useWorkoutStore((state) => state.setSessionPlan);
+  const saveSessionAsTemplate = useTemplateStore((state) => state.saveSessionAsTemplate);
+  const showPreviewNotice = useUiStore((state) => state.showPreviewNotice);
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
   const [lastSetKey, setLastSetKey] = useState('');
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState('');
   const session = sessions.find((item) => item.id === sessionId);
   const sessionSets = sets.filter((setItem) => setItem.sessionId === sessionId);
 
@@ -99,6 +105,20 @@ export function Session() {
     }
   }
 
+  function handleSaveTemplate(event: FormEvent) {
+    event.preventDefault();
+    const name = templateName.trim();
+    if (!name) {
+      return;
+    }
+    const template = saveSessionAsTemplate(session.id, name);
+    if (template) {
+      showPreviewNotice(`Saved "${template.name}" to your templates.`);
+      setTemplateName('');
+      setShowSaveTemplate(false);
+    }
+  }
+
   return (
     <div className="grid gap-4">
       <div className="flex items-start justify-between gap-3">
@@ -113,6 +133,40 @@ export function Session() {
           Done
         </Link>
       </div>
+
+      {plannedExercises.length > 0 ? (
+        <div className="grid gap-2">
+          <button
+            className="text-link min-h-11 self-start text-sm"
+            type="button"
+            onClick={() => setShowSaveTemplate((current) => !current)}
+          >
+            {showSaveTemplate ? 'Cancel' : 'Save as template'}
+          </button>
+          {showSaveTemplate ? (
+            <form className="flex items-center gap-2" onSubmit={handleSaveTemplate}>
+              <label className="min-w-0 flex-1">
+                <span className="sr-only">Template name</span>
+                <input
+                  className="field !h-10 !min-h-0 !rounded-xl px-3 text-sm"
+                  value={templateName}
+                  onChange={(event) => setTemplateName(event.target.value)}
+                  placeholder="e.g. Push Day"
+                  maxLength={60}
+                  autoFocus
+                />
+              </label>
+              <button
+                className="button-primary !min-h-10 px-3 text-sm"
+                type="submit"
+                disabled={!templateName.trim()}
+              >
+                Save
+              </button>
+            </form>
+          ) : null}
+        </div>
+      ) : null}
 
       {sessionSets.length > 0 ? (
         <RestTimer activeKey={lastSetKey || sessionSets.at(-1)?.id || session.id} />

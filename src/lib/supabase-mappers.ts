@@ -1,4 +1,14 @@
-import type { EquipmentKind, Exercise, Goal, ImageStyle, LoggedSet, MuscleGroup, WorkoutSession } from '../types';
+import type {
+  EquipmentKind,
+  Exercise,
+  Goal,
+  ImageStyle,
+  LoggedSet,
+  MuscleGroup,
+  Template,
+  TemplateExercise,
+  WorkoutSession,
+} from '../types';
 
 type ExerciseRow = {
   id: string;
@@ -44,6 +54,25 @@ type GoalRow = {
   target_unit: Goal['targetUnit'] | null;
   achieved: boolean | null;
   achieved_at: string | null;
+  created_at: string;
+};
+
+type TemplateRow = {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type TemplateExerciseRow = {
+  id: string;
+  template_id: string;
+  exercise_id: string;
+  position: number;
+  target_sets: number | null;
+  target_reps: number | null;
+  target_weight_lb: number | string | null;
   created_at: string;
 };
 
@@ -102,6 +131,29 @@ export function goalToRow(goal: Goal) {
   };
 }
 
+export function templateToRow(template: Template) {
+  return {
+    id: template.id,
+    user_id: template.userId,
+    name: template.name,
+    created_at: template.createdAt,
+    updated_at: template.updatedAt,
+  };
+}
+
+export function templateExerciseToRow(templateExercise: TemplateExercise) {
+  return {
+    id: templateExercise.id,
+    template_id: templateExercise.templateId,
+    exercise_id: templateExercise.exerciseId,
+    position: templateExercise.position,
+    target_sets: templateExercise.targetSets ?? null,
+    target_reps: templateExercise.targetReps ?? null,
+    target_weight_lb: templateExercise.targetWeightLb ?? null,
+    created_at: templateExercise.createdAt,
+  };
+}
+
 export function rowToExercise(row: ExerciseRow): Exercise {
   return {
     id: row.id,
@@ -153,6 +205,30 @@ export function rowToGoal(row: GoalRow): Goal {
     targetUnit: row.target_unit ?? undefined,
     achieved: row.achieved ?? false,
     achievedAt: row.achieved_at ?? undefined,
+    createdAt: row.created_at,
+  };
+}
+
+export function rowToTemplate(row: TemplateRow): Template {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    name: row.name,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function rowToTemplateExercise(row: TemplateExerciseRow): TemplateExercise {
+  return {
+    id: row.id,
+    templateId: row.template_id,
+    exerciseId: row.exercise_id,
+    position: row.position,
+    targetSets: row.target_sets ?? undefined,
+    targetReps: row.target_reps ?? undefined,
+    targetWeightLb:
+      row.target_weight_lb === null || row.target_weight_lb === undefined ? undefined : Number(row.target_weight_lb),
     createdAt: row.created_at,
   };
 }
