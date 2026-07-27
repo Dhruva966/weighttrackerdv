@@ -11,6 +11,7 @@ import { formatImportedSessionNotes, parseBrainDump } from '../lib/liftImport';
 import { parseExerciseLogSmart } from '../lib/exercise-log-parse';
 import { isPersonalRecord } from '../lib/pr';
 import { deleteSyncedSet, syncExercise, syncGoal, syncSession, syncSet } from '../lib/supabase-sync';
+import type { RemoteSnapshot } from '../lib/supabase-hydrate';
 import { USER_ID } from '../lib/user';
 import type { EquipmentKind, Exercise, Goal, LoggedSet, MuscleGroup, WorkoutSession } from '../types';
 import { usePrStore } from './prStore';
@@ -55,6 +56,8 @@ type WorkoutState = {
   ) => Promise<{ imported: number; notes: string[] }>;
   clearHistory: () => void;
   toggleGoal: (goalId: string) => void;
+  /** One-way remote-fills-gaps merge. Never overwrites local rows; safe to call repeatedly. */
+  hydrateFromRemote: (remote: RemoteSnapshot) => void;
 };
 
 function newId(): string {
@@ -67,6 +70,17 @@ function mergeById<T extends { id: string }>(required: T[], persisted: T[] | und
     items.set(item.id, item);
   }
   return [...items.values()];
+}
+
+/**
+ * Remote hydration only fills gaps — local always wins on conflict. Local state may hold an
+ * optimistic edit that hasn't finished syncing up yet, so a remote row must never clobber it.
+ * Union-by-id also makes hydration idempotent: replaying the same remote snapshot never duplicates.
+ */
+function unionPreferLocal<T extends { id: string }>(local: T[], remote: T[]): T[] {
+  const localIds = new Set(local.map((item) => item.id));
+  const additions = remote.filter((item) => !localIds.has(item.id));
+  return additions.length > 0 ? [...local, ...additions] : local;
 }
 
 function mergeExercises(required: Exercise[], persisted: Exercise[] | undefined): Exercise[] {
@@ -449,6 +463,14 @@ export const useWorkoutStore = create<WorkoutState>()(
           boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
         });
         usePrStore.getState().clearPr();
+      },
+      hydrateFromRemote: (remote) => {
+        set((state) => ({
+          exercises: unionPreferLocal(state.exercises, remote.exercises),
+          sessions: unionPreferLocal(state.sessions, remote.sessions),
+          sets: unionPreferLocal(state.sets, remote.sets),
+          goals: unionPreferLocal(state.goals, remote.goals),
+        }));
       },
       toggleGoal: (goalId) => {
         const current = get().goals.find((goal) => goal.id === goalId);

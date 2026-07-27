@@ -7,6 +7,7 @@ import {
   starterSets,
 } from '../data/catalog';
 import * as supabaseSync from '../lib/supabase-sync';
+import type { Exercise, Goal, LoggedSet, WorkoutSession } from '../types';
 import { usePrStore } from './prStore';
 import { BOARD_HISTORY_SEED_VERSION, InvalidSetInputError, useWorkoutStore } from './workoutStore';
 
@@ -445,6 +446,99 @@ describe('workoutStore', () => {
       const cleared = useWorkoutStore.getState().goals.find((item) => item.id === goal.id);
       expect(cleared?.achieved).toBe(false);
       expect(cleared?.achievedAt).toBeUndefined();
+    });
+  });
+
+  describe('hydrateFromRemote', () => {
+    function remoteExercise(overrides: Partial<Exercise> = {}): Exercise {
+      return {
+        id: crypto.randomUUID(),
+        slug: 'remote-row',
+        name: 'Remote Row',
+        muscleGroup: 'back',
+        secondaryMuscles: [],
+        equipment: 'cable',
+        instructions: [],
+        imageStyle: 'name-only',
+        source: 'remote',
+        ...overrides,
+      };
+    }
+
+    it('adds remote-only sessions, sets, exercises, and goals not present locally', () => {
+      const remoteSession: WorkoutSession = {
+        id: crypto.randomUUID(),
+        userId: 'user-1',
+        startedAt: '2026-07-01T12:00:00.000Z',
+        endedAt: '2026-07-01T13:00:00.000Z',
+      };
+      const remoteExerciseRow = remoteExercise();
+      const remoteSet: LoggedSet = {
+        id: crypto.randomUUID(),
+        sessionId: remoteSession.id,
+        exerciseId: remoteExerciseRow.id,
+        setNumber: 1,
+        weightLb: 90,
+        reps: 8,
+        isWarmup: false,
+        isPr: false,
+        createdAt: '2026-07-01T12:05:00.000Z',
+      };
+      const remoteGoal: Goal = {
+        id: crypto.randomUUID(),
+        userId: 'user-1',
+        name: 'Remote goal',
+        achieved: false,
+        createdAt: '2026-07-01T00:00:00.000Z',
+      };
+
+      useWorkoutStore.getState().hydrateFromRemote({
+        exercises: [remoteExerciseRow],
+        sessions: [remoteSession],
+        sets: [remoteSet],
+        goals: [remoteGoal],
+      });
+
+      const state = useWorkoutStore.getState();
+      expect(state.exercises.some((item) => item.id === remoteExerciseRow.id)).toBe(true);
+      expect(state.sessions.some((item) => item.id === remoteSession.id)).toBe(true);
+      expect(state.sets.some((item) => item.id === remoteSet.id)).toBe(true);
+      expect(state.goals.some((item) => item.id === remoteGoal.id)).toBe(true);
+    });
+
+    it('keeps the local row when a remote row shares its id (dup-session guard)', () => {
+      const session = useWorkoutStore.getState().createSession();
+      const localVersion = useWorkoutStore.getState().sessions.find((item) => item.id === session.id)!;
+      const conflictingRemote: WorkoutSession = {
+        ...localVersion,
+        notes: 'should not win over local',
+      };
+
+      useWorkoutStore.getState().hydrateFromRemote({
+        exercises: [],
+        sessions: [conflictingRemote],
+        sets: [],
+        goals: [],
+      });
+
+      const state = useWorkoutStore.getState();
+      expect(state.sessions.filter((item) => item.id === session.id)).toHaveLength(1);
+      expect(state.sessions.find((item) => item.id === session.id)?.notes).toBe(localVersion.notes);
+    });
+
+    it('is idempotent across repeated hydration (reload safe)', () => {
+      const remoteExerciseRow = remoteExercise();
+      const remote = { exercises: [remoteExerciseRow], sessions: [], sets: [], goals: [] };
+
+      useWorkoutStore.getState().hydrateFromRemote(remote);
+      const afterFirst = useWorkoutStore.getState().exercises.length;
+      useWorkoutStore.getState().hydrateFromRemote(remote);
+      const afterSecond = useWorkoutStore.getState().exercises.length;
+
+      expect(afterSecond).toBe(afterFirst);
+      expect(
+        useWorkoutStore.getState().exercises.filter((item) => item.id === remoteExerciseRow.id),
+      ).toHaveLength(1);
     });
   });
 });

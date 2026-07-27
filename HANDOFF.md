@@ -21,6 +21,7 @@ Legacy redirects: `/log`→`/move`, `/history`→`/grow`, `/progress`→`/grow`,
 | `removeSet(setId)` | Deletes a logged set, renumbers `set_number` in that session+exercise, recalculates `isPr` for the exercise, syncs via `deleteSyncedSet` + sibling upserts. |
 | `sessions.notes` | Session freeform notes (import + NL exercise notes). **No day_notes table** — day notes are just per-session notes on that calendar day. |
 | PendingWrite | Dexie queue for Supabase writes (`upsert` + `delete`; drain handles both). |
+| `hydrateFromRemote(remote)` | Pulls exercises/sessions/sets/goals down from Supabase on boot (`src/lib/supabase-hydrate.ts` fetch → `workoutStore.hydrateFromRemote` merge). Remote **only fills gaps** — union by id, local always wins on conflict, safe to call repeatedly. Runs in `useSupabaseBootstrap` after queue drain. Closes the old one-way-up sync gap (new device / cleared storage now recovers real history). |
 
 ### Gym calendar day panel (`src/lib/calendar.ts`)
 UI calendar uses **`getDayWorkoutBundle(date, sessions, sets, { timeZone })`** — gym-only, completed sessions (`endedAt`), volume/PR per session. Powers `DayWorkoutPanel` on Move. Open (unended) sessions for the selected day are passed separately and link to `/session/:id`. Display times use `formatDateTimeInZone(..., 'America/Los_Angeles')`.
@@ -65,6 +66,15 @@ Removed: blind `tendGold()` +1.
 | Session + search | `src/pages/Session.tsx`, `ExercisePicker.tsx`, `MovementLogger.tsx` |
 | Theme | `tailwind.config.js`, `src/index.css` |
 | ADRs | `decisions/2026-07-14-aloo-gold-diary.md`, `decisions/2026-07-14-context-save.md` |
+| Supabase hydration | `src/lib/supabase-hydrate.ts` (fetch + row mappers), `src/lib/supabase-mappers.ts` (`rowToExercise/Session/Set/Goal`), wired in `src/hooks/useSupabaseBootstrap.ts` |
+
+## Supabase project state (2026-07-27)
+- Live project is **`weighttracker`** (`svcjdtlmmrisrkjqdsjt`, ap-southeast-2) — matches `VITE_SUPABASE_URL`. A same-named-ish sibling **`weighttrackerdv`** (`stvyokgukswcebpyqcnb`) also exists in the same org and is unused; don't confuse the two when linking the Supabase CLI.
+- This project had **zero tables** until today — `0001_init.sql`/`0002_storage_bucket.sql` existed in the repo but were never pushed to this project. All 4 migrations (0001–0004) are now applied and verified (`pnpm check:supabase` + anon-key REST read both pass).
+- `supabase/config.toml` used the pre-rename `name` key, which current CLI (2.109.1) rejects (`config.config' has invalid keys: name`). Fixed to `project_id`. If `supabase db push`/`link` ever fails with that config error again, it's this same schema drift, not a real project problem.
+- `0003_templates_and_local_day.sql` added `templates`/`template_exercises` (empty, no store/UI yet — see follow-ups) and `sessions.local_date`/`sessions.timezone` (columns exist, backfilled to America/Los_Angeles, but nothing writes device-local values yet — see follow-ups).
+- `0004_equipment_band.sql` added `'band'` to `equipment_kind`.
+- Supabase CLI is authenticated locally (`npx supabase projects list` works) independent of the `claude.ai Supabase` MCP connection, which is tied to a different Supabase account and cannot see this project — use the CLI (or a project-scoped `claude mcp add --transport http supabase ...`, already registered in `.mcp.json`) for this project, not the generic `claude.ai Supabase` MCP tools.
 
 ## Open follow-ups
 - Catalog exercise ids (`ex-${slug}`) never sync to Supabase — sets stay local until UUID migration
@@ -72,6 +82,9 @@ Removed: blind `tendGold()` +1.
 - Optional freeform custom movement categories beyond the fixed kind list
 - Groq Whisper edge for iPhone installed-PWA STT
 - Rebuild food/meal logging from `archive/food/` when ready
+- `templates`/`template_exercises` tables exist but have no store or UI — CRUD, start-from-template, save-session-as-template still to build
+- `sessions.local_date`/`timezone` columns exist but the app still hardcodes `America/Los_Angeles` in ~10 files — device-local tz swap still to do
+- Exercise PDF/manifest import (Free Exercise DB match, `image_style: 'name-only'` fallback, never Strong's proprietary icons) not yet run — extracted page images sit in `tmp/pdfs/aloo-exercises/extracted-images/` (gitignored, local only)
 
 ## Verification
 `pnpm test` · `pnpm build` · smoke: Today → Move → day Log workout → session → Done → Move · Grow lift chart

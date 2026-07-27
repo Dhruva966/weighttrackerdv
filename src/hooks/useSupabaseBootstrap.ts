@@ -1,16 +1,28 @@
 import { useEffect, useState } from 'react';
+import { fetchRemoteSnapshot } from '../lib/supabase-hydrate';
 import { bootstrapSupabaseSync } from '../lib/supabase-sync';
+import { useWorkoutStore } from '../stores/workoutStore';
 
 export function useSupabaseBootstrap() {
-  const [status, setStatus] = useState({ configured: false, reachable: false, drained: 0 });
+  const [status, setStatus] = useState({ configured: false, reachable: false, drained: 0, hydrated: false });
 
   useEffect(() => {
     let active = true;
 
     const run = async () => {
       const result = await bootstrapSupabaseSync();
+      // Drain (push local writes up) happens inside bootstrapSupabaseSync above; hydrate
+      // (pull remote down) only after, so a fresh device sees this device's own just-drained writes too.
+      let hydrated = false;
+      if (result.reachable) {
+        const remote = await fetchRemoteSnapshot();
+        if (remote) {
+          useWorkoutStore.getState().hydrateFromRemote(remote);
+          hydrated = true;
+        }
+      }
       if (active) {
-        setStatus(result);
+        setStatus({ ...result, hydrated });
       }
     };
 
