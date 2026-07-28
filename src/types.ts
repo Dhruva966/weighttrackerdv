@@ -15,7 +15,15 @@ export type MuscleGroup =
   | 'full-body'
   | 'cardio';
 
-export type EquipmentKind = 'barbell' | 'dumbbell' | 'machine' | 'cable' | 'bodyweight' | 'kettlebell' | 'other';
+export type EquipmentKind =
+  | 'barbell'
+  | 'dumbbell'
+  | 'machine'
+  | 'cable'
+  | 'bodyweight'
+  | 'kettlebell'
+  | 'band'
+  | 'other';
 
 export type ImageStyle = 'photo' | 'silhouette' | 'name-only';
 
