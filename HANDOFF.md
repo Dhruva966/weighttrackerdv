@@ -9,10 +9,14 @@ Use this file when one agent hands work to another. Keep it short, contract-focu
 **Today · Move · Grow · You**
 `/` Today · `/move` · `/grow` · `/you` · `/session/:id` · `/exercises*` · `/goals`
 Legacy redirects: `/log`→`/move`, `/history`→`/grow`, `/progress`→`/grow`, `/settings`→`/you`, `/onboarding`→`/`, `/calendar`→`/move`
-**Move (`/move`):** primary gym home — `InteractiveGymCalendar` + day panel (LA datetimes) + walks secondary. Empty day → `/session/new?date=YYYY-MM-DD` (backdates `startedAt` via `calendarDayToStartedAt`). Session Done → `/move`.  
+**Move (`/move`):** primary gym home — always-visible resume-banner/start-empty-workout (`TodayWorkoutBanner`) above `InteractiveGymCalendar` + day panel (device-local datetimes) + walks secondary. Empty day → `/session/new?date=YYYY-MM-DD` (backdates `startedAt` via `calendarDayToStartedAt`). Session Done → `/move`.  
 **Grow (`/grow`):** pot + `LiftProgress` (`buildLiftProgress` on real `LoggedSet` rows) + gym-only recent feed. Board baseline seed lives in `starterSessions` / `starterSets` (`src/data/catalog.ts`); bump `BOARD_HISTORY_SEED_VERSION` in `workoutStore` to re-merge after a clear. No jagged synthetic UI series.
 
 ## Data contracts
+### Templates (Supabase / templateStore) — new
+`useTemplateStore` (`src/stores/templateStore.ts`), persisted key `weight-tracker-templates`. `templates` + `templateExercises` (ordered by `position`), synced the same UUID-gated way as workoutStore. `createTemplate/updateTemplateName/deleteTemplate/duplicateTemplate/setTemplateExercises` (one atomic reconcile: adds/removes/repositions — no separate add/remove/reorder calls). `startWorkoutFromTemplate(templateId)` and the standalone `startWorkoutWithExercises(exerciseIds)` both reuse **today's open session** via `findDaySession`/`calendarDayToStartedAt` (Move is day-centric) and merge into `plannedExerciseIds` rather than creating a second session or clobbering an existing plan. `saveSessionAsTemplate(sessionId, name)` builds a template from a session's logged sets in first-logged order, falling back to `plannedExerciseIds` if nothing's logged yet. Read-only `exampleTemplates` (`src/data/example-templates.ts`, generic Push/Pull/Leg split, not copied from any third-party app) resolve against the live catalog and start a workout via `startWorkoutWithExercises` **without** ever creating a Template record — only an explicit "Save as template" (wired into `Session.tsx`) or `/templates/new` materializes one. UI: `Templates.tsx` (list), `TemplateEditorPage.tsx` (create/edit, shared route component, up/down reorder — no drag-and-drop dependency), `TemplateCard.tsx`, `TemplateMenu.tsx`. Entry point: "Templates" button on `Move.tsx`.
+**Gotcha if you touch `TemplateCard.tsx` again:** the exercise-list line needs `min-w-0` at *every* nested flex/grid level down to the `truncate` `<p>` (card root, the flex row, the text wrapper) — Tailwind's `truncate` silently fails to clip and the card visibly overflows its column if any one level in that chain is missing `min-w-0`. This is the standard CSS grid/flexbox "min-content sizing" gotcha, not specific to this component.
+
 ### Gym (Supabase / workoutStore)
 | Contract | Notes |
 |----------|-------|
@@ -21,9 +25,14 @@ Legacy redirects: `/log`→`/move`, `/history`→`/grow`, `/progress`→`/grow`,
 | `removeSet(setId)` | Deletes a logged set, renumbers `set_number` in that session+exercise, recalculates `isPr` for the exercise, syncs via `deleteSyncedSet` + sibling upserts. |
 | `sessions.notes` | Session freeform notes (import + NL exercise notes). **No day_notes table** — day notes are just per-session notes on that calendar day. |
 | PendingWrite | Dexie queue for Supabase writes (`upsert` + `delete`; drain handles both). |
+| `hydrateFromRemote(remote)` | Pulls exercises/sessions/sets/goals down from Supabase on boot (`src/lib/supabase-hydrate.ts` fetch → `workoutStore.hydrateFromRemote` merge). Remote **only fills gaps** — union by id, local always wins on conflict, safe to call repeatedly. Runs in `useSupabaseBootstrap` after queue drain. Closes the old one-way-up sync gap (new device / cleared storage now recovers real history). |
 
 ### Gym calendar day panel (`src/lib/calendar.ts`)
-UI calendar uses **`getDayWorkoutBundle(date, sessions, sets, { timeZone })`** — gym-only, completed sessions (`endedAt`), volume/PR per session. Powers `DayWorkoutPanel` on Move. Open (unended) sessions for the selected day are passed separately and link to `/session/:id`. Display times use `formatDateTimeInZone(..., 'America/Los_Angeles')`.
+UI calendar uses **`getDayWorkoutBundle(date, sessions, sets, { timeZone })`** — gym-only, completed sessions (`endedAt`), volume/PR per session. Powers `DayWorkoutPanel` on Move. Open (unended) sessions for the selected day are passed separately and link to `/session/:id`. Display times use `formatDateTimeInZone(value)`, default timezone is now device-local (see below), not a literal.
+
+### Timezone (`src/lib/local-day.ts`) — device-local, no longer hardcoded LA
+`getDeviceTimeZone()` (`Intl.DateTimeFormat().resolvedOptions().timeZone`, falls back to `'America/Los_Angeles'` only if that throws) is now the default `timeZone` param everywhere that used to hardcode `'America/Los_Angeles'`: `calendar.ts`, `day-workout-bundle.ts`, `gold.ts`, `streak.ts`, `fmt.ts`, `diaryStore.ts` (which gained a `timeZone` param it never had before), `InteractiveGymCalendar.tsx`'s `MOVE_TIMEZONE`, `SessionLauncher.tsx`, `StreakBadge.tsx`, `Today.tsx`, and `templateStore.ts`'s `MOVE_TIMEZONE`. Sessions now stamp `localDate`/`timezone` on `createSession` (and `reopenSession` preserves them — easy to drop by accident if you ever rewrite either). Tests intentionally still pin `'America/Los_Angeles'` explicitly where they're testing that specific case, alongside new non-LA + DST-transition (2026-03-08 / 2026-11-01) coverage.
+**Known residual limitation, not a regression:** `calendarDayToStartedAt`'s UTC-anchor-hour heuristic was tuned around a US-Pacific-ish offset and is verified for LA/NY/Kolkata but not exhaustively for extreme offsets (e.g. UTC+14). It was equally untested for non-LA zones before this change since the app only ever ran in LA — flag if the owner ever travels somewhere extreme and day-bucketing looks off by one.
 
 ### Move day reconstruction (`src/lib/day-workout-bundle.ts`) — separate helper
 Richer Move-day shape (sessions + movements). **Not** what the calendar panel imports today. Empty days return `null`; LA day keys. Do not mix archived food code into either bundle.
@@ -65,6 +74,15 @@ Removed: blind `tendGold()` +1.
 | Session + search | `src/pages/Session.tsx`, `ExercisePicker.tsx`, `MovementLogger.tsx` |
 | Theme | `tailwind.config.js`, `src/index.css` |
 | ADRs | `decisions/2026-07-14-aloo-gold-diary.md`, `decisions/2026-07-14-context-save.md` |
+| Supabase hydration | `src/lib/supabase-hydrate.ts` (fetch + row mappers), `src/lib/supabase-mappers.ts` (`rowToExercise/Session/Set/Goal`), wired in `src/hooks/useSupabaseBootstrap.ts` |
+
+## Supabase project state (2026-07-27)
+- Live project is **`weighttracker`** (`svcjdtlmmrisrkjqdsjt`, ap-southeast-2) — matches `VITE_SUPABASE_URL`. A same-named-ish sibling **`weighttrackerdv`** (`stvyokgukswcebpyqcnb`) also exists in the same org and is unused; don't confuse the two when linking the Supabase CLI.
+- This project had **zero tables** until today — `0001_init.sql`/`0002_storage_bucket.sql` existed in the repo but were never pushed to this project. All 4 migrations (0001–0004) are now applied and verified (`pnpm check:supabase` + anon-key REST read both pass).
+- `supabase/config.toml` used the pre-rename `name` key, which current CLI (2.109.1) rejects (`config.config' has invalid keys: name`). Fixed to `project_id`. If `supabase db push`/`link` ever fails with that config error again, it's this same schema drift, not a real project problem.
+- `0003_templates_and_local_day.sql` added `templates`/`template_exercises` (empty, no store/UI yet — see follow-ups) and `sessions.local_date`/`sessions.timezone` (columns exist, backfilled to America/Los_Angeles, but nothing writes device-local values yet — see follow-ups).
+- `0004_equipment_band.sql` added `'band'` to `equipment_kind`.
+- Supabase CLI is authenticated locally (`npx supabase projects list` works) independent of the `claude.ai Supabase` MCP connection, which is tied to a different Supabase account and cannot see this project — use the CLI (or a project-scoped `claude mcp add --transport http supabase ...`, already registered in `.mcp.json`) for this project, not the generic `claude.ai Supabase` MCP tools.
 
 ## Open follow-ups
 - Catalog exercise ids (`ex-${slug}`) never sync to Supabase — sets stay local until UUID migration
@@ -72,6 +90,12 @@ Removed: blind `tendGold()` +1.
 - Optional freeform custom movement categories beyond the fixed kind list
 - Groq Whisper edge for iPhone installed-PWA STT
 - Rebuild food/meal logging from `archive/food/` when ready
+- Templates has no explicit "delete session" UI path — cleaning up a stray test session during this work required a direct Supabase delete + localStorage patch; fine for now since sessions are meant to be day-scoped and reopenable, not deleted, but flag if that assumption changes
+- Phase 8 (generalize synthetic history past the seeded catalog lifts) deliberately not done: the 42 `baselineRows` already cover 100% of the 39 static `starterExercises`, and `buildSyntheticProgressRows` is already fully generic — no seed-value gap there. Of the 250 PDF-imported exercises, only 9 have a non-null `visibleWeightLb` in the manifest (most Strong-library rows don't show a personal weight, since this was the app's generic exercise catalog, not the owner's personal lift history) — small enough that it's a minor future nice-to-have, not worth chasing now. If revisited, seed only those 9 from their real `visibleWeightLb`/`visibleReps`; never invent a number for the rest.
+
+### PDF exercise import — done (2026-07-28)
+`scripts/data/pdf-exercise-manifest.json` (250 entries, hand-transcribed from 30 screenshots of the Strong app's own exercise library — names/categories/equipment/visible numbers only, never the app's own icon artwork) → `scripts/import-exercise-manifest.ts` (`pnpm import:pdf-exercises`, also supports `--dry-run`) upserts by slug into the live `exercises` table, fuzzy-matches each name against Free Exercise DB (github.com/yuhonas/free-exercise-db) with an equipment-compatibility cross-check to reject same-name-wrong-equipment false positives, uploads matched photos to the `exercise-images` bucket, and falls back to `image_style: 'name-only'` for the rest. Result: 250 upserted, 150 photo-matched, 100 name-only, 0 errors — independently verified against the live table (enum validity, photo/name-only consistency, spot checks, and live in-browser confirmation that a new import (`Zercher Squat (Barbell)`) shows up in `/exercises` search with its real photo after hydration). All rows tagged `source: 'pdf-import'`. `EquipmentKind` in `src/types.ts` was missing `'band'` even though the DB enum (migration `0004`) already had it — fixed as part of this.
+**Note on how this actually got built:** the first attempt at this (a background agent) built the manifest and script correctly but silently stalled for ~16 hours before anyone noticed — it never crashed loudly, it just stopped. The manifest and script were salvaged from its abandoned worktree and run manually rather than redone. If a future long-running background task goes quiet, check its worktree's `git status`/file mtimes directly rather than assuming silence means "still working."
 
 ## Verification
 `pnpm test` · `pnpm build` · smoke: Today → Move → day Log workout → session → Done → Move · Grow lift chart

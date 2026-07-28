@@ -1,15 +1,45 @@
+import { LayoutList } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MovementLogger } from '../components/MovementLogger';
-import { InteractiveGymCalendar } from '../components/InteractiveGymCalendar';
+import { InteractiveGymCalendar, MOVE_TIMEZONE } from '../components/InteractiveGymCalendar';
+import { TodayWorkoutBanner } from '../components/TodayWorkoutBanner';
+import { isBoardBaselineSession } from '../data/catalog';
+import { findDaySession, toDayKey } from '../lib/calendar';
+import { useWorkoutStore } from '../stores/workoutStore';
 
 export function Move() {
+  const sessions = useWorkoutStore((state) =>
+    state.sessions.filter((session) => !isBoardBaselineSession(session.id)),
+  );
+  const sets = useWorkoutStore((state) =>
+    state.sets.filter((setItem) => !isBoardBaselineSession(setItem.sessionId)),
+  );
+
+  const todayKey = toDayKey(new Date(), MOVE_TIMEZONE);
+  const todaySession = findDaySession(todayKey, sessions);
+  const openSession =
+    todaySession && !todaySession.endedAt
+      ? {
+          id: todaySession.id,
+          setCount: sets.filter((setItem) => setItem.sessionId === todaySession.id).length,
+        }
+      : null;
+
   return (
     <div className="grid animate-rise gap-6">
-      <div>
-        <h1 className="page-title">Move</h1>
-        <p className="page-lead mt-3">
-          Pick a day, see what you logged, and keep training on the calendar.
-        </p>
+      <TodayWorkoutBanner openSession={openSession} />
+
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="page-title">Move</h1>
+          <p className="page-lead mt-3">
+            Pick a day, see what you logged, and keep training on the calendar.
+          </p>
+        </div>
+        <Link className="button-secondary min-h-11 shrink-0 gap-1.5 px-3 text-sm" to="/templates">
+          <LayoutList size={16} strokeWidth={1.75} />
+          Templates
+        </Link>
       </div>
 
       <InteractiveGymCalendar showMonthStats />

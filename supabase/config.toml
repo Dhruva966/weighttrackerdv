@@ -1,4 +1,4 @@
-name = "weight-tracker"
+project_id = "weight-tracker"
 
 [functions.parse-exercise-log]
 verify_jwt = false

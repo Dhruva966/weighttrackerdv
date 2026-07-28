@@ -223,6 +223,41 @@ describe('getDayWorkoutBundle', () => {
       sessionIds: ['s-open'],
     });
   });
+
+  it('keys the same late-night session into a different day for a non-LA device timezone', () => {
+    // 2026-07-12T06:30:00.000Z is still Jul 11 in LA (UTC-7) but already Jul 12 in Kolkata (UTC+5:30).
+    const lateSessions = [
+      { id: 'late', startedAt: '2026-07-12T06:30:00.000Z', endedAt: '2026-07-12T07:30:00.000Z' },
+    ];
+    const lateSets = [
+      {
+        id: 'late-set',
+        sessionId: 'late',
+        exerciseId: 'ex-1',
+        setNumber: 1,
+        weightLb: 135,
+        reps: 8,
+        isWarmup: false,
+        isPr: false,
+        createdAt: '2026-07-12T06:40:00.000Z',
+      },
+    ];
+
+    const laBundle = getDayWorkoutBundle('2026-07-11', lateSessions, lateSets, {
+      timeZone: 'America/Los_Angeles',
+    });
+    expect(laBundle.sessions).toHaveLength(1);
+
+    const kolkataBundleSameDate = getDayWorkoutBundle('2026-07-11', lateSessions, lateSets, {
+      timeZone: 'Asia/Kolkata',
+    });
+    expect(kolkataBundleSameDate.sessions).toHaveLength(0);
+
+    const kolkataBundleNextDate = getDayWorkoutBundle('2026-07-12', lateSessions, lateSets, {
+      timeZone: 'Asia/Kolkata',
+    });
+    expect(kolkataBundleNextDate.sessions).toHaveLength(1);
+  });
 });
 
 describe('calendarDayToStartedAt', () => {
@@ -235,6 +270,52 @@ describe('calendarDayToStartedAt', () => {
   it('anchors past days near local noon in LA', () => {
     const startedAt = calendarDayToStartedAt('2026-07-10', 'America/Los_Angeles', new Date('2026-07-18T20:00:00Z'));
     expect(toDayKey(startedAt, 'America/Los_Angeles')).toBe('2026-07-10');
+  });
+
+  it('round-trips correctly for a non-LA device timezone (Asia/Kolkata)', () => {
+    const now = new Date('2026-07-18T05:15:00.000Z');
+    const todayKey = toDayKey(now, 'Asia/Kolkata');
+    expect(calendarDayToStartedAt(todayKey, 'Asia/Kolkata', now)).toBe(now.toISOString());
+
+    const startedAt = calendarDayToStartedAt('2026-07-10', 'Asia/Kolkata', new Date('2026-07-18T20:00:00Z'));
+    expect(toDayKey(startedAt, 'Asia/Kolkata')).toBe('2026-07-10');
+  });
+
+  it('anchors correctly for America/New_York, a common non-LA US timezone', () => {
+    const startedAt = calendarDayToStartedAt(
+      '2026-07-10',
+      'America/New_York',
+      new Date('2026-07-18T20:00:00Z'),
+    );
+    expect(toDayKey(startedAt, 'America/New_York')).toBe('2026-07-10');
+  });
+
+  it('anchors correctly for a calendar day that itself crosses the March 2026 DST transition', () => {
+    // 2026-03-08 is the spring-forward day (02:00 PST -> 03:00 PDT).
+    const startedAt = calendarDayToStartedAt(
+      '2026-03-08',
+      'America/Los_Angeles',
+      new Date('2026-03-18T20:00:00Z'),
+    );
+    expect(toDayKey(startedAt, 'America/Los_Angeles')).toBe('2026-03-08');
+  });
+
+  it('anchors correctly for a calendar day that itself crosses the November 2026 DST transition', () => {
+    // 2026-11-01 is the fall-back day (02:00 PDT -> 01:00 PST).
+    const startedAt = calendarDayToStartedAt(
+      '2026-11-01',
+      'America/Los_Angeles',
+      new Date('2026-11-18T20:00:00Z'),
+    );
+    expect(toDayKey(startedAt, 'America/Los_Angeles')).toBe('2026-11-01');
+  });
+});
+
+describe('toDayKey with a non-LA device timezone', () => {
+  it('buckets the same instant into a different calendar day than America/Los_Angeles', () => {
+    const instant = new Date('2026-07-17T19:00:00Z');
+    expect(toDayKey(instant, 'America/Los_Angeles')).toBe('2026-07-17');
+    expect(toDayKey(instant, 'Asia/Kolkata')).toBe('2026-07-18');
   });
 });
 

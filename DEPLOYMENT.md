@@ -56,10 +56,10 @@ flowchart LR
 
 ## Supabase Setup
 1. Create a Supabase project.
-2. Apply `supabase/migrations/0001_init.sql` when it exists.
+2. Apply all migrations in `supabase/migrations/` in order (`supabase db push` once linked — `supabase/config.toml` needs a `project_id` key, not the old `name` key, or current CLI versions reject it).
 3. Create public-read Storage bucket `exercise-images`.
 4. Set local script-only secrets in the shell when running seed or backfill.
-5. Verify `exercises`, `sessions`, `sets`, `body_weight_logs`, and `goals` exist before running the app.
+5. Verify `exercises`, `sessions`, `sets`, `body_weight_logs`, `goals`, `templates`, and `template_exercises` exist before running the app.
 
 ## Supabase Edge Function secrets
 LLM keys belong in **Supabase secrets**, not Postgres tables and not `VITE_*` (browser) env.

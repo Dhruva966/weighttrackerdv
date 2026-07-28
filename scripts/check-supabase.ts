@@ -1,4 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+import { loadEnvLocal } from './load-env-local';
+
+loadEnvLocal();
 
 function requireEnv(name: string): string {
   const value = process.env[name];

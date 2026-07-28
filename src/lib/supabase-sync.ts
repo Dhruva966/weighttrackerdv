@@ -1,7 +1,14 @@
 import { drainQueue, enqueueWrite } from './offline-queue';
-import { exerciseToRow, goalToRow, sessionToRow, setToRow } from './supabase-mappers';
+import {
+  exerciseToRow,
+  goalToRow,
+  sessionToRow,
+  setToRow,
+  templateExerciseToRow,
+  templateToRow,
+} from './supabase-mappers';
 import { getSupabase } from './supabase';
-import type { Exercise, Goal, LoggedSet, WorkoutSession } from '../types';
+import type { Exercise, Goal, LoggedSet, Template, TemplateExercise, WorkoutSession } from '../types';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -78,6 +85,39 @@ export async function syncGoal(goal: Goal): Promise<void> {
   }
 
   await persistUpsert('goals', goalToRow(goal));
+}
+
+export async function syncTemplate(template: Template): Promise<void> {
+  if (!isUuid(template.id)) {
+    return;
+  }
+
+  await persistUpsert('templates', templateToRow(template));
+}
+
+export async function syncTemplateExercise(templateExercise: TemplateExercise): Promise<void> {
+  if (!isUuid(templateExercise.id) || !isUuid(templateExercise.templateId) || !isUuid(templateExercise.exerciseId)) {
+    return;
+  }
+
+  await persistUpsert('template_exercises', templateExerciseToRow(templateExercise));
+}
+
+export async function deleteSyncedTemplate(templateId: string): Promise<void> {
+  if (!isUuid(templateId)) {
+    return;
+  }
+
+  // template_exercises cascade-delete server-side (FK on_delete cascade).
+  await persistDelete('templates', templateId);
+}
+
+export async function deleteSyncedTemplateExercise(templateExerciseId: string): Promise<void> {
+  if (!isUuid(templateExerciseId)) {
+    return;
+  }
+
+  await persistDelete('template_exercises', templateExerciseId);
 }
 
 export async function pingSupabase(): Promise<boolean> {

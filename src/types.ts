@@ -15,7 +15,15 @@ export type MuscleGroup =
   | 'full-body'
   | 'cardio';
 
-export type EquipmentKind = 'barbell' | 'dumbbell' | 'machine' | 'cable' | 'bodyweight' | 'kettlebell' | 'other';
+export type EquipmentKind =
+  | 'barbell'
+  | 'dumbbell'
+  | 'machine'
+  | 'cable'
+  | 'bodyweight'
+  | 'kettlebell'
+  | 'band'
+  | 'other';
 
 export type ImageStyle = 'photo' | 'silhouette' | 'name-only';
 
@@ -41,6 +49,10 @@ export type WorkoutSession = {
   endedAt?: string;
   notes?: string;
   plannedExerciseIds?: string[];
+  /** Calendar day (YYYY-MM-DD) this session belongs to, in `timezone`. */
+  localDate?: string;
+  /** IANA timezone the session was created in (device-local at creation time). */
+  timezone?: string;
 };
 
 export type LoggedSet = {
@@ -64,5 +76,24 @@ export type Goal = {
   targetUnit?: 'lb' | 'reps' | 'flexibility' | 'other';
   achieved: boolean;
   achievedAt?: string;
+  createdAt: string;
+};
+
+export type Template = {
+  id: string;
+  userId: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TemplateExercise = {
+  id: string;
+  templateId: string;
+  exerciseId: string;
+  position: number;
+  targetSets?: number;
+  targetReps?: number;
+  targetWeightLb?: number;
   createdAt: string;
 };

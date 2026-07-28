@@ -1,3 +1,5 @@
+import { getDeviceTimeZone } from './local-day';
+
 export function formatWeight(value: number, unit: 'lb' | 'kg' = 'lb'): string {
   if (unit === 'kg') {
     return `${Math.round(value * 0.453592 * 10) / 10} kg`;
@@ -6,8 +8,8 @@ export function formatWeight(value: number, unit: 'lb' | 'kg' = 'lb'): string {
   return `${Number.isInteger(value) ? value : value.toFixed(1)} lb`;
 }
 
-/** Display timezone for lift/chart history so multi-year Pacific baselines don't shift a day in other locales. */
-export const CHART_TIME_ZONE = 'America/Los_Angeles';
+/** Display timezone for lift/chart history; defaults to the device's local timezone. */
+export const CHART_TIME_ZONE = getDeviceTimeZone();
 
 export function formatDate(value: string, timeZone = CHART_TIME_ZONE): string {
   return new Intl.DateTimeFormat('en-US', {
@@ -34,7 +36,7 @@ export function formatDateTime(value: string): string {
 
 export function formatDateTimeInZone(
   value: string,
-  timeZone = 'America/Los_Angeles',
+  timeZone = getDeviceTimeZone(),
 ): string {
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',

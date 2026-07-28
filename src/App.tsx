@@ -18,6 +18,8 @@ import { HistorySession } from './pages/HistorySession';
 import { Move } from './pages/Move';
 import { Session } from './pages/Session';
 import { SettingsPage } from './pages/Settings';
+import { TemplateEditorPage } from './pages/TemplateEditorPage';
+import { Templates } from './pages/Templates';
 import { Today } from './pages/Today';
 import { WorkoutHistory } from './pages/WorkoutHistory';
 import { useDiaryStore } from './stores/diaryStore';
@@ -72,6 +74,9 @@ function AppRoutes() {
       <Route path="/history/:sessionId" element={<HistorySession />} />
       <Route path="/session/new" element={<SessionLauncher />} />
       <Route path="/session/:sessionId" element={<Session />} />
+      <Route path="/templates" element={<Templates />} />
+      <Route path="/templates/new" element={<TemplateEditorPage />} />
+      <Route path="/templates/:templateId/edit" element={<TemplateEditorPage />} />
       <Route path="/exercises" element={<ExerciseLibrary />} />
       <Route path="/exercises/new" element={<ExerciseCreate />} />
       <Route path="/exercises/:slug" element={<ExerciseDetail />} />

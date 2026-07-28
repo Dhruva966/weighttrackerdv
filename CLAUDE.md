@@ -69,13 +69,17 @@ Escalate only when the lower tier fails with a concrete reasoning gap. Keep the 
 | Offline database | `src/lib/db.ts` |
 | Offline queue | `src/lib/offline-queue.ts` |
 | Session state | `src/stores/workoutStore.ts` |
+| Templates | `src/stores/templateStore.ts` |
+| Supabase remote hydration | `src/lib/supabase-hydrate.ts` (wired in `src/hooks/useSupabaseBootstrap.ts`) |
+| Device-local timezone | `src/lib/local-day.ts` |
 | Set logging UI | `src/components/NaturalLanguageSetLogger.tsx` |
 | Active session page | `src/pages/Session.tsx` |
 | Exercise library | `src/pages/ExerciseLibrary.tsx` |
 | Grow / history | `src/pages/History.tsx` (also `/grow`) |
-| DB migration | `supabase/migrations/0001_init.sql` |
+| DB migrations | `supabase/migrations/0001_init.sql` through `0004_equipment_band.sql` |
 | Seed script | `scripts/seed-user-board.ts` |
 | Image backfill script | `scripts/backfill-images.ts` |
+| PDF exercise manifest import | `scripts/import-exercise-manifest.ts` (`pnpm import:pdf-exercises`) |
 | PWA assets | `public/manifest.webmanifest`, `public/icons/`, `public/body-map.svg` |
 | Web subsystem rules | `web/CLAUDE.md` |
 | DB subsystem rules | `db/CLAUDE.md` |
@@ -86,10 +90,12 @@ Use Supabase Postgres. Generate client-side UUIDs for offline writes and let Pos
 | Table | Key columns | Purpose | Required policies and indexes |
 |-------|-------------|---------|-------------------------------|
 | `exercises` | `id uuid`, `slug text unique`, `name text`, `muscle_group muscle_group`, `secondary_muscles text[]`, `equipment equipment_kind`, `instructions text[]`, `setup_notes text[]`, `image_url text`, `image_style image_style`, `source text`, `archived boolean`, `created_at`, `updated_at` | Shared exercise catalog seeded from the owner's board, Free Exercise DB matches, user-created exercises, and machine setup notes like seat level/pin/setting. | Index `muscle_group`, `archived`, and GIN full-text search on `name`. Touch `updated_at` on update. |
-| `sessions` | `id uuid`, `user_id uuid`, `started_at`, `ended_at`, `notes text` | One workout session. | Index `(user_id, started_at desc)`. Client uses the single hardcoded owner `USER_ID`. |
+| `sessions` | `id uuid`, `user_id uuid`, `started_at`, `ended_at`, `notes text`, `local_date date`, `timezone text` | One workout session. `local_date`/`timezone` are the device-local calendar day and IANA tz at creation time. | Index `(user_id, started_at desc)` and `(user_id, local_date)`. Client uses the single hardcoded owner `USER_ID`. |
 | `sets` | `id uuid`, `session_id uuid`, `exercise_id uuid`, `set_number int`, `weight_lb numeric(6,2)`, `reps int`, `rpe numeric(3,1)`, `is_warmup boolean`, `is_pr boolean`, `created_at` | Logged lift sets. | Foreign key to `sessions` with cascade delete. Foreign key to `exercises`. Index `session_id` and `(exercise_id, created_at desc)`. Trigger marks PRs before insert. |
 | `body_weight_logs` | `id uuid`, `user_id uuid`, `logged_at date`, `weight_lb numeric(5,2)` | Body weight tracking for progress charts. | Unique `(user_id, logged_at)`. |
 | `goals` | `id uuid`, `user_id uuid`, `name text`, `target_value numeric`, `target_unit text`, `achieved boolean`, `achieved_at date`, `created_at` | Goal checklist imported from the board's Goals column. | Keep user scoped by `user_id`. |
+| `templates` | `id uuid`, `user_id uuid`, `name text`, `created_at`, `updated_at` | A saved, reusable workout (My templates + generic example templates). | Index `user_id`. Touch `updated_at` on update. |
+| `template_exercises` | `id uuid`, `template_id uuid`, `exercise_id uuid`, `position int`, `target_sets int`, `target_reps int`, `target_weight_lb numeric(6,2)`, `created_at` | Ordered exercise list within a template. | Foreign key to `templates` with cascade delete. Foreign key to `exercises`. Unique `(template_id, position)`. Index `template_id`. |
 
 Enums:
 
@@ -101,7 +107,7 @@ create type muscle_group as enum (
 );
 
 create type equipment_kind as enum (
-  'barbell','dumbbell','machine','cable','bodyweight','kettlebell','other'
+  'barbell','dumbbell','machine','cable','bodyweight','kettlebell','band','other'
 );
 
 create type image_style as enum ('photo','silhouette','name-only');

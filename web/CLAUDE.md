@@ -14,6 +14,7 @@ Return to the root instructions before changing shared contracts: [../CLAUDE.md]
 | Diary store | `../src/stores/diaryStore.ts` |
 | UI / intentions / goldDays | `../src/stores/uiStore.ts` |
 | Workout store | `../src/stores/workoutStore.ts` |
+| Template store | `../src/stores/templateStore.ts` |
 | Styles (gold theme) | `../src/index.css`, `../tailwind.config.js` |
 | Pages | `../src/pages/` (Today, Move, Session, History/Grow, Goals, Settings/You, Library) |
 | Hooks / lib | `../src/hooks/`, `../src/lib/` |

@@ -7,15 +7,17 @@ Return to the root instructions before changing shared contracts: [../CLAUDE.md]
 ## Key Files
 | What | Where |
 |------|-------|
-| Init migration | `../supabase/migrations/0001_init.sql` |
+| Migrations | `../supabase/migrations/0001_init.sql` through `0004_equipment_band.sql` |
 | Supabase client | `../src/lib/supabase.ts` |
 | Single-user constant | `../src/lib/user.ts` |
 | Dexie schema | `../src/lib/db.ts` |
 | Offline queue | `../src/lib/offline-queue.ts` |
+| Remote hydration (pull-down) | `../src/lib/supabase-hydrate.ts` |
 | Local diary (not synced) | `../src/stores/diaryStore.ts` |
 | Seed script | `../scripts/seed-user-board.ts` |
 | Image backfill | `../scripts/backfill-images.ts` |
 | Board data | `../scripts/data/user-board.json` |
+| PDF exercise manifest + import | `../scripts/data/pdf-exercise-manifest.json`, `../scripts/import-exercise-manifest.ts` |
 | Cross-agent contracts | `../HANDOFF.md` |
 | Deployment runbook | `../DEPLOYMENT.md` |
 

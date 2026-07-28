@@ -4,6 +4,7 @@ import { EncouragementLine } from '../components/EncouragementLine';
 import { PotOfGold } from '../components/PotOfGold';
 import { isBoardBaselineSession } from '../data/catalog';
 import { toDayKey } from '../lib/calendar';
+import { getDeviceTimeZone } from '../lib/local-day';
 import {
   getBodyWeightDelta,
   getLatestBodyWeight,
@@ -25,11 +26,12 @@ export function Today() {
   const latestWeight = getLatestBodyWeight(bodyWeightLogs);
   const weightDelta = getBodyWeightDelta(bodyWeightLogs);
   const todayMovements = movementsForDay(movements);
-  const todayKey = toDayKey(new Date(), 'America/Los_Angeles');
+  const timeZone = getDeviceTimeZone();
+  const todayKey = toDayKey(new Date(), timeZone);
   const todaySessions = sessions.filter(
     (session) =>
       !isBoardBaselineSession(session.id) &&
-      toDayKey(session.startedAt, 'America/Los_Angeles') === todayKey,
+      toDayKey(session.startedAt, timeZone) === todayKey,
   );
   const todaySessionIds = new Set(todaySessions.map((session) => session.id));
   const openSessions = todaySessions.filter((session) => !session.endedAt).length;
