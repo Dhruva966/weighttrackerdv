@@ -158,7 +158,7 @@ Parallel dispatch: use only for independent files with no shared state. Sequenti
 ### Adding a route
 1. Add the page under `src/pages/`.
 2. Register the route in `src/App.tsx`.
-3. Add navigation only if it belongs in the four-tab shell: **Today, Move, Grow, You**.
+3. Add navigation only if it belongs in the four-tab shell: **Move, Today, Grow, You** (Move is home — `/` redirects to `/move`).
 4. Use route params for detail pages: `/session/:id`, `/exercises/:slug`, `/history/:sessionId`.
 5. Prefer routing legacy paths (`/log`, `/progress`, `/history`, `/settings`) to the current IA rather than resurrecting old tabs.
 6. Add route tests for redirect behavior and empty states.

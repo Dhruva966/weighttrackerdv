@@ -64,8 +64,9 @@ function GrowPage() {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Today />} />
+      <Route path="/" element={<Navigate to="/move" replace />} />
       <Route path="/move" element={<Move />} />
+      <Route path="/today" element={<Today />} />
       <Route path="/grow" element={<GrowPage />} />
       <Route path="/you" element={<SettingsPage />} />
       <Route path="/log" element={<Navigate to="/move" replace />} />
@@ -116,8 +117,8 @@ export function App() {
       </main>
       <Nav
         items={[
-          { to: '/', label: 'Today', icon: Home },
           { to: '/move', label: 'Move', icon: Dumbbell },
+          { to: '/today', label: 'Today', icon: Home },
           { to: '/grow', label: 'Grow', icon: Sparkles },
           { to: '/you', label: 'You', icon: User },
         ]}
