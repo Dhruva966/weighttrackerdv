@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ExercisePicker } from '../components/ExercisePicker';
+import { MovementLogger } from '../components/MovementLogger';
 import { NaturalLanguageSetLogger } from '../components/NaturalLanguageSetLogger';
 import { RestTimer } from '../components/RestTimer';
 import { useTemplateStore } from '../stores/templateStore';
@@ -136,6 +137,7 @@ export function Session() {
         <RestTimer activeKey={lastSetKey || sessionSets.at(-1)?.id || session.id} />
       ) : null}
 
+      {/* 1. Your exercises — top */}
       <section className="grid gap-4">
         <h2 className="text-lg font-medium text-fg">
           {plannedExercises.length ? 'Your exercises' : 'No exercises yet'}
@@ -192,6 +194,7 @@ export function Session() {
         )}
       </section>
 
+      {/* 2. Save as template */}
       {plannedExercises.length > 0 ? (
         <div className="grid gap-2">
           <button
@@ -226,12 +229,22 @@ export function Session() {
         </div>
       ) : null}
 
+      {/* 3. Add exercises */}
       <section className="grid gap-3 border-t border-border/70 pt-5">
         <h2 className="text-lg font-medium text-fg">Add exercises for today</h2>
         <ExercisePicker
           excludeIds={plannedExercises.map((exercise) => exercise.id)}
           onPick={addExercise}
         />
+      </section>
+
+      {/* 4. Log movement — very bottom */}
+      <section className="grid gap-3 border-t border-border/70 pt-5">
+        <h2 className="text-lg font-medium text-fg">Log movement</h2>
+        <p className="text-sm text-fgMuted">
+          Walks and cardio go here in plain English — e.g. &ldquo;walking 30 min&rdquo;.
+        </p>
+        <MovementLogger compact />
       </section>
     </div>
   );
