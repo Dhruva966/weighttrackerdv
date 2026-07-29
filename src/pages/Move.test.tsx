@@ -34,7 +34,7 @@ describe('Move', () => {
     cleanup();
   });
 
-  it('shows the resume banner linking to today’s open session, above the Templates row', () => {
+  it('shows exactly one accessible continue action for today’s open session', () => {
     const session = useWorkoutStore.getState().createSession();
     const exercise = starterExercises[0];
     useWorkoutStore.getState().addSet({
@@ -54,14 +54,13 @@ describe('Move', () => {
 
     renderMove();
 
-    const resumeLink = screen.getByRole('link', { name: /continue today’s workout/i });
+    const resumeLinks = screen.getAllByRole('link', { name: /continue today’s workout/i });
+    expect(resumeLinks).toHaveLength(1);
+
+    const [resumeLink] = resumeLinks;
     expect(resumeLink).toHaveAttribute('href', `/session/${session.id}`);
     expect(screen.getByText(/2 sets logged so far/i)).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /start empty workout/i })).not.toBeInTheDocument();
-
-    // Banner renders before the Templates row in document order (prominent, not buried).
-    const body = document.body.innerHTML;
-    expect(body.indexOf('Continue today')).toBeLessThan(body.indexOf('Templates'));
   });
 
   it('shows a one-tap start-empty-workout affordance when there is no session today', () => {
@@ -82,10 +81,15 @@ describe('Move', () => {
     expect(screen.queryByRole('link', { name: /continue today’s workout/i })).not.toBeInTheDocument();
   });
 
-  it('still renders the Templates link and page title alongside the banner', () => {
+  it('keeps workout shortcuts while removing calendar and cardio UI', () => {
     renderMove();
 
     expect(screen.getByRole('heading', { name: 'Move' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /templates/i })).toHaveAttribute('href', '/templates');
+    expect(screen.getByRole('link', { name: /browse exercises/i })).toHaveAttribute('href', '/exercises');
+    expect(screen.queryByText(/pick a day, see what you logged/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/walks & cardio/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Gym days')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sets logged')).not.toBeInTheDocument();
   });
 });

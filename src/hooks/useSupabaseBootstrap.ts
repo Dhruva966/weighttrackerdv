@@ -1,16 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchRemoteSnapshot, fetchTemplateSnapshot } from '../lib/supabase-hydrate';
 import { bootstrapSupabaseSync } from '../lib/supabase-sync';
 import { useTemplateStore } from '../stores/templateStore';
 import { useWorkoutStore } from '../stores/workoutStore';
 
 export function useSupabaseBootstrap() {
-  const [status, setStatus] = useState({ configured: false, reachable: false, drained: 0, hydrated: false });
+  const [status, setStatus] = useState({
+    configured: false,
+    reachable: false,
+    drained: 0,
+    hydrated: false,
+    syncing: false,
+  });
+  const activeRef = useRef(false);
+  const runningRef = useRef(false);
 
-  useEffect(() => {
-    let active = true;
+  const refresh = useCallback(async () => {
+    if (runningRef.current) return;
 
-    const run = async () => {
+    runningRef.current = true;
+    if (activeRef.current) {
+      setStatus((current) => ({ ...current, syncing: true }));
+    }
+
+    try {
       const result = await bootstrapSupabaseSync();
       // Drain (push local writes up) happens inside bootstrapSupabaseSync above; hydrate
       // (pull remote down) only after, so a fresh device sees this device's own just-drained writes too.
@@ -25,23 +38,32 @@ export function useSupabaseBootstrap() {
           useTemplateStore.getState().hydrateFromRemote(remoteTemplates);
         }
       }
-      if (active) {
-        setStatus({ ...result, hydrated });
+      if (activeRef.current) {
+        setStatus({ ...result, hydrated, syncing: false });
       }
-    };
+    } catch {
+      if (activeRef.current) {
+        setStatus((current) => ({ ...current, reachable: false, syncing: false }));
+      }
+    } finally {
+      runningRef.current = false;
+    }
+  }, []);
 
-    void run();
+  useEffect(() => {
+    activeRef.current = true;
+    void refresh();
 
     const onOnline = () => {
-      void run();
+      void refresh();
     };
 
     window.addEventListener('online', onOnline);
     return () => {
-      active = false;
+      activeRef.current = false;
       window.removeEventListener('online', onOnline);
     };
-  }, []);
+  }, [refresh]);
 
-  return status;
+  return { ...status, refresh };
 }
