@@ -1,9 +1,20 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { starterExercises, starterGoals, starterSets } from '../data/catalog';
 import { BOARD_HISTORY_SEED_VERSION, useWorkoutStore } from '../stores/workoutStore';
+import { useTemplateStore } from '../stores/templateStore';
 import { Move } from './Move';
+
+const navigateMock = vi.fn();
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
+});
 
 function resetStores() {
   useWorkoutStore.setState({
@@ -13,6 +24,10 @@ function resetStores() {
     sets: starterSets,
     historyCleared: false,
     boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
+  });
+  useTemplateStore.setState({
+    templates: [],
+    templateExercises: [],
   });
 }
 
@@ -27,6 +42,7 @@ function renderMove() {
 describe('Move', () => {
   beforeEach(() => {
     localStorage.clear();
+    navigateMock.mockReset();
     resetStores();
   });
 
@@ -81,15 +97,40 @@ describe('Move', () => {
     expect(screen.queryByRole('link', { name: /continue today’s workout/i })).not.toBeInTheDocument();
   });
 
-  it('keeps workout shortcuts while removing calendar and cardio UI', () => {
+  it('puts templates first: examples are startable and calendar/cardio UI stays off Move', () => {
     renderMove();
 
     expect(screen.getByRole('heading', { name: 'Move' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /templates/i })).toHaveAttribute('href', '/templates');
+    expect(screen.getByRole('heading', { name: 'Templates' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Example templates' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^all$/i })).toHaveAttribute('href', '/templates');
+    expect(screen.getByRole('link', { name: /^new$/i })).toHaveAttribute('href', '/templates/new');
     expect(screen.getByRole('link', { name: /browse exercises/i })).toHaveAttribute('href', '/exercises');
+
+    expect(screen.getByText('Push Day')).toBeInTheDocument();
+    expect(screen.getByText('Pull Day')).toBeInTheDocument();
+    expect(screen.getByText('Leg Day')).toBeInTheDocument();
+
+    const startButtons = screen.getAllByRole('button', { name: /start workout/i });
+    expect(startButtons.length).toBeGreaterThanOrEqual(3);
+    fireEvent.click(startButtons[0]);
+    expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/session\//));
+
     expect(screen.queryByText(/pick a day, see what you logged/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/walks & cardio/i)).not.toBeInTheDocument();
     expect(screen.queryByText('Gym days')).not.toBeInTheDocument();
     expect(screen.queryByText('Sets logged')).not.toBeInTheDocument();
+  });
+
+  it('lists a saved template ahead of examples and can start it', () => {
+    const exercise = starterExercises[0];
+    useTemplateStore.getState().createTemplate('Chest focus', [exercise.id]);
+
+    renderMove();
+
+    expect(screen.getByText('Chest focus')).toBeInTheDocument();
+    const startButtons = screen.getAllByRole('button', { name: /start workout/i });
+    fireEvent.click(startButtons[0]);
+    expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/session\//));
   });
 });

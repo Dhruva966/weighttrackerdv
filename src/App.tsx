@@ -87,7 +87,7 @@ function AppRoutes() {
       <Route path="/settings" element={<Navigate to="/you" replace />} />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />
       <Route path="/progress" element={<Navigate to="/grow" replace />} />
-      <Route path="/calendar" element={<Navigate to="/move" replace />} />
+      <Route path="/calendar" element={<Navigate to="/grow" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
