@@ -78,7 +78,7 @@ describe('app shell', () => {
   });
 
   it('renders Aloo Today with universal command bar', () => {
-    renderApp('/');
+    renderApp('/today');
     expect(screen.getByText(/hi dhruva/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /your pot of gold is filling/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /body weight/i })).toBeInTheDocument();
@@ -88,14 +88,14 @@ describe('app shell', () => {
   });
 
   it('does not count board baseline sets as today training', () => {
-    renderApp('/');
+    renderApp('/today');
 
     expect(screen.getByText(/no lifts or walks yet/i)).toBeInTheDocument();
     expect(screen.queryByText(/sets today/i)).not.toBeInTheDocument();
   });
 
   it('shows Training log on Today and omits food diary and Intentions', () => {
-    renderApp('/');
+    renderApp('/today');
 
     const mainText = screen.getByRole('main').textContent ?? '';
     expect(mainText).toContain('Training log');
@@ -115,21 +115,24 @@ describe('app shell', () => {
       isWarmup: false,
     });
 
-    renderApp('/');
+    renderApp('/today');
 
     expect(screen.getByText(/1 set today/i)).toBeInTheDocument();
     expect(screen.getByText(/1 open workout/i)).toBeInTheDocument();
   });
 
-  it('navigates Move Grow You tabs without an Eat tab', async () => {
+  it('lands on Move at the root route and navigates Grow, Today, You without an Eat tab', async () => {
     renderApp('/');
+    expect(screen.getByRole('heading', { name: /^move$/i })).toBeInTheDocument();
     expect(within(screen.getByRole('navigation')).queryByRole('link', { name: /^eat$/i })).toBeNull();
-
-    clickBottomNav(/^move$/i);
-    await waitFor(() => expect(screen.getByRole('heading', { name: /^move$/i })).toBeInTheDocument());
 
     clickBottomNav(/^grow$/i);
     await waitFor(() => expect(screen.getByRole('heading', { name: /your pot of gold/i })).toBeInTheDocument());
+
+    clickBottomNav(/^today$/i);
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /your pot of gold is filling/i })).toBeInTheDocument(),
+    );
 
     clickBottomNav(/^you$/i);
     await waitFor(() => expect(screen.getByRole('heading', { name: /^you$/i })).toBeInTheDocument());

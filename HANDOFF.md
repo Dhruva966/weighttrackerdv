@@ -6,10 +6,11 @@ Use this file when one agent hands work to another. Keep it short, contract-focu
 **Aloo** is a single-user PWA for owner Dhruva (`vutultadhruva@gmail.com`). Gym path uses hardcoded `USER_ID` + Supabase when configured. Diary (weight and walks/cardio) and UI prefs are local-first Zustand (`aloo-diary-v1`, `aloo-ui-v1`). Soft gold + white shell; pot of gold grows with `goldDays`. Food, meal, macro, and calorie UI is archived under `archive/food/` for a later pass.
 
 ## Nav & routes
-**Today · Move · Grow · You**
-`/` Today · `/move` · `/grow` · `/you` · `/session/:id` · `/exercises*` · `/goals`
-Legacy redirects: `/log`→`/move`, `/history`→`/grow`, `/progress`→`/grow`, `/settings`→`/you`, `/onboarding`→`/`, `/calendar`→`/move`
-**Move (`/move`):** primary gym home — always-visible resume-banner/start-empty-workout (`TodayWorkoutBanner`) above `InteractiveGymCalendar` + day panel (device-local datetimes) + walks secondary. Empty day → `/session/new?date=YYYY-MM-DD` (backdates `startedAt` via `calendarDayToStartedAt`). Session Done → `/move`.  
+**Move · Today · Grow · You** (tab order as of 2026-07-28 — Move is the app's home, not Today)
+`/` → redirects to `/move` (Move is home) · `/move` · `/today` · `/grow` · `/you` · `/session/:id` · `/exercises*` · `/goals`
+Legacy redirects: `/log`→`/move`, `/history`→`/grow`, `/progress`→`/grow`, `/settings`→`/you`, `/onboarding`→`/`→`/move`, `/calendar`→`/move`
+**Move (`/move`, also `/`):** the app's home — always-visible resume-banner/start-empty-workout (`TodayWorkoutBanner`) above `InteractiveGymCalendar` + day panel (device-local datetimes) + walks secondary. Empty day → `/session/new?date=YYYY-MM-DD` (backdates `startedAt` via `calendarDayToStartedAt`). Session Done → `/move`. **`/` is a redirect to `/move`, not a duplicate route** — internal links should keep using `/move` (matches the Move nav tab's `NavLink` target) rather than `/`.
+**Today (`/today`):** secondary dashboard — greeting, pot of gold, body weight card, training-log summary. Same component as before, just moved off the root route.
 **Grow (`/grow`):** pot + `LiftProgress` (`buildLiftProgress` on real `LoggedSet` rows) + gym-only recent feed. Board baseline seed lives in `starterSessions` / `starterSets` (`src/data/catalog.ts`); bump `BOARD_HISTORY_SEED_VERSION` in `workoutStore` to re-merge after a clear. No jagged synthetic UI series.
 
 ## Data contracts
