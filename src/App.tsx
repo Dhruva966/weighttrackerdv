@@ -2,6 +2,7 @@ import { Dumbbell, Home, Sparkles, User } from 'lucide-react';
 import { useEffect } from 'react';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { LiftProgress } from './components/LiftProgress';
+import { InteractiveGymCalendar } from './components/InteractiveGymCalendar';
 import { Nav } from './components/Nav';
 import { PotOfGold } from './components/PotOfGold';
 import { SessionLauncher } from './components/SessionLauncher';
@@ -55,6 +56,7 @@ function GrowPage() {
         </div>
         <PotOfGold days={goldDays} />
       </div>
+      <InteractiveGymCalendar showMonthStats />
       <LiftProgress />
       <History compact showCalendar={false} gymOnly />
     </div>

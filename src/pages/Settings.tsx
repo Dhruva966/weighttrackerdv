@@ -1,4 +1,4 @@
-import { Download, Database, Smartphone, Sparkles } from 'lucide-react';
+import { Download, Database, RefreshCw, Smartphone, Sparkles } from 'lucide-react';
 import { downloadWorkoutExport } from '../lib/export';
 import { isExerciseLogLlmConfigured, isSupabaseLlmConfigured } from '../lib/exercise-log-parse';
 import { useOnline } from '../hooks/useOnline';
@@ -39,13 +39,24 @@ export function SettingsPage() {
           <Database size={18} />
           Supabase sync
         </p>
-        <p className="text-sm text-fgMuted">
-          {supabase.configured
+        <p className="text-sm text-fgMuted" role="status" aria-live="polite">
+          {supabase.syncing
+            ? 'Syncing your latest workout data…'
+            : supabase.configured
             ? supabase.reachable
-              ? `Connected. ${supabase.drained > 0 ? `Replayed ${supabase.drained} offline write${supabase.drained === 1 ? '' : 's'}.` : 'Ready to sync new workouts.'}`
+              ? `Connected. ${supabase.drained > 0 ? `Replayed ${supabase.drained} offline write${supabase.drained === 1 ? '' : 's'}.` : supabase.hydrated ? 'Latest data is synced.' : 'Ready to sync new workouts.'}`
               : 'Configured, but the database is not reachable yet. Check migration and keys.'
             : 'Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local or Cursor secrets.'}
         </p>
+        <button
+          className="button-secondary w-fit"
+          type="button"
+          onClick={() => void supabase.refresh()}
+          disabled={supabase.syncing}
+        >
+          <RefreshCw className={supabase.syncing ? 'animate-spin' : undefined} size={16} aria-hidden />
+          {supabase.syncing ? 'Syncing…' : 'Refresh sync'}
+        </button>
       </section>
       <section className="app-card grid gap-3">
         <p className="flex items-center gap-2 font-bold text-fg">

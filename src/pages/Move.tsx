@@ -1,10 +1,8 @@
-import { LayoutList } from 'lucide-react';
+import { Dumbbell, LayoutList } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { MovementLogger } from '../components/MovementLogger';
-import { InteractiveGymCalendar, MOVE_TIMEZONE } from '../components/InteractiveGymCalendar';
-import { TodayWorkoutBanner } from '../components/TodayWorkoutBanner';
 import { isBoardBaselineSession } from '../data/catalog';
 import { findDaySession, toDayKey } from '../lib/calendar';
+import { getDeviceTimeZone } from '../lib/local-day';
 import { useWorkoutStore } from '../stores/workoutStore';
 
 export function Move() {
@@ -15,7 +13,7 @@ export function Move() {
     state.sets.filter((setItem) => !isBoardBaselineSession(setItem.sessionId)),
   );
 
-  const todayKey = toDayKey(new Date(), MOVE_TIMEZONE);
+  const todayKey = toDayKey(new Date(), getDeviceTimeZone());
   const todaySession = findDaySession(todayKey, sessions);
   const openSession =
     todaySession && !todaySession.endedAt
@@ -27,13 +25,11 @@ export function Move() {
 
   return (
     <div className="grid animate-rise gap-6">
-      <TodayWorkoutBanner openSession={openSession} />
-
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="page-title">Move</h1>
           <p className="page-lead mt-3">
-            Pick a day, see what you logged, and keep training on the calendar.
+            Start a workout, keep today moving, or use a saved template.
           </p>
         </div>
         <Link className="button-secondary min-h-11 shrink-0 gap-1.5 px-3 text-sm" to="/templates">
@@ -42,16 +38,35 @@ export function Move() {
         </Link>
       </div>
 
-      <InteractiveGymCalendar showMonthStats />
+      {openSession ? (
+        <Link
+          className="grid min-h-11 gap-1.5 rounded-lg border border-accent/30 bg-accentSoft/40 p-4 transition hover:border-accent/50"
+          to={`/session/${openSession.id}`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <p className="font-bold text-fg">Continue today’s workout</p>
+            <span className="shrink-0 rounded-md bg-accentSoft px-2 py-1 text-xs font-bold text-accent">
+              In progress
+            </span>
+          </div>
+          <p className="text-sm text-fgMuted">
+            {openSession.setCount > 0
+              ? `${openSession.setCount} set${openSession.setCount === 1 ? '' : 's'} logged so far — tap to keep going`
+              : 'No sets logged yet — tap to keep going'}
+          </p>
+        </Link>
+      ) : (
+        <section className="app-card grid gap-3 text-center">
+          <p className="text-fgMuted">No workout logged yet today.</p>
+          <Link className="button-primary mx-auto inline-flex min-h-11 items-center gap-2" to="/session/new">
+            <Dumbbell size={16} strokeWidth={1.75} />
+            Start empty workout
+          </Link>
+        </section>
+      )}
 
       <section className="grid gap-3 border-t border-border/70 pt-5">
-        <div>
-          <h2 className="text-lg font-medium text-fg">Walks & cardio</h2>
-          <p className="mt-1 text-sm leading-relaxed text-fgMuted">
-            Secondary to lifts — log in plain English when you need it.
-          </p>
-        </div>
-        <MovementLogger compact />
+        <h2 className="text-lg font-medium text-fg">Workout tools</h2>
         <Link className="text-link min-h-11 inline-flex items-center" to="/exercises">
           Browse exercises
         </Link>
