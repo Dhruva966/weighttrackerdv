@@ -2,7 +2,6 @@ import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ExercisePicker } from '../components/ExercisePicker';
-import { MovementLogger } from '../components/MovementLogger';
 import { NaturalLanguageSetLogger } from '../components/NaturalLanguageSetLogger';
 import { RestTimer } from '../components/RestTimer';
 import { useTemplateStore } from '../stores/templateStore';
@@ -123,10 +122,9 @@ export function Session() {
     <div className="grid gap-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="page-title">Today’s workout</h1>
+          <h1 className="page-title">Today's workout</h1>
           <p className="mt-1 text-sm text-fgMuted">
-            Add exercises, then tap each one and log sets in plain English. Come back any time to keep
-            logging.
+            Tap an exercise and log sets in plain English. Come back any time to keep logging.
           </p>
         </div>
         <Link className="button-secondary min-h-11" to="/move">
@@ -134,59 +132,9 @@ export function Session() {
         </Link>
       </div>
 
-      {plannedExercises.length > 0 ? (
-        <div className="grid gap-2">
-          <button
-            className="text-link min-h-11 self-start text-sm"
-            type="button"
-            onClick={() => setShowSaveTemplate((current) => !current)}
-          >
-            {showSaveTemplate ? 'Cancel' : 'Save as template'}
-          </button>
-          {showSaveTemplate ? (
-            <form className="flex items-center gap-2" onSubmit={handleSaveTemplate}>
-              <label className="min-w-0 flex-1">
-                <span className="sr-only">Template name</span>
-                <input
-                  className="field !h-10 !min-h-0 !rounded-xl px-3 text-sm"
-                  value={templateName}
-                  onChange={(event) => setTemplateName(event.target.value)}
-                  placeholder="e.g. Push Day"
-                  maxLength={60}
-                  autoFocus
-                />
-              </label>
-              <button
-                className="button-primary !min-h-10 px-3 text-sm"
-                type="submit"
-                disabled={!templateName.trim()}
-              >
-                Save
-              </button>
-            </form>
-          ) : null}
-        </div>
-      ) : null}
-
       {sessionSets.length > 0 ? (
         <RestTimer activeKey={lastSetKey || sessionSets.at(-1)?.id || session.id} />
       ) : null}
-
-      <section className="grid gap-3">
-        <h2 className="text-lg font-medium text-fg">Log movement</h2>
-        <p className="text-sm text-fgMuted">
-          Walks and cardio go here in plain English — e.g. “walking 30 min”.
-        </p>
-        <MovementLogger compact />
-      </section>
-
-      <section className="grid gap-3">
-        <h2 className="text-lg font-medium text-fg">Add exercises for today</h2>
-        <ExercisePicker
-          excludeIds={plannedExercises.map((exercise) => exercise.id)}
-          onPick={addExercise}
-        />
-      </section>
 
       <section className="grid gap-4">
         <h2 className="text-lg font-medium text-fg">
@@ -194,7 +142,7 @@ export function Session() {
         </h2>
 
         {plannedExercises.length === 0 ? (
-          <p className="app-card text-fgMuted">Search above and add everything you plan to train today.</p>
+          <p className="app-card text-fgMuted">Search below and add everything you plan to train today.</p>
         ) : (
           groupedExercises.map(([muscleGroup, groupExercises]) => (
             <div key={muscleGroup} className="grid gap-2">
@@ -242,6 +190,48 @@ export function Session() {
             </div>
           ))
         )}
+      </section>
+
+      {plannedExercises.length > 0 ? (
+        <div className="grid gap-2">
+          <button
+            className="text-link min-h-11 self-start text-sm"
+            type="button"
+            onClick={() => setShowSaveTemplate((current) => !current)}
+          >
+            {showSaveTemplate ? 'Cancel' : 'Save as template'}
+          </button>
+          {showSaveTemplate ? (
+            <form className="flex items-center gap-2" onSubmit={handleSaveTemplate}>
+              <label className="min-w-0 flex-1">
+                <span className="sr-only">Template name</span>
+                <input
+                  className="field !h-10 !min-h-0 !rounded-xl px-3 text-sm"
+                  value={templateName}
+                  onChange={(event) => setTemplateName(event.target.value)}
+                  placeholder="e.g. Push Day"
+                  maxLength={60}
+                  autoFocus
+                />
+              </label>
+              <button
+                className="button-primary !min-h-10 px-3 text-sm"
+                type="submit"
+                disabled={!templateName.trim()}
+              >
+                Save
+              </button>
+            </form>
+          ) : null}
+        </div>
+      ) : null}
+
+      <section className="grid gap-3 border-t border-border/70 pt-5">
+        <h2 className="text-lg font-medium text-fg">Add exercises for today</h2>
+        <ExercisePicker
+          excludeIds={plannedExercises.map((exercise) => exercise.id)}
+          onPick={addExercise}
+        />
       </section>
     </div>
   );
