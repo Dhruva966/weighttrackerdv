@@ -110,9 +110,11 @@ describe('Move', () => {
     expect(screen.getByText('Push Day')).toBeInTheDocument();
     expect(screen.getByText('Pull Day')).toBeInTheDocument();
     expect(screen.getByText('Leg Day')).toBeInTheDocument();
+    expect(screen.getByText('Chest & Back')).toBeInTheDocument();
+    expect(screen.getByText('Arms Day')).toBeInTheDocument();
 
     const startButtons = screen.getAllByRole('button', { name: /start workout/i });
-    expect(startButtons.length).toBeGreaterThanOrEqual(3);
+    expect(startButtons.length).toBeGreaterThanOrEqual(5);
     fireEvent.click(startButtons[0]);
     expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/session\//));
 
