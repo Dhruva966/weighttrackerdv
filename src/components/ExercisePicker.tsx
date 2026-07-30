@@ -11,7 +11,10 @@ export function ExercisePicker({
   excludeIds?: string[];
 }) {
   const [query, setQuery] = useState('');
-  const exercises = useExercises(query).filter((exercise) => !excludeIds.includes(exercise.id));
+  const trimmed = query.trim();
+  const exercises = useExercises(trimmed)
+    .filter((exercise) => !excludeIds.includes(exercise.id))
+    .slice(0, 4);
 
   return (
     <div className="app-card">
@@ -25,23 +28,25 @@ export function ExercisePicker({
           onChange={(event) => setQuery(event.target.value)}
         />
       </label>
-      <div className="mt-3 grid gap-1.5">
-        {exercises.length ? (
-          exercises.slice(0, 8).map((exercise) => (
-            <button
-              key={exercise.id}
-              className="flex min-h-10 items-center justify-between gap-3 rounded-xl border border-border bg-bg px-3 py-2 text-left hover:border-fg/30"
-              type="button"
-              onClick={() => onPick(exercise)}
-            >
-              <span className="truncate text-sm font-medium text-fg">{exercise.name}</span>
-              <span className="shrink-0 text-xs capitalize text-fgMuted">{exercise.muscleGroup}</span>
-            </button>
-          ))
-        ) : (
-          <p className="text-sm text-fgMuted">No matches. Try another search or create one in Library.</p>
-        )}
-      </div>
+      {trimmed ? (
+        <div className="mt-3 grid gap-1.5">
+          {exercises.length ? (
+            exercises.map((exercise) => (
+              <button
+                key={exercise.id}
+                className="flex min-h-10 items-center justify-between gap-3 rounded-xl border border-border bg-bg px-3 py-2 text-left hover:border-fg/30"
+                type="button"
+                onClick={() => onPick(exercise)}
+              >
+                <span className="truncate text-sm font-medium text-fg">{exercise.name}</span>
+                <span className="shrink-0 text-xs capitalize text-fgMuted">{exercise.muscleGroup}</span>
+              </button>
+            ))
+          ) : (
+            <p className="text-sm text-fgMuted">No matches. Try another search or create one in Library.</p>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
