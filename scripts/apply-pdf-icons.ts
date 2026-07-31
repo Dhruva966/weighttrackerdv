@@ -49,10 +49,38 @@ async function main(): Promise<void> {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? requireEnv('VITE_SUPABASE_ANON_KEY');
   const supabase = createClient(url, key);
 
+  /** Letter-tile placeholders — never upload or attach as exercise images. */
+  const LETTER_TILE_SLUGS = new Set([
+    'aerobics',
+    'climbing',
+    'cycling',
+    'floor-press-barbell',
+    'glute-ham-raise',
+    'glute-kickback-machine',
+    'hiking',
+    'jump-shrug-barbell',
+    'kipping-pull-up',
+    'press-under-barbell',
+    'pullover-machine',
+    'seated-calf-raise-machine',
+    'skating',
+    'skiing',
+    'snowboarding',
+    'strict-military-press-barbell',
+    'swimming',
+    'thruster-barbell',
+    'torso-rotation-machine',
+    'tricep-extension-machine-w-pad',
+    'walking',
+    'yoga',
+  ]);
+
   const pairsPath = path.join(rootDir(), 'scripts', 'data', 'pdf-icon-pairs.json');
   const payload = JSON.parse(readFileSync(pairsPath, 'utf8')) as { pairs: IconPair[] };
-  const pairs = payload.pairs ?? [];
-  console.log(`Applying ${pairs.length} IMG_3417.pdf icon pairs${dryRun ? ' (dry-run)' : ''}.`);
+  const pairs = (payload.pairs ?? []).filter((p) => !LETTER_TILE_SLUGS.has(p.slug));
+  console.log(
+    `Applying ${pairs.length} IMG_3417.pdf icon pairs (skipped ${LETTER_TILE_SLUGS.size} letter tiles)${dryRun ? ' (dry-run)' : ''}.`,
+  );
 
   let uploaded = 0;
   let updated = 0;
