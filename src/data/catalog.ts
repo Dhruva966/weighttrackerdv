@@ -36,6 +36,7 @@ function exercise(
   equipment: EquipmentKind,
   secondaryMuscles: string[] = [],
   setupNotes: string[] = [],
+  extras: Pick<Partial<Exercise>, 'imageUrl' | 'imageStyle' | 'source' | 'instructions'> = {},
 ): Exercise {
   return {
     id: `ex-${slug}`,
@@ -44,10 +45,11 @@ function exercise(
     muscleGroup,
     secondaryMuscles,
     equipment,
-    instructions: [],
+    instructions: extras.instructions ?? [],
     setupNotes,
-    imageStyle: 'name-only',
-    source: 'user-board',
+    imageUrl: extras.imageUrl,
+    imageStyle: extras.imageUrl ? (extras.imageStyle ?? 'photo') : (extras.imageStyle ?? 'name-only'),
+    source: extras.source ?? 'user-board',
   };
 }
 
@@ -89,6 +91,12 @@ export const starterExercises: Exercise[] = [
   exercise('hip-abductor', 'Hip Abductor', 'glutes', 'machine'),
 
   exercise('lat-pulldown', 'Lat Pulldown', 'back', 'cable', ['biceps']),
+  // Keep name-only until a verified photo match exists (FEDB Close-Grip Front Lat Pulldown was a wrong seated pairing).
+  exercise('close-grip-pulldown', 'Close Grip Pulldown', 'back', 'cable', [
+    'biceps',
+    'middle back',
+    'shoulders',
+  ]),
   exercise('seated-row-machine', 'Seated Row Machine', 'back', 'machine', ['biceps'], ['Level 5', 'Seat 5']),
   exercise('trap-row-gym', 'Trap Row Gym', 'back', 'machine', [], ['155 lb each side', 'Chair level 4']),
   exercise('trap-row-dumbbells', 'Trap Row Dumbbells', 'back', 'dumbbell'),

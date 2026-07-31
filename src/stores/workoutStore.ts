@@ -6,6 +6,7 @@ import {
   starterGoals,
   starterSets,
 } from '../data/catalog';
+import { pdfIconUrl } from '../data/pdfIconSlugs';
 import { toDayKey } from '../lib/calendar';
 import { slugify } from '../lib/fmt';
 import { getDeviceTimeZone } from '../lib/local-day';
@@ -15,8 +16,16 @@ import { isPersonalRecord } from '../lib/pr';
 import { deleteSyncedSet, syncExercise, syncGoal, syncSession, syncSet } from '../lib/supabase-sync';
 import type { RemoteSnapshot } from '../lib/supabase-hydrate';
 import { USER_ID } from '../lib/user';
+import type { SessionSnapshot } from '../lib/session-history';
 import type { EquipmentKind, Exercise, Goal, LoggedSet, MuscleGroup, WorkoutSession } from '../types';
 import { usePrStore } from './prStore';
+
+/** Prefer OCR-cropped IMG_3417.pdf icons over FEDB/remote stock when a verified pair exists. */
+function withPdfIcon(exercise: Exercise): Exercise {
+  const url = pdfIconUrl(exercise.slug, exercise.equipment);
+  if (!url) return exercise;
+  return { ...exercise, imageUrl: url, imageStyle: 'photo' };
+}
 
 type ExerciseInput = {
   name: string;
@@ -49,8 +58,12 @@ type WorkoutState = {
   /** Removes a logged set, renumbers remaining sets in that session+exercise, and refreshes PR flags. */
   removeSet: (setId: string) => void;
   addExercise: (input: ExerciseInput) => Exercise;
+  /** Updates metadata in place. Keeps `id` and `slug` stable so set FKs and Library routes stay valid. */
+  updateExercise: (id: string, input: ExerciseInput) => Exercise | undefined;
   importLiftDump: (text: string) => { imported: number; notes: number; skipped: string[] };
   setSessionPlan: (sessionId: string, exerciseIds: string[]) => void;
+  /** Replaces plan + session sets from an undo/redo snapshot (other sessions untouched). */
+  restoreSessionSnapshot: (sessionId: string, snapshot: SessionSnapshot) => void;
   logExerciseNotes: (
     sessionId: string,
     exerciseId: string,
@@ -85,12 +98,42 @@ function unionPreferLocal<T extends { id: string }>(local: T[], remote: T[]): T[
   return additions.length > 0 ? [...local, ...additions] : local;
 }
 
+/**
+ * Prefer local exercise identity on id/slug conflicts (board starter + pdf-import must not
+ * double). Gap-fill imageUrl/imageStyle from remote when the local row has no photo — that is
+ * how Supabase `exercise-images` backfills reach Library without hardcoding starter URLs.
+ * Verified IMG_3417.pdf crops always win over remote FEDB stock for the same slug.
+ */
+function unionExercisesPreferLocal(local: Exercise[], remote: Exercise[]): Exercise[] {
+  const remoteById = new Map(remote.map((item) => [item.id, item]));
+  const remoteBySlug = new Map(remote.map((item) => [item.slug, item]));
+
+  const merged = local.map((item) => {
+    const remoteMatch = remoteById.get(item.id) ?? remoteBySlug.get(item.slug);
+    if (!remoteMatch || item.imageUrl || !remoteMatch.imageUrl) {
+      return withPdfIcon(item);
+    }
+    return withPdfIcon({
+      ...item,
+      imageUrl: remoteMatch.imageUrl,
+      imageStyle: remoteMatch.imageStyle ?? 'photo',
+    });
+  });
+
+  const localIds = new Set(merged.map((item) => item.id));
+  const localSlugs = new Set(merged.map((item) => item.slug));
+  const additions = remote
+    .filter((item) => !localIds.has(item.id) && !localSlugs.has(item.slug))
+    .map(withPdfIcon);
+  return additions.length > 0 ? [...merged, ...additions] : merged;
+}
+
 function mergeExercises(required: Exercise[], persisted: Exercise[] | undefined): Exercise[] {
   const starterIds = new Set(required.map((item) => item.id));
   const persistedById = new Map((persisted ?? []).map((item) => [item.id, item]));
   const merged = required.map((item) => {
     const stored = persistedById.get(item.id);
-    return stored
+    const base = stored
       ? {
           ...item,
           archived: stored.archived,
@@ -98,9 +141,13 @@ function mergeExercises(required: Exercise[], persisted: Exercise[] | undefined)
           imageStyle: stored.imageUrl ? stored.imageStyle : item.imageStyle,
         }
       : item;
+    return withPdfIcon(base);
   });
 
-  return [...merged, ...(persisted ?? []).filter((item) => !starterIds.has(item.id))];
+  return [
+    ...merged,
+    ...(persisted ?? []).filter((item) => !starterIds.has(item.id)).map(withPdfIcon),
+  ];
 }
 
 function mergeSets(required: LoggedSet[], persisted: LoggedSet[] | undefined): LoggedSet[] {
@@ -182,6 +229,20 @@ function findExerciseByName(exercises: Exercise[], name: string): Exercise | und
     exercises.find((exercise) => exercise.name.toLowerCase() === name.toLowerCase()) ??
     exercises.find((exercise) => exercise.slug.includes(slug) || slug.includes(exercise.slug))
   );
+}
+
+/** Next free slug for a display name — never collide with an existing catalog row. */
+export function uniqueExerciseSlug(name: string, existing: Array<Pick<Exercise, 'slug'>>): string {
+  const base = slugify(name) || 'exercise';
+  const taken = new Set(existing.map((item) => item.slug));
+  if (!taken.has(base)) {
+    return base;
+  }
+  let suffix = 2;
+  while (taken.has(`${base}-${suffix}`)) {
+    suffix += 1;
+  }
+  return `${base}-${suffix}`;
 }
 
 export const useWorkoutStore = create<WorkoutState>()(
@@ -306,11 +367,14 @@ export const useWorkoutStore = create<WorkoutState>()(
         }
       },
       addExercise: (input) => {
-        const slug = slugify(input.name);
+        // Unique slug is required for Supabase (`exercises.slug` unique) and Library detail routes.
+        // Colliding with a starter/pdf-import slug used to 409 the upsert, so creates looked
+        // "UI-only" after refresh when the queued write never landed.
+        const slug = uniqueExerciseSlug(input.name, get().exercises);
         const exercise: Exercise = {
           id: newId(),
           slug,
-          name: input.name,
+          name: input.name.trim(),
           muscleGroup: input.muscleGroup,
           secondaryMuscles: [],
           equipment: input.equipment,
@@ -319,8 +383,33 @@ export const useWorkoutStore = create<WorkoutState>()(
           imageUrl: input.imageUrl,
           imageStyle: input.imageUrl ? 'photo' : 'name-only',
           source: 'user-created',
+          archived: false,
         };
         set((state) => ({ exercises: [exercise, ...state.exercises] }));
+        void syncExercise(exercise);
+        return exercise;
+      },
+      updateExercise: (id, input) => {
+        const existing = get().exercises.find((item) => item.id === id);
+        if (!existing) {
+          return undefined;
+        }
+
+        // Keep id + slug stable: sets/templates FK by id; Library/detail routes use slug.
+        // Renames update display name only so bookmarks and uniqueness stay intact.
+        const nextImageUrl = input.imageUrl !== undefined ? input.imageUrl : existing.imageUrl;
+        const exercise: Exercise = {
+          ...existing,
+          name: input.name.trim(),
+          muscleGroup: input.muscleGroup,
+          equipment: input.equipment,
+          setupNotes: input.setupNotes ?? [],
+          imageUrl: nextImageUrl,
+          imageStyle: nextImageUrl ? (existing.imageStyle === 'name-only' ? 'photo' : existing.imageStyle) : 'name-only',
+        };
+        set((state) => ({
+          exercises: state.exercises.map((item) => (item.id === id ? exercise : item)),
+        }));
         void syncExercise(exercise);
         return exercise;
       },
@@ -420,6 +509,49 @@ export const useWorkoutStore = create<WorkoutState>()(
           void syncSession({ ...session, plannedExerciseIds: exerciseIds });
         }
       },
+      restoreSessionSnapshot: (sessionId, snapshot) => {
+        const state = get();
+        const previousSessionSets = state.sets.filter((setItem) => setItem.sessionId === sessionId);
+        const otherSets = state.sets.filter((setItem) => setItem.sessionId !== sessionId);
+        const nextSessionSets = snapshot.sets.map((setItem) => ({ ...setItem, sessionId }));
+
+        const exerciseIds = new Set([
+          ...previousSessionSets.map((setItem) => setItem.exerciseId),
+          ...nextSessionSets.map((setItem) => setItem.exerciseId),
+        ]);
+
+        let nextSets = [...otherSets, ...nextSessionSets];
+        for (const exerciseId of exerciseIds) {
+          nextSets = recalculateExercisePrFlags(nextSets, exerciseId);
+        }
+
+        set({
+          sessions: state.sessions.map((session) =>
+            session.id === sessionId
+              ? { ...session, plannedExerciseIds: [...snapshot.plannedExerciseIds] }
+              : session,
+          ),
+          sets: nextSets,
+        });
+
+        const session = get().sessions.find((item) => item.id === sessionId);
+        if (session) {
+          void syncSession(session);
+        }
+
+        const nextIds = new Set(nextSessionSets.map((setItem) => setItem.id));
+        for (const removed of previousSessionSets) {
+          if (!nextIds.has(removed.id)) {
+            void deleteSyncedSet(removed.id);
+          }
+        }
+        for (const setItem of nextSets) {
+          if (setItem.sessionId !== sessionId) {
+            continue;
+          }
+          void syncSet(setItem);
+        }
+      },
       logExerciseNotes: async (sessionId, exerciseId, text) => {
         const state = get();
         const exercise = state.exercises.find((item) => item.id === exerciseId);
@@ -474,7 +606,7 @@ export const useWorkoutStore = create<WorkoutState>()(
       },
       hydrateFromRemote: (remote) => {
         set((state) => ({
-          exercises: unionPreferLocal(state.exercises, remote.exercises),
+          exercises: unionExercisesPreferLocal(state.exercises, remote.exercises),
           sessions: unionPreferLocal(state.sessions, remote.sessions),
           sets: unionPreferLocal(state.sets, remote.sets),
           goals: unionPreferLocal(state.goals, remote.goals),

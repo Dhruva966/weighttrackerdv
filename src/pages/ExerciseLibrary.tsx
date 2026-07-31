@@ -19,7 +19,7 @@ export function ExerciseLibrary() {
           <h1 className="page-title">Exercise Library</h1>
           <p className="mt-1 text-sm text-fgMuted">Search, filter, and open past performance.</p>
         </div>
-        <Link className="button-secondary hidden sm:inline-flex" to="/exercises/new">
+        <Link className="button-secondary inline-flex shrink-0" to="/exercises/new">
           <Plus size={18} />
           New
         </Link>

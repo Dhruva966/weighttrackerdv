@@ -21,8 +21,9 @@ export function TodayWorkoutBanner({ openSession }: TodayWorkoutBannerProps) {
     const { setCount } = openSession;
     return (
       <Link
-        className="grid min-h-11 gap-1.5 rounded-lg border border-accent/30 bg-accentSoft/40 p-4 transition hover:border-accent/50"
+        className="grid min-h-9 gap-1.5 rounded-lg border border-accent/30 bg-accentSoft/40 p-4 transition hover:border-accent/50"
         to={`/session/${openSession.id}`}
+        state={{ from: '/today' }}
       >
         <div className="flex items-center justify-between gap-3">
           <p className="font-bold text-fg">Continue today’s workout</p>
@@ -42,7 +43,11 @@ export function TodayWorkoutBanner({ openSession }: TodayWorkoutBannerProps) {
   return (
     <div className="app-card grid gap-3 text-center">
       <p className="text-fgMuted">No workout logged yet today.</p>
-      <Link className="button-primary mx-auto inline-flex min-h-11 items-center gap-2" to="/session/new">
+      <Link
+        className="button-primary mx-auto inline-flex min-h-9 items-center gap-2"
+        to="/session/new"
+        state={{ from: '/today' }}
+      >
         <Dumbbell size={16} strokeWidth={1.75} />
         Start empty workout
       </Link>

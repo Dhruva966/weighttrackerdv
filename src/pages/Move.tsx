@@ -42,7 +42,7 @@ export function Move() {
   function handleStart(templateId: string) {
     const sessionId = startWorkoutFromTemplate(templateId);
     if (sessionId) {
-      navigate(`/session/${sessionId}`);
+      navigate(`/session/${sessionId}`, { state: { from: '/move' } });
     }
   }
 
@@ -50,7 +50,7 @@ export function Move() {
     const exerciseIds = resolveExampleTemplateExerciseIds(example, exercises);
     const sessionId = startWorkoutWithExercises(exerciseIds);
     if (sessionId) {
-      navigate(`/session/${sessionId}`);
+      navigate(`/session/${sessionId}`, { state: { from: '/move' } });
     }
   }
 
@@ -79,8 +79,9 @@ export function Move() {
 
       {openSession ? (
         <Link
-          className="grid min-h-11 gap-1.5 rounded-lg border border-accent/30 bg-accentSoft/40 p-4 transition hover:border-accent/50"
+          className="grid min-h-9 gap-1.5 rounded-lg border border-accent/30 bg-accentSoft/40 p-4 transition hover:border-accent/50"
           to={`/session/${openSession.id}`}
+          state={{ from: '/move' }}
         >
           <div className="flex items-center justify-between gap-3">
             <p className="font-bold text-fg">Continue today’s workout</p>
@@ -105,11 +106,11 @@ export function Move() {
             <p className="mt-1 text-sm text-fgMuted">One tap to start a planned workout.</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <Link className="button-secondary min-h-11 gap-1.5 px-3 text-sm" to="/templates/new">
+            <Link className="button-secondary min-h-9 gap-1.5 px-3 text-sm" to="/templates/new">
               <Plus size={16} strokeWidth={1.75} />
               New
             </Link>
-            <Link className="button-secondary min-h-11 gap-1.5 px-3 text-sm" to="/templates">
+            <Link className="button-secondary min-h-9 gap-1.5 px-3 text-sm" to="/templates">
               <LayoutList size={16} strokeWidth={1.75} />
               All
             </Link>
@@ -158,12 +159,16 @@ export function Move() {
       <section className="grid gap-3 border-t border-border/70 pt-5">
         <h2 className="text-lg font-medium text-fg">Other ways to start</h2>
         {!openSession ? (
-          <Link className="button-primary inline-flex min-h-11 w-full items-center justify-center gap-2 sm:w-auto" to="/session/new">
+          <Link
+            className="button-primary inline-flex min-h-9 w-full items-center justify-center gap-2 sm:w-auto"
+            to="/session/new"
+            state={{ from: '/move' }}
+          >
             <Dumbbell size={16} strokeWidth={1.75} />
             Start empty workout
           </Link>
         ) : null}
-        <Link className="text-link min-h-11 inline-flex items-center" to="/exercises">
+        <Link className="text-link min-h-9 inline-flex items-center" to="/exercises">
           Browse exercises
         </Link>
       </section>

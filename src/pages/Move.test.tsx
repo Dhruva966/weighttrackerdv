@@ -116,7 +116,10 @@ describe('Move', () => {
     const startButtons = screen.getAllByRole('button', { name: /start workout/i });
     expect(startButtons.length).toBeGreaterThanOrEqual(5);
     fireEvent.click(startButtons[0]);
-    expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/session\//));
+    expect(navigateMock).toHaveBeenCalledWith(
+      expect.stringMatching(/^\/session\//),
+      expect.objectContaining({ state: { from: '/move' } }),
+    );
 
     expect(screen.queryByText(/pick a day, see what you logged/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/walks & cardio/i)).not.toBeInTheDocument();
@@ -133,6 +136,9 @@ describe('Move', () => {
     expect(screen.getByText('Chest focus')).toBeInTheDocument();
     const startButtons = screen.getAllByRole('button', { name: /start workout/i });
     fireEvent.click(startButtons[0]);
-    expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/session\//));
+    expect(navigateMock).toHaveBeenCalledWith(
+      expect.stringMatching(/^\/session\//),
+      expect.objectContaining({ state: { from: '/move' } }),
+    );
   });
 });

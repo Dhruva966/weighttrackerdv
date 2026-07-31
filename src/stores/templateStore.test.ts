@@ -147,6 +147,41 @@ describe('templateStore', () => {
       expect(sessionId).not.toBeNull();
       expect(useTemplateStore.getState().templates).toHaveLength(templatesBefore);
     });
+
+    it('applies exercises onto a specific past-day session without creating today', () => {
+      const [a, b] = starterExercises;
+      const past = useWorkoutStore.getState().createSession({
+        startedAt: '2026-07-29T18:00:00-07:00',
+      });
+      useWorkoutStore.getState().setSessionPlan(past.id, [a.id]);
+      const sessionCountBefore = useWorkoutStore.getState().sessions.length;
+
+      const sessionId = startWorkoutWithExercises([b.id], { sessionId: past.id });
+
+      expect(sessionId).toBe(past.id);
+      expect(useWorkoutStore.getState().sessions).toHaveLength(sessionCountBefore);
+      expect(
+        useWorkoutStore.getState().sessions.find((item) => item.id === past.id)?.plannedExerciseIds,
+      ).toEqual([a.id, b.id]);
+    });
+
+    it('creates or reuses a session for an explicit past dayKey when backfilling', () => {
+      const [a, b] = starterExercises;
+      const dayKey = '2026-07-29';
+
+      const sessionId = startWorkoutWithExercises([a.id], { dayKey });
+
+      expect(sessionId).not.toBeNull();
+      const session = useWorkoutStore.getState().sessions.find((item) => item.id === sessionId);
+      expect(session?.localDate).toBe(dayKey);
+      expect(session?.plannedExerciseIds).toEqual([a.id]);
+
+      const again = startWorkoutWithExercises([b.id], { dayKey });
+      expect(again).toBe(sessionId);
+      expect(
+        useWorkoutStore.getState().sessions.find((item) => item.id === sessionId)?.plannedExerciseIds,
+      ).toEqual([a.id, b.id]);
+    });
   });
 
   describe('saveSessionAsTemplate', () => {

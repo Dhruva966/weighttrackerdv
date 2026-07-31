@@ -1,5 +1,5 @@
-import { Dumbbell, Home, Sparkles, User } from 'lucide-react';
-import { useEffect } from 'react';
+import { BookOpen, Dumbbell, Home, Sparkles, User } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { LiftProgress } from './components/LiftProgress';
 import { InteractiveGymCalendar } from './components/InteractiveGymCalendar';
@@ -9,9 +9,11 @@ import { SessionLauncher } from './components/SessionLauncher';
 import { Toaster } from './components/Toaster';
 import { UniversalCommandBar } from './components/UniversalCommandBar';
 import { useSupabaseBootstrap } from './hooks/useSupabaseBootstrap';
+import { dailyQuoteForToday } from './lib/daily-quote';
 import { syncPotOfGold } from './lib/sync-gold';
 import { ExerciseCreate } from './pages/ExerciseCreate';
 import { ExerciseDetail } from './pages/ExerciseDetail';
+import { ExerciseEdit } from './pages/ExerciseEdit';
 import { ExerciseLibrary } from './pages/ExerciseLibrary';
 import { Goals } from './pages/Goals';
 import { History } from './pages/History';
@@ -44,15 +46,17 @@ function Header() {
 
 function GrowPage() {
   const goldDays = useUiStore((state) => state.goldDays);
+  const quote = useMemo(() => dailyQuoteForToday(), []);
 
   return (
     <div className="grid animate-rise gap-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="page-title">Your pot of gold</h1>
-          <p className="page-lead mt-3">
-            Consistency fills the pot — lifts, walks, and weigh-ins compound here.
-          </p>
+          <blockquote className="page-lead mt-3">
+            <p>“{quote.text}”</p>
+            <footer className="mt-2 text-sm text-fgMuted">— {quote.attribution}</footer>
+          </blockquote>
         </div>
         <PotOfGold days={goldDays} />
       </div>
@@ -82,6 +86,7 @@ function AppRoutes() {
       <Route path="/templates/:templateId/edit" element={<TemplateEditorPage />} />
       <Route path="/exercises" element={<ExerciseLibrary />} />
       <Route path="/exercises/new" element={<ExerciseCreate />} />
+      <Route path="/exercises/:slug/edit" element={<ExerciseEdit />} />
       <Route path="/exercises/:slug" element={<ExerciseDetail />} />
       <Route path="/goals" element={<Goals />} />
       <Route path="/settings" element={<Navigate to="/you" replace />} />
@@ -122,6 +127,7 @@ export function App() {
           { to: '/move', label: 'Move', icon: Dumbbell },
           { to: '/today', label: 'Today', icon: Home },
           { to: '/grow', label: 'Grow', icon: Sparkles },
+          { to: '/exercises', label: 'Library', icon: BookOpen },
           { to: '/you', label: 'You', icon: User },
         ]}
       />

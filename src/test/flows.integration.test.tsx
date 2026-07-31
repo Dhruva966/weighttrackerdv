@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
 import { ExerciseCreate } from '../pages/ExerciseCreate';
+import { ExerciseEdit } from '../pages/ExerciseEdit';
 import { Goals } from '../pages/Goals';
 import { History } from '../pages/History';
 import { Session } from '../pages/Session';
@@ -11,6 +12,7 @@ import { SettingsPage } from '../pages/Settings';
 import { starterExercises, starterGoals, starterSets } from '../data/catalog';
 import { useDiaryStore } from '../stores/diaryStore';
 import { usePrStore } from '../stores/prStore';
+import { useTemplateStore } from '../stores/templateStore';
 import { useUiStore } from '../stores/uiStore';
 import { BOARD_HISTORY_SEED_VERSION, useWorkoutStore } from '../stores/workoutStore';
 
@@ -41,6 +43,7 @@ function resetStores() {
     historyCleared: false,
     boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
   });
+  useTemplateStore.setState({ templates: [], templateExercises: [] });
   usePrStore.getState().clearPr();
   useDiaryStore.setState({
     bodyWeightLogs: [{ id: 'bw-seed-dhruva', loggedAt: '2026-07-13', weightLb: 169 }],
@@ -121,10 +124,14 @@ describe('app shell', () => {
     expect(screen.getByText(/1 open workout/i)).toBeInTheDocument();
   });
 
-  it('lands on Move at the root route and navigates Grow, Today, You without an Eat tab', async () => {
+  it('lands on Move at the root route and navigates Grow, Today, Library, You without an Eat tab', async () => {
     renderApp('/');
     expect(screen.getByRole('heading', { name: /^move$/i })).toBeInTheDocument();
     expect(within(screen.getByRole('navigation')).queryByRole('link', { name: /^eat$/i })).toBeNull();
+    expect(within(screen.getByRole('navigation')).getByRole('link', { name: /^library$/i })).toHaveAttribute(
+      'href',
+      '/exercises',
+    );
 
     clickBottomNav(/^grow$/i);
     await waitFor(() => expect(screen.getByRole('heading', { name: /your pot of gold/i })).toBeInTheDocument());
@@ -133,6 +140,9 @@ describe('app shell', () => {
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: /your pot of gold is filling/i })).toBeInTheDocument(),
     );
+
+    clickBottomNav(/^library$/i);
+    await waitFor(() => expect(screen.getByRole('heading', { name: /exercise library/i })).toBeInTheDocument());
 
     clickBottomNav(/^you$/i);
     await waitFor(() => expect(screen.getByRole('heading', { name: /^you$/i })).toBeInTheDocument());
@@ -175,6 +185,8 @@ describe('active session flow', () => {
     );
 
     expect(screen.getByText(/no exercises yet/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Templates' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /example templates/i })).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText(/search exercises to add/i), {
       target: { value: exercise.name },
@@ -187,6 +199,111 @@ describe('active session flow', () => {
       expect(
         useWorkoutStore.getState().sessions.find((item) => item.id === session.id)?.plannedExerciseIds,
       ).toEqual([exercise.id]);
+    });
+  });
+
+  it('creates an exercise from the picker, adds it, and keeps it searchable', async () => {
+    const session = useWorkoutStore.getState().createSession();
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={[`/session/${session.id}`]}>
+          <Routes>
+            <Route path="/session/:sessionId" element={<Session />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /create exercise/i }));
+    fireEvent.change(screen.getByLabelText(/^name$/i), { target: { value: 'Zorp Picker Create' } });
+    fireEvent.click(screen.getByRole('button', { name: /create & add/i }));
+
+    await waitFor(() => {
+      const created = useWorkoutStore.getState().exercises.find((item) => item.slug === 'zorp-picker-create');
+      expect(created).toBeTruthy();
+      expect(
+        useWorkoutStore.getState().sessions.find((item) => item.id === session.id)?.plannedExerciseIds,
+      ).toEqual([created!.id]);
+      expect(screen.getByText('Zorp Picker Create')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText(/search exercises to add/i), {
+      target: { value: 'Zorp Picker Create' },
+    });
+
+    await waitFor(() => {
+      const addedRow = screen.getByRole('button', { name: /zorp picker create.*added/i });
+      expect(addedRow).toBeDisabled();
+    });
+  });
+
+  it('shows photos or no-photo placeholders beside planned exercises', () => {
+    const withPhoto = {
+      ...starterExercises[0],
+      slug: 'triceps-pushdown-cable-straight-bar',
+      name: 'Triceps Pushdown (Cable - Straight Bar)',
+      imageUrl: 'https://example.com/press.jpg',
+      imageStyle: 'photo' as const,
+    };
+    const withoutPhoto = {
+      ...starterExercises[1],
+      slug: 'totally-unknown-session-exercise',
+      name: 'Totally Unknown Session Exercise',
+      imageUrl: undefined,
+      imageStyle: 'name-only' as const,
+    };
+    useWorkoutStore.setState({ exercises: [withPhoto, withoutPhoto, ...starterExercises.slice(2)] });
+    const session = useWorkoutStore.getState().createSession();
+    useWorkoutStore.getState().setSessionPlan(session.id, [withPhoto.id, withoutPhoto.id]);
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={[`/session/${session.id}`]}>
+          <Routes>
+            <Route path="/session/:sessionId" element={<Session />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByRole('img', { name: withPhoto.name })).toHaveAttribute(
+      'src',
+      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
+    );
+    expect(
+      screen.getByRole('img', { name: `No photo available for ${withoutPhoto.name}` }),
+    ).toBeInTheDocument();
+  });
+
+  it('applies an example template onto a past-day session', async () => {
+    const session = useWorkoutStore.getState().createSession({
+      startedAt: '2026-07-29T18:00:00-07:00',
+    });
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={[`/session/${session.id}`]}>
+          <Routes>
+            <Route path="/session/:sessionId" element={<Session />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    // Prefer Push Day specifically among example templates
+    const pushCards = screen.getAllByText('Push Day');
+    expect(pushCards.length).toBeGreaterThan(0);
+    const pushCard = pushCards[0]!.closest('.app-card');
+    expect(pushCard).toBeTruthy();
+    fireEvent.click(within(pushCard as HTMLElement).getByRole('button', { name: /add to workout/i }));
+
+    await waitFor(() => {
+      const planned =
+        useWorkoutStore.getState().sessions.find((item) => item.id === session.id)?.plannedExerciseIds ??
+        [];
+      expect(planned.length).toBeGreaterThan(0);
+      expect(screen.getByText(/your exercises/i)).toBeInTheDocument();
     });
   });
 
@@ -207,7 +324,7 @@ describe('active session flow', () => {
     );
 
     fireEvent.click(screen.getAllByRole('button', { name: new RegExp(exercise.name, 'i') })[0]!);
-    fireEvent.change(screen.getByPlaceholderText(/115 for 8 7 7/i), {
+    fireEvent.change(screen.getByLabelText(/^log$/i), {
       target: { value: '95 for 8' },
     });
     fireEvent.click(screen.getByRole('button', { name: /log sets/i }));
@@ -219,6 +336,7 @@ describe('active session flow', () => {
       expect(saved?.weightLb).toBe(95);
       expect(saved?.reps).toBe(8);
       expect(screen.getByText('95 lb x 8')).toBeInTheDocument();
+      expect(screen.queryByText(/logged \d+ sets?\./i)).not.toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole('link', { name: /^done$/i }));
@@ -310,7 +428,9 @@ describe('exercise creation', () => {
     cleanup();
   });
 
-  it('creates an exercise from the form', async () => {
+  it('creates an exercise from the form and finds it in Library search', async () => {
+    const { searchExercises } = await import('../hooks/useExercises');
+
     render(
       <QueryClientProvider client={new QueryClient()}>
         <MemoryRouter initialEntries={['/exercises/new']}>
@@ -321,11 +441,49 @@ describe('exercise creation', () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Cable Fly' } });
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Zorp Library Create' } });
     fireEvent.click(screen.getByRole('button', { name: /save exercise/i }));
 
     await waitFor(() => {
-      expect(useWorkoutStore.getState().exercises.some((item) => item.slug === 'cable-fly')).toBe(true);
+      const created = useWorkoutStore.getState().exercises.find((item) => item.slug === 'zorp-library-create');
+      expect(created).toBeTruthy();
+      const hits = searchExercises(useWorkoutStore.getState().exercises, 'Zorp Library Create');
+      expect(hits[0]?.id).toBe(created!.id);
+    });
+  });
+
+  it('edits muscle group from the edit form and updates Library filters', async () => {
+    const { searchExercises } = await import('../hooks/useExercises');
+    const created = useWorkoutStore.getState().addExercise({
+      name: 'Zorp Mis-tagged Lift',
+      muscleGroup: 'cardio',
+      equipment: 'other',
+    });
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={[`/exercises/${created.slug}/edit`]}>
+          <Routes>
+            <Route path="/exercises/:slug/edit" element={<ExerciseEdit />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.change(screen.getByLabelText(/muscle group/i), { target: { value: 'back' } });
+    fireEvent.change(screen.getByLabelText(/equipment/i), { target: { value: 'cable' } });
+    fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
+
+    await waitFor(() => {
+      const updated = useWorkoutStore.getState().exercises.find((item) => item.id === created.id);
+      expect(updated?.muscleGroup).toBe('back');
+      expect(updated?.equipment).toBe('cable');
+      expect(updated?.slug).toBe(created.slug);
+      const hits = searchExercises(
+        useWorkoutStore.getState().exercises.filter((item) => item.muscleGroup === 'back'),
+        'Zorp Mis-tagged Lift',
+      );
+      expect(hits[0]?.id).toBe(created.id);
     });
   });
 });

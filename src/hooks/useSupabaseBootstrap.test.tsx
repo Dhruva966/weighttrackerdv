@@ -32,8 +32,8 @@ describe('useSupabaseBootstrap', () => {
 
     const { result } = renderHook(() => useSupabaseBootstrap());
 
+    await waitFor(() => expect(bootstrapSupabaseSync).toHaveBeenCalledTimes(1));
     expect(result.current.syncing).toBe(true);
-    expect(bootstrapSupabaseSync).toHaveBeenCalledTimes(1);
 
     act(() => {
       void result.current.refresh();

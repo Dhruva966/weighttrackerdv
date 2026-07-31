@@ -31,4 +31,19 @@ describe('workout navigation surfaces', () => {
     renderApp('/move');
     expect(screen.queryByLabelText('Workout calendar')).not.toBeInTheDocument();
   });
+
+  it('shows a daily attributed quote on Grow instead of the old pot copy', () => {
+    renderApp('/grow');
+    expect(screen.getByRole('heading', { name: /your pot of gold/i })).toBeInTheDocument();
+    expect(screen.queryByText(/consistency fills the pot/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/^— /)).toBeInTheDocument();
+  });
+
+  it('exposes Library in the bottom nav and opens the exercise library', () => {
+    renderApp('/exercises');
+    const libraryTab = screen.getByRole('navigation').querySelector('a[href="/exercises"]');
+    expect(libraryTab).toBeTruthy();
+    expect(libraryTab).toHaveTextContent(/library/i);
+    expect(screen.getByRole('heading', { name: /exercise library/i })).toBeInTheDocument();
+  });
 });

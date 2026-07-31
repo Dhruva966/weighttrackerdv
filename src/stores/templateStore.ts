@@ -25,38 +25,62 @@ function unionPreferLocal<T extends { id: string }>(local: T[], remote: T[]): T[
   return additions.length > 0 ? [...local, ...additions] : local;
 }
 
+export type StartWorkoutOptions = {
+  /** Apply into an existing session (e.g. Session page / past-day backfill). */
+  sessionId?: string;
+  /** Calendar day to find/create when no sessionId is given. Defaults to today. */
+  dayKey?: string;
+};
+
 /**
- * Reuses today's open session (Move is day-centric — one workout per day) and appends
+ * Reuses the target day's open session (Move is day-centric — one workout per day) and appends
  * these exercises to its plan. Shared by "My templates" and read-only "Example templates",
  * which start a workout without ever materializing a persisted Template record.
+ *
+ * Pass `sessionId` to apply onto a specific workout (including past calendar days). Pass `dayKey`
+ * to backfill a forgotten day without jumping to today.
  */
-export function startWorkoutWithExercises(exerciseIds: string[]): string | null {
+export function startWorkoutWithExercises(
+  exerciseIds: string[],
+  options: StartWorkoutOptions = {},
+): string | null {
   if (exerciseIds.length === 0) {
     return null;
   }
 
   const workout = useWorkoutStore.getState();
-  const dayKey = toDayKey(new Date(), MOVE_TIMEZONE);
-  const existing = findDaySession(
-    dayKey,
-    workout.sessions.map((session) => ({
-      id: session.id,
-      startedAt: session.startedAt,
-      endedAt: session.endedAt,
-      notes: session.notes,
-    })),
-    { timeZone: MOVE_TIMEZONE },
-  );
+  let sessionId = options.sessionId;
 
-  let sessionId: string;
-  if (existing) {
-    if (existing.endedAt) {
-      workout.reopenSession(existing.id);
+  if (sessionId) {
+    const target = workout.sessions.find((item) => item.id === sessionId);
+    if (!target) {
+      return null;
     }
-    sessionId = existing.id;
+    if (target.endedAt) {
+      workout.reopenSession(target.id);
+    }
   } else {
-    const session = workout.createSession({ startedAt: calendarDayToStartedAt(dayKey, MOVE_TIMEZONE) });
-    sessionId = session.id;
+    const dayKey = options.dayKey ?? toDayKey(new Date(), MOVE_TIMEZONE);
+    const existing = findDaySession(
+      dayKey,
+      workout.sessions.map((session) => ({
+        id: session.id,
+        startedAt: session.startedAt,
+        endedAt: session.endedAt,
+        notes: session.notes,
+      })),
+      { timeZone: MOVE_TIMEZONE },
+    );
+
+    if (existing) {
+      if (existing.endedAt) {
+        workout.reopenSession(existing.id);
+      }
+      sessionId = existing.id;
+    } else {
+      const session = workout.createSession({ startedAt: calendarDayToStartedAt(dayKey, MOVE_TIMEZONE) });
+      sessionId = session.id;
+    }
   }
 
   const session = useWorkoutStore.getState().sessions.find((item) => item.id === sessionId);
@@ -77,8 +101,8 @@ type TemplateState = {
   duplicateTemplate: (templateId: string, name?: string) => Template | null;
   /** Full reconcile: adds missing exercises, drops removed ones, repositions the rest. One atomic commit. */
   setTemplateExercises: (templateId: string, orderedExerciseIds: string[]) => void;
-  /** Reuses today's open session (Move is day-centric) and appends this template's exercises to its plan. */
-  startWorkoutFromTemplate: (templateId: string) => string | null;
+  /** Reuses the target day's session (or a given sessionId) and appends this template's exercises. */
+  startWorkoutFromTemplate: (templateId: string, options?: StartWorkoutOptions) => string | null;
   /** Builds a template from a session's exercises in first-logged order, falling back to its planned exercises. */
   saveSessionAsTemplate: (sessionId: string, name: string) => Template | null;
   hydrateFromRemote: (remote: RemoteTemplateSnapshot) => void;
@@ -173,7 +197,8 @@ export const useTemplateStore = create<TemplateState>()(
           void deleteSyncedTemplateExercise(removedItem.id);
         }
       },
-      startWorkoutFromTemplate: (templateId) => startWorkoutWithExercises(get().exercisesFor(templateId)),
+      startWorkoutFromTemplate: (templateId, options) =>
+        startWorkoutWithExercises(get().exercisesFor(templateId), options),
       saveSessionAsTemplate: (sessionId, name) => {
         const workout = useWorkoutStore.getState();
         const session = workout.sessions.find((item) => item.id === sessionId);

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { Pencil } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ExerciseImage } from '../components/ExerciseImage';
 import { SetRow } from '../components/SetRow';
@@ -46,11 +47,17 @@ export function ExerciseDetail() {
   return (
     <div className="grid gap-4">
       <ExerciseImage exercise={exercise} />
-      <div>
-        <h1 className="page-title">{exercise.name}</h1>
-        <p className="mt-1 text-sm capitalize text-fgMuted">
-          {exercise.muscleGroup} / {exercise.equipment}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="page-title">{exercise.name}</h1>
+          <p className="mt-1 text-sm capitalize text-fgMuted">
+            {exercise.muscleGroup} / {exercise.equipment}
+          </p>
+        </div>
+        <Link className="button-secondary inline-flex shrink-0" to={`/exercises/${exercise.slug}/edit`}>
+          <Pencil size={16} />
+          Edit
+        </Link>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="app-card">

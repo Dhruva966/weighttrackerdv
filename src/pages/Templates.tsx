@@ -23,7 +23,7 @@ export function Templates() {
   function handleStart(templateId: string) {
     const sessionId = startWorkoutFromTemplate(templateId);
     if (sessionId) {
-      navigate(`/session/${sessionId}`);
+      navigate(`/session/${sessionId}`, { state: { from: '/templates' } });
     }
   }
 
@@ -31,7 +31,7 @@ export function Templates() {
     const exerciseIds = resolveExampleTemplateExerciseIds(example, exercises);
     const sessionId = startWorkoutWithExercises(exerciseIds);
     if (sessionId) {
-      navigate(`/session/${sessionId}`);
+      navigate(`/session/${sessionId}`, { state: { from: '/templates' } });
     }
   }
 
@@ -54,7 +54,7 @@ export function Templates() {
           <h1 className="page-title">Templates</h1>
           <p className="page-lead mt-3">Start a workout in one tap, or build your own.</p>
         </div>
-        <Link className="button-primary min-h-11 gap-1.5 px-3 text-sm" to="/templates/new">
+        <Link className="button-primary min-h-9 gap-1.5 px-3 text-sm" to="/templates/new">
           <Plus size={16} strokeWidth={1.75} />
           New
         </Link>
