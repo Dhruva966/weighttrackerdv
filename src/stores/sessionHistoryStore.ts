@@ -38,7 +38,6 @@ function capture(sessionId: string): SessionSnapshot {
 
 function pushIfChanged(
   set: (updater: (state: SessionHistoryState) => Partial<SessionHistoryState>) => void,
-  get: () => SessionHistoryState,
   sessionId: string,
   label: string,
   before: SessionSnapshot,
@@ -70,13 +69,13 @@ export const useSessionHistoryStore = create<SessionHistoryState>()((set, get) =
     const before = capture(sessionId);
     mutate();
     const after = capture(sessionId);
-    return pushIfChanged(set, get, sessionId, label, before, after);
+    return pushIfChanged(set, sessionId, label, before, after);
   },
   commitEditAsync: async (sessionId, label, mutate) => {
     const before = capture(sessionId);
     await mutate();
     const after = capture(sessionId);
-    return pushIfChanged(set, get, sessionId, label, before, after);
+    return pushIfChanged(set, sessionId, label, before, after);
   },
   undo: (sessionId) => {
     const current = stacksFor(get().bySession, sessionId);
