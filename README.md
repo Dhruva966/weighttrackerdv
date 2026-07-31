@@ -36,12 +36,14 @@ flowchart TD
 ## Routes
 | Route | Purpose |
 |-------|---------|
-| `/` | Today — weight, training summary, pot of gold |
-| `/move` | Gym home — calendar, day detail, walks secondary |
-| `/grow` | Pot of gold + lift progress charts + gym feed |
+| `/` | Redirect → `/move` |
+| `/move` | Template-first gym home (resume today's session or start from templates) |
+| `/today` | Secondary dashboard — weight, training summary, pot of gold |
+| `/grow` | Pot + gym calendar + lift progress + gym feed |
 | `/you` | Settings / export |
-| `/session/new`, `/session/:id` | Active workout; NL walks + set logging |
-| `/exercises`, `/exercises/new`, `/exercises/:slug` | Library |
+| `/session/new`, `/session/:id` | Active workout; lift + cardio set logging |
+| `/templates`, `/templates/new`, `/templates/:id/edit` | Manage / edit workout templates |
+| `/exercises`, `/exercises/new`, `/exercises/:slug`, `/exercises/:slug/edit` | Library + create/edit |
 | `/goals` | Editable daily intentions |
 | `/log` | Redirect → `/move` |
 | `/history` | Redirect → `/grow` |
@@ -85,4 +87,4 @@ Food archive lives under `archive/food/` and is not imported by the active app.
 | `wiki/README.md` | Long-form notes index |
 
 ## Current Status (Jul 2026)
-Current active shape: Aloo gold shell, pot of gold, universal NL/voice bar, walks/weight local diary, editable intentions, real lift charts, and gym sessions that sync to Supabase when configured. Food, meal, macro, and calorie UI is archived under `archive/food/`.
+Current active shape: Aloo gold shell, pot of gold, universal NL/voice bar, walks/weight local diary, editable intentions, real lift charts, template-first Move, catalog exercise merges (board→PDF), editable library cards, and gym sessions (lift + cardio fields) that sync to Supabase when configured. Food UI remains archived under `archive/food/`. Production: https://weighttrackerdv.vercel.app (Vercel auto-deploy from `main`).

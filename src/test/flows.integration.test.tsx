@@ -186,7 +186,6 @@ describe('active session flow', () => {
 
     expect(screen.getByText(/no exercises yet/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Templates' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /example templates/i })).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText(/search exercises to add/i), {
       target: { value: exercise.name },
@@ -269,7 +268,7 @@ describe('active session flow', () => {
 
     expect(screen.getByRole('img', { name: withPhoto.name })).toHaveAttribute(
       'src',
-      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
+      'https://example.com/press.jpg',
     );
     expect(
       screen.getByRole('img', { name: `No photo available for ${withoutPhoto.name}` }),

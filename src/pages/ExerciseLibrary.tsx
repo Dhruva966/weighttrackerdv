@@ -53,7 +53,7 @@ export function ExerciseLibrary() {
 
       <div className="grid gap-2">
         {exercises.map((exercise) => (
-          <ExerciseCard key={exercise.id} exercise={exercise} />
+          <ExerciseCard key={exercise.id} exercise={exercise} from="/exercises" />
         ))}
       </div>
     </div>

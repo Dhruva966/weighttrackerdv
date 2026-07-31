@@ -97,12 +97,12 @@ describe('Move', () => {
     expect(screen.queryByRole('link', { name: /continue today’s workout/i })).not.toBeInTheDocument();
   });
 
-  it('puts templates first: examples are startable and calendar/cardio UI stays off Move', () => {
+  it('puts templates first: starters are startable and calendar/cardio UI stays off Move', () => {
     renderMove();
 
     expect(screen.getByRole('heading', { name: 'Move' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Templates' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Example templates' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Example templates' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /^all$/i })).toHaveAttribute('href', '/templates');
     expect(screen.getByRole('link', { name: /^new$/i })).toHaveAttribute('href', '/templates/new');
     expect(screen.getByRole('link', { name: /browse exercises/i })).toHaveAttribute('href', '/exercises');
@@ -127,13 +127,15 @@ describe('Move', () => {
     expect(screen.queryByText('Sets logged')).not.toBeInTheDocument();
   });
 
-  it('lists a saved template ahead of examples and can start it', () => {
+  it('lists a saved template ahead of starters and can start it', () => {
     const exercise = starterExercises[0];
     useTemplateStore.getState().createTemplate('Chest focus', [exercise.id]);
+    useTemplateStore.getState().createTemplate('Empty draft', []);
 
     renderMove();
 
     expect(screen.getByText('Chest focus')).toBeInTheDocument();
+    expect(screen.queryByText('Empty draft')).not.toBeInTheDocument();
     const startButtons = screen.getAllByRole('button', { name: /start workout/i });
     fireEvent.click(startButtons[0]);
     expect(navigateMock).toHaveBeenCalledWith(

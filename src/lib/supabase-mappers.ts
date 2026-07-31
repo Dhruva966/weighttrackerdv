@@ -40,12 +40,16 @@ type SetRow = {
   session_id: string;
   exercise_id: string;
   set_number: number;
-  weight_lb: number | string;
-  reps: number;
+  weight_lb: number | string | null;
+  reps: number | null;
   rpe: number | string | null;
   is_warmup: boolean | null;
   is_pr: boolean | null;
   created_at: string;
+  level?: number | string | null;
+  speed?: number | string | null;
+  duration_sec?: number | null;
+  calories?: number | string | null;
 };
 
 type GoalRow = {
@@ -113,12 +117,16 @@ export function setToRow(setItem: LoggedSet) {
     session_id: setItem.sessionId,
     exercise_id: setItem.exerciseId,
     set_number: setItem.setNumber,
-    weight_lb: setItem.weightLb,
-    reps: setItem.reps,
+    weight_lb: setItem.weightLb > 0 ? setItem.weightLb : null,
+    reps: setItem.reps > 0 ? setItem.reps : null,
     rpe: setItem.rpe ?? null,
     is_warmup: setItem.isWarmup,
     is_pr: setItem.isPr,
     created_at: setItem.createdAt,
+    level: setItem.level ?? null,
+    speed: setItem.speed ?? null,
+    duration_sec: setItem.durationSec ?? null,
+    calories: setItem.calories ?? null,
   };
 }
 
@@ -193,12 +201,16 @@ export function rowToSet(row: SetRow): LoggedSet {
     sessionId: row.session_id,
     exerciseId: row.exercise_id,
     setNumber: row.set_number,
-    weightLb: Number(row.weight_lb),
-    reps: row.reps,
+    weightLb: row.weight_lb === null || row.weight_lb === undefined ? 0 : Number(row.weight_lb),
+    reps: row.reps === null || row.reps === undefined ? 0 : row.reps,
     rpe: row.rpe === null || row.rpe === undefined ? undefined : Number(row.rpe),
     isWarmup: row.is_warmup ?? false,
     isPr: row.is_pr ?? false,
     createdAt: row.created_at,
+    level: row.level === null || row.level === undefined ? undefined : Number(row.level),
+    speed: row.speed === null || row.speed === undefined ? undefined : Number(row.speed),
+    durationSec: row.duration_sec === null || row.duration_sec === undefined ? undefined : row.duration_sec,
+    calories: row.calories === null || row.calories === undefined ? undefined : Number(row.calories),
   };
 }
 

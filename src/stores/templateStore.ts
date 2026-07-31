@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { remapExerciseId } from '../data/exercise-merges';
 import { calendarDayToStartedAt, findDaySession, toDayKey } from '../lib/calendar';
 import { getDeviceTimeZone } from '../lib/local-day';
 import type { RemoteTemplateSnapshot } from '../lib/supabase-hydrate';
@@ -34,7 +35,7 @@ export type StartWorkoutOptions = {
 
 /**
  * Reuses the target day's open session (Move is day-centric — one workout per day) and appends
- * these exercises to its plan. Shared by "My templates" and read-only "Example templates",
+ * these exercises to its plan. Shared by saved templates and read-only starters,
  * which start a workout without ever materializing a persisted Template record.
  *
  * Pass `sessionId` to apply onto a specific workout (including past calendar days). Pass `dayKey`
@@ -229,6 +230,30 @@ export const useTemplateStore = create<TemplateState>()(
     }),
     {
       name: 'weight-tracker-templates',
+      merge: (persisted, current) => {
+        const stored = persisted as Partial<{ templates: Template[]; templateExercises: TemplateExercise[] }> | undefined;
+        const exercises = useWorkoutStore.getState().exercises;
+        const remapped = (stored?.templateExercises ?? current.templateExercises).map((item) => ({
+          ...item,
+          exerciseId: remapExerciseId(item.exerciseId, exercises),
+        }));
+        // Drop duplicate template↔exercise links created when two slugs collapsed to one id.
+        const seen = new Set<string>();
+        const templateExercises = remapped.filter((item) => {
+          const key = `${item.templateId}:${item.exerciseId}`;
+          if (seen.has(key)) {
+            return false;
+          }
+          seen.add(key);
+          return true;
+        });
+        return {
+          ...current,
+          ...stored,
+          templates: stored?.templates ?? current.templates,
+          templateExercises,
+        };
+      },
     },
   ),
 );
