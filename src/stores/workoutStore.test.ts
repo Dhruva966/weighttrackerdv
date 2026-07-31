@@ -736,7 +736,50 @@ describe('workoutStore', () => {
       expect(match?.imageUrl).toBe('https://example.com/local.jpg');
     });
 
-    it('prefers verified IMG_3417.pdf icons over remote FEDB stock for the same slug', () => {
+    it('gap-fills imageUrl from remote even when a stale local PDF icon path was stamped', () => {
+      useWorkoutStore.setState((state) => ({
+        exercises: [
+          ...state.exercises,
+          {
+            id: 'ex-arnold-press-dumbbell',
+            slug: 'arnold-press-dumbbell',
+            name: 'Arnold Press (Dumbbell)',
+            muscleGroup: 'shoulders' as const,
+            secondaryMuscles: [],
+            equipment: 'dumbbell' as const,
+            instructions: [],
+            imageUrl: '/exercise-icons/arnold-press-dumbbell.jpg',
+            imageStyle: 'photo' as const,
+            source: 'pdf-import',
+            archived: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        ],
+      }));
+
+      useWorkoutStore.getState().hydrateFromRemote({
+        exercises: [
+          remoteExercise({
+            id: 'ex-arnold-press-dumbbell',
+            slug: 'arnold-press-dumbbell',
+            name: 'Arnold Press (Dumbbell)',
+            imageUrl: 'https://example.com/fedb-arnold.jpg',
+            imageStyle: 'photo',
+            source: 'pdf-import',
+          }),
+        ],
+        sessions: [],
+        sets: [],
+        goals: [],
+      });
+
+      const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'arnold-press-dumbbell');
+      expect(match?.imageUrl).toBe('https://example.com/fedb-arnold.jpg');
+      expect(match?.imageStyle).toBe('photo');
+    });
+
+    it('keeps remote Supabase imageUrl instead of stamping a local PDF icon path into the store', () => {
       useWorkoutStore.getState().hydrateFromRemote({
         exercises: [
           remoteExercise({
@@ -753,7 +796,7 @@ describe('workoutStore', () => {
       });
 
       const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'arnold-press-dumbbell');
-      expect(match?.imageUrl).toBe('/exercise-icons/arnold-press-dumbbell.jpg');
+      expect(match?.imageUrl).toBe('https://example.com/fedb-arnold.jpg');
       expect(match?.imageStyle).toBe('photo');
     });
   });
