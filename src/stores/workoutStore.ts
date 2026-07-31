@@ -6,7 +6,6 @@ import {
   starterGoals,
   starterSets,
 } from '../data/catalog';
-import { pdfIconUrl } from '../data/pdfIconSlugs';
 import { toDayKey } from '../lib/calendar';
 import { slugify } from '../lib/fmt';
 import { getDeviceTimeZone } from '../lib/local-day';
@@ -20,11 +19,30 @@ import type { SessionSnapshot } from '../lib/session-history';
 import type { EquipmentKind, Exercise, Goal, LoggedSet, MuscleGroup, WorkoutSession } from '../types';
 import { usePrStore } from './prStore';
 
-/** Prefer OCR-cropped IMG_3417.pdf icons over FEDB/remote stock when a verified pair exists. */
-function withPdfIcon(exercise: Exercise): Exercise {
-  const url = pdfIconUrl(exercise.slug, exercise.equipment);
-  if (!url) return exercise;
-  return { ...exercise, imageUrl: url, imageStyle: 'photo' };
+/**
+ * Local `/exercise-icons/*.jpg` paths are UI-only candidates (see ExerciseImage).
+ * Never persist them as the exercise's imageUrl — they overwrite Supabase Storage URLs
+ * and then block gap-fill when the binaries are gitignored / missing.
+ */
+function isLocalPdfIconPath(url: string | undefined): boolean {
+  return Boolean(url?.startsWith('/exercise-icons/'));
+}
+
+/** True when the row has a real stored photo (remote or blob), not a missing local icon stamp. */
+function hasStoredPhoto(url: string | undefined): boolean {
+  const trimmed = url?.trim();
+  return Boolean(trimmed) && !isLocalPdfIconPath(trimmed);
+}
+
+function sanitizeExerciseImage(exercise: Exercise): Exercise {
+  if (!isLocalPdfIconPath(exercise.imageUrl)) {
+    return exercise;
+  }
+  return {
+    ...exercise,
+    imageUrl: undefined,
+    imageStyle: exercise.imageStyle === 'photo' ? 'name-only' : exercise.imageStyle,
+  };
 }
 
 type ExerciseInput = {
@@ -100,31 +118,33 @@ function unionPreferLocal<T extends { id: string }>(local: T[], remote: T[]): T[
 
 /**
  * Prefer local exercise identity on id/slug conflicts (board starter + pdf-import must not
- * double). Gap-fill imageUrl/imageStyle from remote when the local row has no photo — that is
- * how Supabase `exercise-images` backfills reach Library without hardcoding starter URLs.
- * Verified IMG_3417.pdf crops always win over remote FEDB stock for the same slug.
+ * double). Gap-fill imageUrl/imageStyle from remote when the local row has no real photo —
+ * how Supabase `exercise-images` backfills reach Library. Local `/exercise-icons/` stamps
+ * are ignored so missing gitignored binaries cannot block remote URLs; ExerciseImage still
+ * prefers a local crop at render time and falls back to imageUrl on error.
  */
 function unionExercisesPreferLocal(local: Exercise[], remote: Exercise[]): Exercise[] {
   const remoteById = new Map(remote.map((item) => [item.id, item]));
   const remoteBySlug = new Map(remote.map((item) => [item.slug, item]));
 
   const merged = local.map((item) => {
-    const remoteMatch = remoteById.get(item.id) ?? remoteBySlug.get(item.slug);
-    if (!remoteMatch || item.imageUrl || !remoteMatch.imageUrl) {
-      return withPdfIcon(item);
+    const cleaned = sanitizeExerciseImage(item);
+    const remoteMatch = remoteById.get(cleaned.id) ?? remoteBySlug.get(cleaned.slug);
+    if (!remoteMatch || hasStoredPhoto(cleaned.imageUrl) || !remoteMatch.imageUrl) {
+      return cleaned;
     }
-    return withPdfIcon({
-      ...item,
+    return {
+      ...cleaned,
       imageUrl: remoteMatch.imageUrl,
       imageStyle: remoteMatch.imageStyle ?? 'photo',
-    });
+    };
   });
 
   const localIds = new Set(merged.map((item) => item.id));
   const localSlugs = new Set(merged.map((item) => item.slug));
   const additions = remote
     .filter((item) => !localIds.has(item.id) && !localSlugs.has(item.slug))
-    .map(withPdfIcon);
+    .map(sanitizeExerciseImage);
   return additions.length > 0 ? [...merged, ...additions] : merged;
 }
 
@@ -133,20 +153,21 @@ function mergeExercises(required: Exercise[], persisted: Exercise[] | undefined)
   const persistedById = new Map((persisted ?? []).map((item) => [item.id, item]));
   const merged = required.map((item) => {
     const stored = persistedById.get(item.id);
-    const base = stored
-      ? {
-          ...item,
-          archived: stored.archived,
-          imageUrl: stored.imageUrl ?? item.imageUrl,
-          imageStyle: stored.imageUrl ? stored.imageStyle : item.imageStyle,
-        }
-      : item;
-    return withPdfIcon(base);
+    if (!stored) {
+      return item;
+    }
+    const storedUrl = hasStoredPhoto(stored.imageUrl) ? stored.imageUrl : undefined;
+    return {
+      ...item,
+      archived: stored.archived,
+      imageUrl: storedUrl ?? item.imageUrl,
+      imageStyle: storedUrl ? stored.imageStyle : item.imageStyle,
+    };
   });
 
   return [
     ...merged,
-    ...(persisted ?? []).filter((item) => !starterIds.has(item.id)).map(withPdfIcon),
+    ...(persisted ?? []).filter((item) => !starterIds.has(item.id)).map(sanitizeExerciseImage),
   ];
 }
 
