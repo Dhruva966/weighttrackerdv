@@ -28,34 +28,48 @@ const boardBicep: Exercise = {
 };
 
 describe('exerciseImageCandidates', () => {
-  it('prefers local PDF icon over remote imageUrl for paired slugs', () => {
+  it('prefers durable remote imageUrl over local PDF icon (Vercel has no icon binaries)', () => {
     expect(
       exerciseImageCandidates({
         ...pdfPaired,
         imageUrl: 'https://example.com/remote.jpg',
       }),
     ).toEqual([
-      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
       'https://example.com/remote.jpg',
+      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
     ]);
   });
 
-  it('aliases board short slugs onto verified PDF crops', () => {
+  it('aliases board short slugs onto verified PDF crops when no remote URL', () => {
     expect(exerciseImageCandidates(boardBicep)).toEqual(['/exercise-icons/bicep-curl-dumbbell.jpg']);
+  });
+
+  it('ignores stamped local /exercise-icons paths stored as imageUrl', () => {
+    expect(
+      exerciseImageCandidates({
+        ...pdfPaired,
+        imageUrl: '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
+      }),
+    ).toEqual(['/exercise-icons/triceps-pushdown-cable-straight-bar.jpg']);
   });
 });
 
 describe('ExerciseImage', () => {
-  it('renders an img for a known PDF-paired slug', () => {
-    render(<ExerciseImage exercise={pdfPaired} size="sm" />);
+  it('renders remote img first when imageUrl is https', () => {
+    render(
+      <ExerciseImage
+        exercise={{ ...pdfPaired, imageUrl: 'https://example.com/remote.jpg' }}
+        size="sm"
+      />,
+    );
 
     expect(screen.getByRole('img', { name: pdfPaired.name })).toHaveAttribute(
       'src',
-      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
+      'https://example.com/remote.jpg',
     );
   });
 
-  it('falls back to remote imageUrl when the local icon errors', () => {
+  it('falls back to local PDF icon when remote errors', () => {
     render(
       <ExerciseImage
         exercise={{ ...pdfPaired, imageUrl: 'https://example.com/fallback.jpg' }}
@@ -67,7 +81,7 @@ describe('ExerciseImage', () => {
 
     expect(screen.getByRole('img', { name: pdfPaired.name })).toHaveAttribute(
       'src',
-      'https://example.com/fallback.jpg',
+      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
     );
   });
 
