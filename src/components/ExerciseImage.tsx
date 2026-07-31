@@ -2,17 +2,38 @@ import { useEffect, useState } from 'react';
 import { pdfIconUrl } from '../data/pdfIconSlugs';
 import type { Exercise } from '../types';
 
-/** Local PDF crop first, then stored/remote imageUrl. Dedupes identical paths. */
+function isDurableRemoteUrl(url: string): boolean {
+  return /^https?:\/\//i.test(url) || url.startsWith('blob:');
+}
+
+/**
+ * Prefer durable Supabase/blob URLs first. Local `/exercise-icons/*` are gitignored
+ * and are not deployed to Vercel (SPA returns HTML 200), so putting them first
+ * blanked Library photos in production even when `image_url` was fine.
+ */
 export function exerciseImageCandidates(exercise: Pick<Exercise, 'slug' | 'equipment' | 'imageUrl'>): string[] {
   const local = pdfIconUrl(exercise.slug, exercise.equipment);
   const remote = exercise.imageUrl?.trim();
   const candidates: string[] = [];
-  if (local) {
-    candidates.push(local);
-  }
-  if (remote && remote !== local) {
+
+  if (remote && isDurableRemoteUrl(remote)) {
     candidates.push(remote);
   }
+
+  if (local && !candidates.includes(local)) {
+    candidates.push(local);
+  }
+
+  // Non-http stored paths (rare) after durable remotes / local crops.
+  if (
+    remote &&
+    !isDurableRemoteUrl(remote) &&
+    !remote.startsWith('/exercise-icons/') &&
+    !candidates.includes(remote)
+  ) {
+    candidates.push(remote);
+  }
+
   return candidates;
 }
 
