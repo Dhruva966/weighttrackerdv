@@ -14,7 +14,7 @@ describe('ExerciseForm muscle options', () => {
     );
 
     const select = screen.getByLabelText(/muscle group/i);
-    const options = [...select.querySelectorAll('option')].map((option) => option.value);
+    const options = Array.from(select.querySelectorAll('option')).map((option) => option.value);
 
     expect(options).not.toContain('arms');
     expect(options).not.toContain('legs');
