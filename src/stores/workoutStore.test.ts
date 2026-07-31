@@ -125,7 +125,7 @@ describe('workoutStore', () => {
 
     it('fires PR events when a set beats prior performance', () => {
       const session = useWorkoutStore.getState().createSession();
-      const exercise = starterExercises.find((item) => item.slug === 'lat-pulldown');
+      const exercise = starterExercises.find((item) => item.slug === 'lat-pulldown-cable');
       expect(exercise).toBeTruthy();
 
       useWorkoutStore.getState().addSet({
@@ -136,7 +136,7 @@ describe('workoutStore', () => {
         isWarmup: false,
       });
 
-      expect(usePrStore.getState().lastPr?.exerciseName).toBe('Lat Pulldown');
+      expect(usePrStore.getState().lastPr?.exerciseName).toBe('Lat Pulldown (Cable)');
     });
 
     it('does not mark repeat performances as PRs', () => {
@@ -200,7 +200,7 @@ describe('workoutStore', () => {
 
     it('does not mark warmup sets as PRs', () => {
       const session = useWorkoutStore.getState().createSession();
-      const exercise = starterExercises.find((item) => item.slug === 'lat-pulldown');
+      const exercise = starterExercises.find((item) => item.slug === 'lat-pulldown-cable');
       expect(exercise).toBeTruthy();
 
       const logged = useWorkoutStore.getState().addSet({
@@ -359,20 +359,23 @@ describe('workoutStore', () => {
 
     it('allocates a unique slug when the base slug is already taken', () => {
       const first = useWorkoutStore.getState().addExercise({
-        name: 'Lat Pulldown',
+        name: 'Lat Pulldown (Cable)',
         muscleGroup: 'back',
         equipment: 'cable',
       });
       const second = useWorkoutStore.getState().addExercise({
-        name: 'Lat Pulldown',
+        name: 'Lat Pulldown (Cable)',
         muscleGroup: 'back',
         equipment: 'cable',
       });
 
-      // Starter catalog already owns `lat-pulldown`.
-      expect(first.slug).toBe('lat-pulldown-2');
-      expect(second.slug).toBe('lat-pulldown-3');
-      expect(useWorkoutStore.getState().exercises.filter((item) => item.name === 'Lat Pulldown').length).toBeGreaterThanOrEqual(2);
+      // Starter catalog already owns `lat-pulldown-cable`.
+      expect(first.slug).toBe('lat-pulldown-cable-2');
+      expect(second.slug).toBe('lat-pulldown-cable-3');
+      expect(
+        useWorkoutStore.getState().exercises.filter((item) => item.name === 'Lat Pulldown (Cable)')
+          .length,
+      ).toBeGreaterThanOrEqual(2);
     });
 
     it('is immediately findable via catalog search after create', async () => {

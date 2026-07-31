@@ -472,12 +472,9 @@ export function Session() {
           <p className="mt-1 text-sm text-fgMuted">Add a planned set of exercises to this workout.</p>
         </div>
 
-        {templates.length === 0 ? (
-          <p className="app-card text-fgMuted">
-            No saved templates yet — use an example below, then save from this workout when it feels right.
-          </p>
-        ) : (
-          templates.map((template) => (
+        {templates
+          .filter((template) => exercisesFor(template.id).length > 0)
+          .map((template) => (
             <TemplateCard
               key={template.id}
               name={template.name}
@@ -485,10 +482,7 @@ export function Session() {
               actionLabel="Add to workout"
               onStart={() => handleApplySavedTemplate(template.id)}
             />
-          ))
-        )}
-
-        <h3 className="pt-1 text-sm font-semibold uppercase tracking-wide text-fgMuted">Example templates</h3>
+          ))}
         {exampleTemplates.map((example) => (
           <TemplateCard
             key={example.id}

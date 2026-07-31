@@ -60,13 +60,33 @@ export type LoggedSet = {
   sessionId: string;
   exerciseId: string;
   setNumber: number;
+  /** Lift load. Null/undefined for cardio-only logs. */
   weightLb: number;
+  /** Lift reps. Null/undefined for cardio-only logs — use 0 locally when cardio. */
   reps: number;
   rpe?: number;
   isWarmup: boolean;
   isPr: boolean;
   createdAt: string;
+  /** Cardio machine level (optional). */
+  level?: number;
+  /** Cardio speed (mph or machine units, optional). */
+  speed?: number;
+  /** Cardio duration in seconds (optional). */
+  durationSec?: number;
+  /** Cardio calories (optional). */
+  calories?: number;
 };
+
+export function isCardioSet(setItem: Pick<LoggedSet, 'level' | 'speed' | 'durationSec' | 'calories' | 'weightLb'>): boolean {
+  return (
+    setItem.level != null ||
+    setItem.speed != null ||
+    setItem.durationSec != null ||
+    setItem.calories != null ||
+    setItem.weightLb <= 0
+  );
+}
 
 export type Goal = {
   id: string;

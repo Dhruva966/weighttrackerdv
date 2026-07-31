@@ -91,7 +91,7 @@ Use Supabase Postgres. Generate client-side UUIDs for offline writes and let Pos
 |-------|-------------|---------|-------------------------------|
 | `exercises` | `id uuid`, `slug text unique`, `name text`, `muscle_group muscle_group`, `secondary_muscles text[]`, `equipment equipment_kind`, `instructions text[]`, `setup_notes text[]`, `image_url text`, `image_style image_style`, `source text`, `archived boolean`, `created_at`, `updated_at` | Shared exercise catalog seeded from the owner's board, Free Exercise DB matches, user-created exercises, and machine setup notes like seat level/pin/setting. | Index `muscle_group`, `archived`, and GIN full-text search on `name`. Touch `updated_at` on update. |
 | `sessions` | `id uuid`, `user_id uuid`, `started_at`, `ended_at`, `notes text`, `local_date date`, `timezone text` | One workout session. `local_date`/`timezone` are the device-local calendar day and IANA tz at creation time. | Index `(user_id, started_at desc)` and `(user_id, local_date)`. Client uses the single hardcoded owner `USER_ID`. |
-| `sets` | `id uuid`, `session_id uuid`, `exercise_id uuid`, `set_number int`, `weight_lb numeric(6,2)`, `reps int`, `rpe numeric(3,1)`, `is_warmup boolean`, `is_pr boolean`, `created_at` | Logged lift sets. | Foreign key to `sessions` with cascade delete. Foreign key to `exercises`. Index `session_id` and `(exercise_id, created_at desc)`. Trigger marks PRs before insert. |
+| `sets` | `id uuid`, `session_id uuid`, `exercise_id uuid`, `set_number int`, `weight_lb numeric(6,2) null`, `reps int null`, `rpe numeric(3,1)`, `is_warmup boolean`, `is_pr boolean`, `level numeric(5,1)`, `speed numeric(5,2)`, `duration_sec int`, `calories numeric(6,1)`, `created_at` | Logged lift or cardio sets (migration `0005`). Lift rows need positive weight+reps; cardio rows need at least one of level/speed/duration/calories. | Foreign key to `sessions` with cascade delete. Foreign key to `exercises`. Index `session_id` and `(exercise_id, created_at desc)`. PR trigger skips null weight/reps. |
 | `body_weight_logs` | `id uuid`, `user_id uuid`, `logged_at date`, `weight_lb numeric(5,2)` | Body weight tracking for progress charts. | Unique `(user_id, logged_at)`. |
 | `goals` | `id uuid`, `user_id uuid`, `name text`, `target_value numeric`, `target_unit text`, `achieved boolean`, `achieved_at date`, `created_at` | Goal checklist imported from the board's Goals column. | Keep user scoped by `user_id`. |
 | `templates` | `id uuid`, `user_id uuid`, `name text`, `created_at`, `updated_at` | A saved, reusable workout (My templates + generic example templates). | Index `user_id`. Touch `updated_at` on update. |
@@ -164,7 +164,7 @@ Parallel dispatch: use only for independent files with no shared state. Sequenti
 6. Add route tests for redirect behavior and empty states.
 
 ### Logging a set
-1. Validate `weight_lb`, `reps`, optional `rpe`, `is_warmup`, `session_id`, and `exercise_id`.
+1. Validate lift (`weight_lb`, `reps`) or cardio (`level` / `speed` / `duration_sec` / `calories`), optional `rpe`, `is_warmup`, `session_id`, and `exercise_id`.
 2. Write with a client-generated UUID so offline replay is idempotent.
 3. Save to Supabase when online and enqueue to Dexie when offline or failed.
 4. Update React Query cache and Zustand PR state only after the write result is known.

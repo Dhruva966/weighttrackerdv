@@ -33,10 +33,12 @@ describe('ExerciseCard', () => {
     const name = screen.getByRole('heading', { name: 'Incline Dumbbell Press' });
 
     expect(image.compareDocumentPosition(name) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(screen.getByRole('link', { name: /incline dumbbell press/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Edit Incline Dumbbell Press' })).toHaveAttribute(
       'href',
-      '/exercises/incline-dumbbell-press',
+      '/exercises/incline-dumbbell-press/edit',
     );
+    const detailLink = screen.getAllByRole('link').find((link) => link.getAttribute('href') === '/exercises/incline-dumbbell-press');
+    expect(detailLink).toBeTruthy();
     expect(screen.getByText('chest / dumbbell')).toBeInTheDocument();
     expect(screen.getByText('Bench at 30 degrees / Use a neutral grip')).toBeInTheDocument();
   });

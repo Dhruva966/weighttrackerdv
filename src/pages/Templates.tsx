@@ -16,6 +16,8 @@ export function Templates() {
   const exercises = useWorkoutStore((state) => state.exercises);
   const showPreviewNotice = useUiStore((state) => state.showPreviewNotice);
 
+  const savedTemplates = templates.filter((template) => exercisesFor(template.id).length > 0);
+
   function exerciseName(id: string): string {
     return exercises.find((exercise) => exercise.id === id)?.name ?? 'Exercise';
   }
@@ -60,32 +62,21 @@ export function Templates() {
         </Link>
       </div>
 
-      <section className="grid gap-3">
-        <h2 className="text-lg font-medium text-fg">My templates</h2>
-        {templates.length === 0 ? (
-          <p className="app-card text-fgMuted">
-            No templates yet — save one from an active workout, or start from an example below.
-          </p>
-        ) : (
-          templates.map((template) => (
-            <TemplateCard
-              key={template.id}
-              name={template.name}
-              exerciseNames={exercisesFor(template.id).map(exerciseName)}
-              onStart={() => handleStart(template.id)}
-              onEdit={() => navigate(`/templates/${template.id}/edit`)}
-              onDuplicate={() => handleDuplicate(template.id)}
-              onDelete={() => handleDelete(template.id, template.name)}
-            />
-          ))
-        )}
-      </section>
-
-      <section className="grid gap-3 border-t border-border/70 pt-5">
-        <div>
-          <h2 className="text-lg font-medium text-fg">Example templates</h2>
-          <p className="mt-1 text-sm text-fgMuted">Generic starting points — start one, then tweak and save your own.</p>
-        </div>
+      <section className="grid gap-3" aria-labelledby="templates-list-heading">
+        <h2 id="templates-list-heading" className="sr-only">
+          Templates
+        </h2>
+        {savedTemplates.map((template) => (
+          <TemplateCard
+            key={template.id}
+            name={template.name}
+            exerciseNames={exercisesFor(template.id).map(exerciseName)}
+            onStart={() => handleStart(template.id)}
+            onEdit={() => navigate(`/templates/${template.id}/edit`)}
+            onDuplicate={() => handleDuplicate(template.id)}
+            onDelete={() => handleDelete(template.id, template.name)}
+          />
+        ))}
         {exampleTemplates.map((example) => (
           <TemplateCard
             key={example.id}

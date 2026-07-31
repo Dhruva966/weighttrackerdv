@@ -3,6 +3,7 @@ import { looksLikeSetAttempt } from '../lib/exercise-log-parse';
 import { previousWorkoutLogPlaceholder } from '../lib/previousWorkoutPlaceholder';
 import { useWorkoutStore } from '../stores/workoutStore';
 import type { Exercise } from '../types';
+import { CardioSetLogger } from './CardioSetLogger';
 import { SetRow } from './SetRow';
 
 type EditRunner = (label: string, run: () => void | Promise<void>) => void | Promise<void>;
@@ -23,7 +24,9 @@ export function NaturalLanguageSetLogger({
   const removeSet = useWorkoutStore((state) => state.removeSet);
   const sets = useWorkoutStore((state) => state.sets);
   const sessions = useWorkoutStore((state) => state.sessions);
-  const exerciseSets = sets.filter((setItem) => setItem.sessionId === sessionId && setItem.exerciseId === exercise.id);
+  const exerciseSets = sets.filter(
+    (setItem) => setItem.sessionId === sessionId && setItem.exerciseId === exercise.id,
+  );
   const placeholder = useMemo(
     () => previousWorkoutLogPlaceholder(sets, sessions, exercise.id, sessionId),
     [sets, sessions, exercise.id, sessionId],
@@ -87,6 +90,33 @@ export function NaturalLanguageSetLogger({
     } finally {
       setIsSaving(false);
     }
+  }
+
+  if (exercise.muscleGroup === 'cardio') {
+    return (
+      <div className="grid gap-2 border-t border-border pt-3">
+        {exercise.setupNotes?.length ? (
+          <ul className="grid gap-1.5">
+            {exercise.setupNotes.map((note) => (
+              <li
+                key={note}
+                className="w-fit rounded-lg border border-accent/20 bg-accentSoft px-2.5 py-1 text-xs font-semibold text-accent"
+              >
+                {note}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <CardioSetLogger sessionId={sessionId} exercise={exercise} disabled={disabled} onEdit={onEdit} />
+        {exerciseSets.length > 0 ? (
+          <div className="grid gap-2">
+            {exerciseSets.map((setItem) => (
+              <SetRow key={setItem.id} setItem={setItem} onDelete={handleDeleteSet} />
+            ))}
+          </div>
+        ) : null}
+      </div>
+    );
   }
 
   return (

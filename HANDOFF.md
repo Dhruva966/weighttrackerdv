@@ -7,26 +7,32 @@ Use this file when one agent hands work to another. Keep it short, contract-focu
 
 ## Nav & routes
 **Move · Today · Grow · You** (tab order as of 2026-07-28 — Move is the app's home, not Today)
-`/` → redirects to `/move` (Move is home) · `/move` · `/today` · `/grow` · `/you` · `/session/:id` · `/exercises*` · `/goals`
+`/` → redirects to `/move` (Move is home) · `/move` · `/today` · `/grow` · `/you` · `/session/:id` · `/templates*` · `/exercises*` · `/goals`
 Legacy redirects: `/log`→`/move`, `/history`→`/grow`, `/progress`→`/grow`, `/settings`→`/you`, `/onboarding`→`/`→`/move`, `/calendar`→`/grow`
 **Move (`/move`, also `/`):** template-first workout home — exactly one resume action when today's session is open; otherwise templates (saved + Push/Pull/Leg examples) are the primary launch surface, with start-empty and exercise browse as secondary. It deliberately has no calendar, monthly stats, day panel, or walks/cardio UI. Session Done → `/move`. **`/` is a redirect to `/move`, not a duplicate route** — internal links should keep using `/move` (matches the Move nav tab's `NavLink` target) rather than `/`.
 **Today (`/today`):** secondary dashboard — greeting, pot of gold, body weight card, training-log summary. Same component as before, just moved off the root route.
-**Grow (`/grow`):** pot + device-local `InteractiveGymCalendar` (month stats and selected-day panel) + `LiftProgress` (`buildLiftProgress` on real `LoggedSet` rows) + gym-only recent feed. Board baseline seed lives in `starterSessions` / `starterSets` (`src/data/catalog.ts`); bump `BOARD_HISTORY_SEED_VERSION` in `workoutStore` to re-merge after a clear. No jagged synthetic UI series.
+**Grow (`/grow`):** pot + device-local `InteractiveGymCalendar` (month stats and selected-day panel) + `LiftProgress` (`buildLiftProgress` on real `LoggedSet` rows) + gym-only recent feed. Board baseline seed lives in `starterSessions` / `starterSets` (`src/data/catalog.ts`); bump `BOARD_HISTORY_SEED_VERSION` in `workoutStore` to re-merge after a clear (currently **6**). No jagged synthetic UI series.
+**Library (`/exercises*`):** `ExerciseCard` is editable — primary tap opens detail, pencil opens `/exercises/:slug/edit` (optional `state.from` for return). Prefer remote Supabase `image_url` over missing local PDF crops; letter-tile / placeholder local URLs are stripped when remote clears them.
 
 ## Data contracts
-### Templates (Supabase / templateStore) — new
-`useTemplateStore` (`src/stores/templateStore.ts`), persisted key `weight-tracker-templates`. `templates` + `templateExercises` (ordered by `position`), synced the same UUID-gated way as workoutStore. `createTemplate/updateTemplateName/deleteTemplate/duplicateTemplate/setTemplateExercises` (one atomic reconcile: adds/removes/repositions — no separate add/remove/reorder calls). `startWorkoutFromTemplate(templateId)` and the standalone `startWorkoutWithExercises(exerciseIds)` both reuse **today's open session** via `findDaySession`/`calendarDayToStartedAt` (Move is day-centric) and merge into `plannedExerciseIds` rather than creating a second session or clobbering an existing plan. `saveSessionAsTemplate(sessionId, name)` builds a template from a session's logged sets in first-logged order, falling back to `plannedExerciseIds` if nothing's logged yet. Read-only `exampleTemplates` (`src/data/example-templates.ts`, generic Push/Pull/Leg split, not copied from any third-party app) resolve against the live catalog and start a workout via `startWorkoutWithExercises` **without** ever creating a Template record — only an explicit "Save as template" (wired into `Session.tsx`) or `/templates/new` materializes one. UI: `Templates.tsx` (full manage list), `TemplateEditorPage.tsx` (create/edit, shared route component, up/down reorder — no drag-and-drop dependency), `TemplateCard.tsx`, `TemplateMenu.tsx`. Entry point: templates are inlined on `Move.tsx` (New / All shortcuts); `/templates` remains the full management page.
+### Templates (Supabase / templateStore)
+`useTemplateStore` (`src/stores/templateStore.ts`), persisted key `weight-tracker-templates`. `templates` + `templateExercises` (ordered by `position`), synced the same UUID-gated way as workoutStore. `createTemplate/updateTemplateName/deleteTemplate/duplicateTemplate/setTemplateExercises` (one atomic reconcile: adds/removes/repositions — no separate add/remove/reorder calls). `startWorkoutFromTemplate(templateId)` and the standalone `startWorkoutWithExercises(exerciseIds)` both reuse **today's open session** via `findDaySession`/`calendarDayToStartedAt` (Move is day-centric) and merge into `plannedExerciseIds` rather than creating a second session or clobbering an existing plan. `saveSessionAsTemplate(sessionId, name)` builds a template from a session's logged sets in first-logged order, falling back to `plannedExerciseIds` if nothing's logged yet. Read-only `exampleTemplates` (`src/data/example-templates.ts`, generic Push/Pull/Leg split) resolve against the live catalog and start via `startWorkoutWithExercises` **without** creating a Template record — only "Save as template" or `/templates/new` materializes one. UI: `Templates.tsx` shows **one collapsed list** (non-empty saved templates + examples; empty saved shells are hidden), `TemplateEditorPage.tsx`, `TemplateCard.tsx`, `TemplateMenu.tsx`. Entry: inlined on `Move.tsx`; `/templates` is the full management page. Persist remaps exercise ids through `EXERCISE_MERGES`.
 **Gotcha if you touch `TemplateCard.tsx` again:** the exercise-list line needs `min-w-0` at *every* nested flex/grid level down to the `truncate` `<p>` (card root, the flex row, the text wrapper) — Tailwind's `truncate` silently fails to clip and the card visibly overflows its column if any one level in that chain is missing `min-w-0`. This is the standard CSS grid/flexbox "min-content sizing" gotcha, not specific to this component.
+
+### Exercise merges (`src/data/exercise-merges.ts`)
+Canonical board→PDF slug collapses (`EXERCISE_MERGES` / `canonicalExerciseSlug` / `remapExerciseId`). Applied on catalog seed, example templates, Zustand persist rehydrate, and (when syncing) archive of retired slugs. Bump `BOARD_HISTORY_SEED_VERSION` when merge map or starter history slugs change so cleared browsers re-seed.
 
 ### Gym (Supabase / workoutStore)
 | Contract | Notes |
 |----------|-------|
-| Exercise / Session / Set / Goal | Unchanged from init schema; client UUIDs for offline. |
+| Exercise / Session / Goal | Client UUIDs for offline; exercises may be archived after merges. |
+| Set | Lift: `weightLb` + `reps`. Cardio: optional `level` / `speed` / `durationSec` / `calories` (`CardioSetLogger`). Local `isCardioSet()` treats zero weight as cardio when any cardio field is set. |
 | `createSession({ startedAt? })` | Optional ISO for calendar-day logging; default `now`. |
 | `removeSet(setId)` | Deletes a logged set, renumbers `set_number` in that session+exercise, recalculates `isPr` for the exercise, syncs via `deleteSyncedSet` + sibling upserts. |
 | `sessions.notes` | Session freeform notes (import + NL exercise notes). **No day_notes table** — day notes are just per-session notes on that calendar day. |
 | PendingWrite | Dexie queue for Supabase writes (`upsert` + `delete`; drain handles both). |
-| `hydrateFromRemote(remote)` | Pulls exercises/sessions/sets/goals down from Supabase on boot (`src/lib/supabase-hydrate.ts` fetch → `workoutStore.hydrateFromRemote` merge). Remote **only fills gaps** — union by id, local always wins on conflict, safe to call repeatedly. `useSupabaseBootstrap` runs it after queue drain at boot, on reconnect, and through Settings’ guarded Refresh sync control. Closes the old one-way-up sync gap (new device / cleared storage now recovers real history). |
+| `hydrateFromRemote(remote)` | Pulls exercises/sessions/sets/goals down from Supabase on boot (`src/lib/supabase-hydrate.ts` fetch → `workoutStore.hydrateFromRemote` merge). Remote **only fills gaps** — union by id, local always wins on conflict, safe to call repeatedly. `useSupabaseBootstrap` runs it after queue drain at boot, on reconnect, and through Settings’ guarded Refresh sync control. |
+| Cardio sync | `syncSet` maps cardio columns; if migration `0005_cardio_set_fields.sql` is **not** applied yet, cardio-only upserts stay queued (lift sync still works). Apply `0005` on the live project before expecting remote cardio rows. |
 
 ### Gym calendar day panel (`src/lib/calendar.ts`)
 UI calendar uses **`getDayWorkoutBundle(date, sessions, sets, { timeZone })`** — gym-only, completed sessions (`endedAt`), volume/PR per session. Powers `DayWorkoutPanel` on Grow. Open (unended) sessions for the selected day are passed separately and link to `/session/:id`. Display times use `formatDateTimeInZone(value)`, default timezone is now device-local (see below), not a literal.
@@ -72,18 +78,18 @@ Removed: blind `tendGold()` +1.
 | NL parsers | `src/lib/weight-from-text.ts`, `src/lib/movement-from-text.ts`, `src/lib/universal-command.ts` |
 | Archived food UI | `archive/food/` |
 | Exercise NL sets | Two-stage LLM-to-UI pattern: Supabase `parse-exercise-log` (Anthropic `claude-haiku-4-5` first, Groq fallback) → constrained draft JSON → deterministic `commitExerciseLogDraft` in `src/lib/exercise-log-parse.ts` → UI-ready sets/notes. Key: `ANTHROPIC_API_KEY` in Supabase secrets only (not `VITE_*`). Clean shorthand stays on-device. |
-| Session + search | `src/pages/Session.tsx`, `ExercisePicker.tsx`, `MovementLogger.tsx` |
+| Session + search | `src/pages/Session.tsx`, `ExercisePicker.tsx`, `MovementLogger.tsx`, `CardioSetLogger.tsx` |
+| Exercise merges | `src/data/exercise-merges.ts` (+ tests) |
 | Theme | `tailwind.config.js`, `src/index.css` |
 | ADRs | `decisions/2026-07-14-aloo-gold-diary.md`, `decisions/2026-07-14-context-save.md` |
 | Supabase hydration | `src/lib/supabase-hydrate.ts` (fetch + row mappers), `src/lib/supabase-mappers.ts` (`rowToExercise/Session/Set/Goal`), wired in `src/hooks/useSupabaseBootstrap.ts` |
 
-## Supabase project state (2026-07-27)
+## Supabase project state (2026-07-31)
 - Live project is **`weighttracker`** (`svcjdtlmmrisrkjqdsjt`, ap-southeast-2) — matches `VITE_SUPABASE_URL`. A same-named-ish sibling **`weighttrackerdv`** (`stvyokgukswcebpyqcnb`) also exists in the same org and is unused; don't confuse the two when linking the Supabase CLI.
-- This project had **zero tables** until today — `0001_init.sql`/`0002_storage_bucket.sql` existed in the repo but were never pushed to this project. All 4 migrations (0001–0004) are now applied and verified (`pnpm check:supabase` + anon-key REST read both pass).
-- `supabase/config.toml` used the pre-rename `name` key, which current CLI (2.109.1) rejects (`config.config' has invalid keys: name`). Fixed to `project_id`. If `supabase db push`/`link` ever fails with that config error again, it's this same schema drift, not a real project problem.
-- `0003_templates_and_local_day.sql` added `templates`/`template_exercises` (empty, no store/UI yet — see follow-ups) and `sessions.local_date`/`sessions.timezone` (columns exist, backfilled to America/Los_Angeles, but nothing writes device-local values yet — see follow-ups).
+- Migrations **0001–0004** are applied on the live project. **`0005_cardio_set_fields.sql` is in-repo** (nullable `weight_lb`/`reps`, adds `level`/`speed`/`duration_sec`/`calories`, lift-or-cardio check, PR trigger skip for null weight/reps) — **confirm with `supabase db push` / dashboard before assuming remote cardio sync works**; client already tolerates missing columns by queueing cardio-only rows.
+- `0003_templates_and_local_day.sql`: `templates`/`template_exercises` are live with store + UI; `sessions.local_date`/`sessions.timezone` are written from the device timezone on `createSession`.
 - `0004_equipment_band.sql` added `'band'` to `equipment_kind`.
-- Supabase CLI is authenticated locally (`npx supabase projects list` works) independent of the `claude.ai Supabase` MCP connection, which is tied to a different Supabase account and cannot see this project — use the CLI (or a project-scoped `claude mcp add --transport http supabase ...`, already registered in `.mcp.json`) for this project, not the generic `claude.ai Supabase` MCP tools.
+- Supabase CLI is authenticated locally (`npx supabase projects list` works). Prefer CLI / project-scoped MCP over generic `claude.ai Supabase` tools for this project.
 
 ## Open follow-ups
 - Catalog exercise ids (`ex-${slug}`) never sync to Supabase — sets stay local until UUID migration

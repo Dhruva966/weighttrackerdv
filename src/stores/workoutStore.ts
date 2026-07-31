@@ -6,6 +6,11 @@ import {
   starterGoals,
   starterSets,
 } from '../data/catalog';
+import {
+  mergeExerciseCatalog,
+  remapExerciseId,
+  remapSetExerciseIds,
+} from '../data/exercise-merges';
 import { toDayKey } from '../lib/calendar';
 import { slugify } from '../lib/fmt';
 import { getDeviceTimeZone } from '../lib/local-day';
@@ -54,7 +59,7 @@ type ExerciseInput = {
 };
 
 /** Bump when re-introducing or changing board baseline seed so cleared browsers re-merge. */
-export const BOARD_HISTORY_SEED_VERSION = 3;
+export const BOARD_HISTORY_SEED_VERSION = 6;
 
 function withoutBaselineSessions<T extends { id: string }>(sessions: T[]): T[] {
   return sessions.filter((session) => !isBoardBaselineSession(session.id));
@@ -130,11 +135,29 @@ function unionExercisesPreferLocal(local: Exercise[], remote: Exercise[]): Exerc
   const merged = local.map((item) => {
     const cleaned = sanitizeExerciseImage(item);
     const remoteMatch = remoteById.get(cleaned.id) ?? remoteBySlug.get(cleaned.slug);
-    if (!remoteMatch || hasStoredPhoto(cleaned.imageUrl) || !remoteMatch.imageUrl) {
+    if (!remoteMatch) {
       return cleaned;
     }
+
+    // Remote cleared a bad letter-tile / placeholder — drop the stale local URL too.
+    if (!remoteMatch.imageUrl && cleaned.imageUrl) {
+      return {
+        ...cleaned,
+        imageUrl: undefined,
+        imageStyle: remoteMatch.imageStyle === 'name-only' ? 'name-only' : cleaned.imageStyle,
+        name: remoteMatch.name || cleaned.name,
+      };
+    }
+
+    if (hasStoredPhoto(cleaned.imageUrl) || !remoteMatch.imageUrl) {
+      return remoteMatch.name && remoteMatch.name !== cleaned.name
+        ? { ...cleaned, name: remoteMatch.name }
+        : cleaned;
+    }
+
     return {
       ...cleaned,
+      name: remoteMatch.name || cleaned.name,
       imageUrl: remoteMatch.imageUrl,
       imageStyle: remoteMatch.imageStyle ?? 'photo',
     };
@@ -188,7 +211,31 @@ export class InvalidSetInputError extends Error {
   }
 }
 
-function assertValidSetInput(input: Pick<LoggedSet, 'weightLb' | 'reps'>): void {
+function assertValidSetInput(
+  input: Pick<LoggedSet, 'weightLb' | 'reps' | 'level' | 'speed' | 'durationSec' | 'calories'>,
+): void {
+  const hasCardio =
+    input.level != null ||
+    input.speed != null ||
+    input.durationSec != null ||
+    input.calories != null;
+
+  if (hasCardio) {
+    if (input.level != null && (!Number.isFinite(input.level) || input.level < 0)) {
+      throw new InvalidSetInputError('Level must be zero or greater.');
+    }
+    if (input.speed != null && (!Number.isFinite(input.speed) || input.speed < 0)) {
+      throw new InvalidSetInputError('Speed must be zero or greater.');
+    }
+    if (input.durationSec != null && (!Number.isFinite(input.durationSec) || input.durationSec <= 0)) {
+      throw new InvalidSetInputError('Time must be greater than zero.');
+    }
+    if (input.calories != null && (!Number.isFinite(input.calories) || input.calories < 0)) {
+      throw new InvalidSetInputError('Calories must be zero or greater.');
+    }
+    return;
+  }
+
   if (!Number.isFinite(input.weightLb) || input.weightLb <= 0) {
     throw new InvalidSetInputError('Weight must be greater than zero.');
   }
@@ -327,6 +374,11 @@ export const useWorkoutStore = create<WorkoutState>()(
         const setNumber =
           state.sets.filter((setItem) => setItem.sessionId === input.sessionId && setItem.exerciseId === input.exerciseId)
             .length + 1;
+        const isCardioLog =
+          input.level != null ||
+          input.speed != null ||
+          input.durationSec != null ||
+          input.calories != null;
         const history = state.sets
           .filter((setItem) => setItem.exerciseId === input.exerciseId)
           .map((setItem) => ({
@@ -338,7 +390,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           ...input,
           id: newId(),
           setNumber,
-          isPr: isPersonalRecord(input, history),
+          isPr: isCardioLog ? false : isPersonalRecord(input, history),
           createdAt: new Date().toISOString(),
         };
         set({ sets: [...state.sets, loggedSet] });
@@ -626,12 +678,27 @@ export const useWorkoutStore = create<WorkoutState>()(
         usePrStore.getState().clearPr();
       },
       hydrateFromRemote: (remote) => {
-        set((state) => ({
-          exercises: unionExercisesPreferLocal(state.exercises, remote.exercises),
-          sessions: unionPreferLocal(state.sessions, remote.sessions),
-          sets: unionPreferLocal(state.sets, remote.sets),
-          goals: unionPreferLocal(state.goals, remote.goals),
-        }));
+        set((state) => {
+          const exercises = mergeExerciseCatalog(
+            unionExercisesPreferLocal(state.exercises, remote.exercises),
+          );
+          const sets = remapSetExerciseIds(
+            unionPreferLocal(state.sets, remote.sets),
+            exercises,
+          );
+          const sessions = unionPreferLocal(state.sessions, remote.sessions).map((session) => ({
+            ...session,
+            plannedExerciseIds: session.plannedExerciseIds
+              ?.map((id) => remapExerciseId(id, exercises))
+              .filter((id, index, all) => all.indexOf(id) === index),
+          }));
+          return {
+            exercises,
+            sessions,
+            sets,
+            goals: unionPreferLocal(state.goals, remote.goals),
+          };
+        });
       },
       toggleGoal: (goalId) => {
         const current = get().goals.find((goal) => goal.id === goalId);
@@ -661,16 +728,30 @@ export const useWorkoutStore = create<WorkoutState>()(
         // or when history was never explicitly cleared for the current seed.
         const useStarterHistory = needsReseed || !stored?.historyCleared;
 
+        const exercises = mergeExerciseCatalog(
+          mergeExercises(starterExercises, stored?.exercises),
+        );
+        const rawSets = useStarterHistory
+          ? mergeSets(starterSets, stored?.sets)
+          : (stored?.sets ?? []);
+        const sets = remapSetExerciseIds(rawSets, exercises);
+        const sessions = withoutBaselineSessions(stored?.sessions ?? []).map((session) => ({
+          ...session,
+          plannedExerciseIds: session.plannedExerciseIds
+            ?.map((id) => remapExerciseId(id, exercises))
+            .filter((id, index, all) => all.indexOf(id) === index),
+        }));
+
         return {
           ...current,
           ...stored,
           historyCleared: needsReseed ? false : Boolean(stored?.historyCleared),
           boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
-          exercises: mergeExercises(starterExercises, stored?.exercises),
+          exercises,
           goals: mergeById(starterGoals, stored?.goals),
           // Never re-introduce baseline sessions as real gym history.
-          sessions: withoutBaselineSessions(stored?.sessions ?? []),
-          sets: useStarterHistory ? mergeSets(starterSets, stored?.sets) : (stored?.sets ?? []),
+          sessions,
+          sets,
         };
       },
     },

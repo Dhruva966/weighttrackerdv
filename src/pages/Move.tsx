@@ -117,13 +117,9 @@ export function Move() {
           </div>
         </div>
 
-        {templates.length === 0 ? (
-          <p className="app-card text-fgMuted">
-            No saved templates yet — start an example below, then save it from the session when it
-            feels right.
-          </p>
-        ) : (
-          templates.map((template) => (
+        {templates
+          .filter((template) => exercisesFor(template.id).length > 0)
+          .map((template) => (
             <TemplateCard
               key={template.id}
               name={template.name}
@@ -133,19 +129,7 @@ export function Move() {
               onDuplicate={() => handleDuplicate(template.id)}
               onDelete={() => handleDelete(template.id, template.name)}
             />
-          ))
-        )}
-      </section>
-
-      <section className="grid gap-3 border-t border-border/70 pt-5" aria-labelledby="move-examples-heading">
-        <div>
-          <h2 id="move-examples-heading" className="text-lg font-medium text-fg">
-            Example templates
-          </h2>
-          <p className="mt-1 text-sm text-fgMuted">
-            Generic starting points — start one, then tweak and save your own.
-          </p>
-        </div>
+          ))}
         {exampleTemplates.map((example) => (
           <TemplateCard
             key={example.id}

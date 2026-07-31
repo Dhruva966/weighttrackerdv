@@ -1,7 +1,7 @@
 import type { Exercise } from '../types';
 
 /**
- * Read-only starter suggestions shown alongside "My templates." Dhruva's usual
+ * Read-only starter suggestions in the universal Templates list. Dhruva's usual
  * Push / Pull / Legs / Chest+Back / Arms split — tapping one starts a session
  * with those exercises (via startWorkoutWithExercises).
  *
@@ -19,23 +19,23 @@ export const exampleTemplates: ExampleTemplate[] = [
     id: 'example-push-day',
     name: 'Push Day',
     exerciseSlugs: [
-      'bench-press',
-      'incline-machine-press',
-      'tricep-machine-extension',
+      'bench-press-barbell',
+      'incline-chest-press-machine',
+      'tricep-extension-machine-w-pad',
       'lateral-raise-machine',
-      'ab-crunch-corner-machine',
+      'crunch-machine',
     ],
   },
   {
     id: 'example-pull-day',
     name: 'Pull Day',
     exerciseSlugs: [
-      'lat-pulldown',
+      'lat-pulldown-cable',
       'seated-row-machine',
       'trap-row-gym',
-      'bicep-curl',
+      'bicep-curl-dumbbell',
       'lateral-raise-machine',
-      'ab-crunch-corner-machine',
+      'crunch-machine',
       'low-back-raise',
     ],
   },
@@ -43,22 +43,22 @@ export const exampleTemplates: ExampleTemplate[] = [
     id: 'example-leg-day',
     name: 'Leg Day',
     exerciseSlugs: [
-      'leg-press-linear',
-      'hack-squat',
-      'quad-extension',
-      'hamstring-curl-laying',
-      'calf-raise-sitting',
-      'ab-crunch-corner-machine',
-      'low-back-extension',
+      'leg-press',
+      'hack-squat-barbell',
+      'leg-extension-machine',
+      'lying-leg-curl-machine',
+      'seated-calf-raise-machine',
+      'crunch-machine',
+      'back-extension-machine',
     ],
   },
   {
     id: 'example-chest-back',
     name: 'Chest & Back',
     exerciseSlugs: [
-      'bench-press',
-      'incline-machine-press',
-      'lat-pulldown',
+      'bench-press-barbell',
+      'incline-chest-press-machine',
+      'lat-pulldown-cable',
       'seated-row-machine',
       'trap-row-gym',
     ],
@@ -67,11 +67,11 @@ export const exampleTemplates: ExampleTemplate[] = [
     id: 'example-arms-day',
     name: 'Arms Day',
     exerciseSlugs: [
-      'shoulder-press',
+      'shoulder-press-machine',
       'lateral-raise-machine',
       'lat-raise',
-      'bicep-curl',
-      'rope-hammer-curl',
+      'bicep-curl-dumbbell',
+      'hammer-curl-cable',
       'preacher-curl-machine',
     ],
   },

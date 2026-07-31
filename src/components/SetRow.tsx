@@ -1,6 +1,39 @@
 import { Trash2, Trophy } from 'lucide-react';
 import { formatWeight } from '../lib/fmt';
-import type { LoggedSet } from '../types';
+import { isCardioSet, type LoggedSet } from '../types';
+
+function formatDuration(durationSec: number): string {
+  if (durationSec >= 60 && durationSec % 60 === 0) {
+    return `${durationSec / 60} min`;
+  }
+  if (durationSec >= 60) {
+    const minutes = Math.floor(durationSec / 60);
+    const seconds = durationSec % 60;
+    return `${minutes}m ${seconds}s`;
+  }
+  return `${durationSec}s`;
+}
+
+function formatSetSummary(setItem: LoggedSet): string {
+  if (isCardioSet(setItem) && setItem.weightLb <= 0) {
+    const parts: string[] = [];
+    if (setItem.level != null) {
+      parts.push(`L${setItem.level}`);
+    }
+    if (setItem.speed != null) {
+      parts.push(`${setItem.speed} spd`);
+    }
+    if (setItem.durationSec != null) {
+      parts.push(formatDuration(setItem.durationSec));
+    }
+    if (setItem.calories != null) {
+      parts.push(`${setItem.calories} cal`);
+    }
+    return parts.join(' · ') || 'Cardio';
+  }
+
+  return `${formatWeight(setItem.weightLb)} x ${setItem.reps}`;
+}
 
 export function SetRow({
   setItem,
@@ -19,9 +52,7 @@ export function SetRow({
       }
     >
       <span className="tabular text-sm font-bold text-fgMuted">#{setItem.setNumber}</span>
-      <span className="tabular font-bold text-fg">
-        {formatWeight(setItem.weightLb)} x {setItem.reps}
-      </span>
+      <span className="tabular font-bold text-fg">{formatSetSummary(setItem)}</span>
       {setItem.isPr ? (
         <span className="inline-flex items-center gap-1 rounded-full bg-pr/15 px-2 py-1 text-xs font-medium text-pr">
           <Trophy size={14} />

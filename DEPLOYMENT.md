@@ -60,6 +60,7 @@ flowchart LR
 3. Create public-read Storage bucket `exercise-images`.
 4. Set local script-only secrets in the shell when running seed or backfill.
 5. Verify `exercises`, `sessions`, `sets`, `body_weight_logs`, `goals`, `templates`, and `template_exercises` exist before running the app.
+6. Apply `0005_cardio_set_fields.sql` so `sets` allows nullable `weight_lb`/`reps` and has `level` / `speed` / `duration_sec` / `calories`. Until it is applied, the client still logs cardio locally and queues cardio-only upserts; lift sync continues to work.
 
 ## Supabase Edge Function secrets
 LLM keys belong in **Supabase secrets**, not Postgres tables and not `VITE_*` (browser) env.
@@ -91,6 +92,7 @@ Or manually in the Supabase dashboard: **Project Settings → Edge Functions →
 4. Set output directory to `dist`.
 5. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 6. Enable auto-deploy from `main`.
+7. Production URL: **https://weighttrackerdv.vercel.app** (confirm in Vercel project domains if renamed).
 
 ## Runbook
 | Symptom | Check | Fix |

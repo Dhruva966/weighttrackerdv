@@ -60,7 +60,29 @@ export async function syncSet(setItem: LoggedSet): Promise<void> {
     return;
   }
 
-  await persistUpsert('sets', setToRow(setItem));
+  const row = setToRow(setItem);
+  const supabase = getSupabase();
+  if (!supabase || !navigator.onLine) {
+    await enqueueWrite({ table: 'sets', op: 'upsert', payload: row });
+    return;
+  }
+
+  const { error } = await supabase.from('sets').upsert(row);
+  if (!error) {
+    return;
+  }
+
+  // Migration 0005 may not be applied yet — retry without cardio columns so lift sync still works.
+  // Cardio-only rows stay queued until the schema is upgraded.
+  const message = error.message ?? '';
+  const missingCardioColumn =
+    /level|speed|duration_sec|calories/i.test(message) || error.code === 'PGRST204' || error.code === '42703';
+  if (missingCardioColumn && (row.level != null || row.speed != null || row.duration_sec != null || row.calories != null)) {
+    await enqueueWrite({ table: 'sets', op: 'upsert', payload: row });
+    return;
+  }
+
+  await enqueueWrite({ table: 'sets', op: 'upsert', payload: row });
 }
 
 export async function deleteSyncedSet(setId: string): Promise<void> {

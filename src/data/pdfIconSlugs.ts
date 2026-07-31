@@ -259,22 +259,29 @@ export const PDF_ICON_SLUGS = new Set<string>([
  * suffixes differ (e.g. board `bicep-curl` → Strong `bicep-curl-dumbbell`).
  */
 const PDF_ICON_ALIASES: Record<string, string> = {
-  'bicep-curl': 'bicep-curl-dumbbell',
-  'rope-hammer-curl': 'hammer-curl-cable',
+  // Surviving board names that still need a crop alias (merged board→PDF slugs are direct).
   'lat-raise': 'lateral-raise-dumbbell',
   'shoulder-press': 'shoulder-press-machine',
   'bench-press': 'bench-press-barbell',
+  'smith-machine-bench': 'bench-press-smith-machine',
+  'preacher-curl-machine': 'preacher-curl-dumbbell',
+  'calf-raise-sitting': 'seated-calf-raise-machine',
+  'quad-extension': 'leg-extension-machine',
+  // Legacy persisted slugs (pre-merge) still resolve to a crop until localStorage remaps.
+  'bicep-curl': 'bicep-curl-dumbbell',
+  'rope-hammer-curl': 'hammer-curl-cable',
   'hip-abductor': 'hip-abductor-machine',
   'lat-pulldown': 'lat-pulldown-cable',
   'hack-squat': 'hack-squat-barbell',
   'leg-press-linear': 'leg-press',
-  'cable-chest-fly': 'cable-crossover',
-  'smith-machine-bench': 'bench-press-smith-machine',
+  'cable-chest-fly': 'chest-fly',
+  'cable-fly': 'chest-fly',
   'dumbbell-preacher-curl': 'preacher-curl-dumbbell',
-  'preacher-curl-machine': 'preacher-curl-dumbbell',
-  'calf-raise-sitting': 'seated-calf-raise-machine',
   'hamstring-curl-laying': 'lying-leg-curl-machine',
-  'quad-extension': 'leg-extension-machine',
+  'tricep-machine-extension': 'tricep-extension-machine-w-pad',
+  'calf-raise-standing-smith': 'standing-calf-raise-smith-machine',
+  'reverse-bar-curl': 'reverse-curl-barbell',
+  'leg-raise': 'flat-leg-raise',
 };
 
 /** Resolve a catalog slug to a verified local PDF icon filename slug. */
