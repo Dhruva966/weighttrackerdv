@@ -1,5 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { starterExercises, starterGoals, starterSets } from '../data/catalog';
+import { USER_ID } from '../lib/user';
+import { BOARD_HISTORY_SEED_VERSION, useWorkoutStore } from '../stores/workoutStore';
 import type { Exercise } from '../types';
 import { NaturalLanguageSetLogger } from './NaturalLanguageSetLogger';
 
@@ -14,6 +17,17 @@ const baseExercise: Exercise = {
   imageStyle: 'name-only',
   source: 'user-created',
 };
+
+beforeEach(() => {
+  useWorkoutStore.setState({
+    exercises: starterExercises,
+    goals: starterGoals,
+    sessions: [],
+    sets: starterSets,
+    historyCleared: false,
+    boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
+  });
+});
 
 describe('NaturalLanguageSetLogger', () => {
   it('shows machine setup notes when the exercise has them', () => {
@@ -32,5 +46,64 @@ describe('NaturalLanguageSetLogger', () => {
     render(<NaturalLanguageSetLogger sessionId="session-1" exercise={baseExercise} />);
 
     expect(screen.queryByText('Seat 5')).not.toBeInTheDocument();
+  });
+
+  it('uses a slim Log field with an optional previous-workout placeholder', () => {
+    render(<NaturalLanguageSetLogger sessionId="session-1" exercise={baseExercise} />);
+
+    expect(screen.getByLabelText(/^log$/i)).toBeInTheDocument();
+    expect(screen.queryByText(/log in your own words/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/claude \(via supabase\)/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/^log$/i)).toHaveAttribute('placeholder', '');
+    expect(screen.queryByText(/first set was 8 reps/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/helped by a friend/i)).not.toBeInTheDocument();
+  });
+
+  it('shows a faded previous-session weight, reps, sets placeholder', () => {
+    useWorkoutStore.setState({
+      sessions: [
+        { id: 'prior', userId: USER_ID, startedAt: '2026-07-20T12:00:00.000Z' },
+        { id: 'session-1', userId: USER_ID, startedAt: '2026-07-30T12:00:00.000Z' },
+      ],
+      sets: [
+        {
+          id: 's1',
+          sessionId: 'prior',
+          exerciseId: baseExercise.id,
+          setNumber: 1,
+          weightLb: 44,
+          reps: 8,
+          isWarmup: false,
+          isPr: false,
+          createdAt: '2026-07-20T12:01:00.000Z',
+        },
+        {
+          id: 's2',
+          sessionId: 'prior',
+          exerciseId: baseExercise.id,
+          setNumber: 2,
+          weightLb: 44,
+          reps: 8,
+          isWarmup: false,
+          isPr: false,
+          createdAt: '2026-07-20T12:02:00.000Z',
+        },
+        {
+          id: 's3',
+          sessionId: 'prior',
+          exerciseId: baseExercise.id,
+          setNumber: 3,
+          weightLb: 44,
+          reps: 7,
+          isWarmup: false,
+          isPr: false,
+          createdAt: '2026-07-20T12:03:00.000Z',
+        },
+      ],
+    });
+
+    render(<NaturalLanguageSetLogger sessionId="session-1" exercise={baseExercise} />);
+
+    expect(screen.getByLabelText(/^log$/i)).toHaveAttribute('placeholder', '44, 8, 3');
   });
 });

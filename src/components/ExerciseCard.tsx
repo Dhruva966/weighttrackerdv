@@ -11,12 +11,12 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
     >
       <ExerciseImage exercise={exercise} />
       <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-fg">{exercise.name}</h3>
-          <p className="mt-1 text-sm capitalize text-fgMuted">
+          <h3 className="text-sm font-semibold text-fg">{exercise.name}</h3>
+          <p className="mt-0.5 text-xs capitalize text-fgMuted">
             {exercise.muscleGroup} / {exercise.equipment}
           </p>
           {exercise.setupNotes?.length ? (
-            <p className="mt-1 line-clamp-2 text-xs font-medium text-fgMuted">{exercise.setupNotes.join(' / ')}</p>
+            <p className="mt-0.5 line-clamp-2 text-[11px] font-medium text-fgMuted">{exercise.setupNotes.join(' / ')}</p>
           ) : null}
       </div>
       <ChevronRight className="shrink-0 text-fgMuted transition group-hover:text-fg" size={18} aria-hidden />

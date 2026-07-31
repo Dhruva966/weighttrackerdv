@@ -56,7 +56,8 @@ describe('DayWorkoutPanel', () => {
     expect(screen.getByLabelText(/muscle groups worked/i)).toBeInTheDocument();
     expect(screen.getByText('Chest')).toBeInTheDocument();
     expect(screen.getByText('Triceps')).toBeInTheDocument();
-    expect(screen.getByText(/open this day’s workout/i)).toBeInTheDocument();
+    expect(screen.queryByText(/open this day’s workout/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/open workout to continue logging/i)).not.toBeInTheDocument();
     expect(screen.queryByText('Sets')).not.toBeInTheDocument();
     expect(screen.queryByText('Volume')).not.toBeInTheDocument();
     expect(screen.queryByText('PRs')).not.toBeInTheDocument();
@@ -73,7 +74,7 @@ describe('DayWorkoutPanel', () => {
     );
     expect(screen.getByText(/in progress/i)).toBeInTheDocument();
     expect(screen.getByText('Back')).toBeInTheDocument();
-    expect(screen.getByText(/open this day’s workout/i)).toBeInTheDocument();
+    expect(screen.queryByText(/open this day’s workout/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /log another workout/i })).not.toBeInTheDocument();
   });
 

@@ -45,10 +45,11 @@ export function DayWorkoutPanel({ selectedDate, summary }: DayWorkoutPanelProps)
         <Link
           className={
             summary.inProgress
-              ? 'grid min-h-11 gap-3 rounded-lg border border-accent/30 bg-accentSoft/40 p-4 hover:border-accent/50'
-              : 'grid min-h-11 gap-3 rounded-lg border border-border bg-surface p-4 hover:border-accent/40'
+              ? 'grid min-h-9 gap-3 rounded-lg border border-accent/30 bg-accentSoft/40 p-4 hover:border-accent/50'
+              : 'grid min-h-9 gap-3 rounded-lg border border-border bg-surface p-4 hover:border-accent/40'
           }
           to={`/session/${summary.primarySessionId}`}
+          state={{ from: '/grow' }}
         >
           <div className="flex items-center justify-between gap-3">
             <p className="font-bold text-fg">This day’s workout</p>
@@ -76,12 +77,15 @@ export function DayWorkoutPanel({ selectedDate, summary }: DayWorkoutPanelProps)
           ) : (
             <p className="text-sm text-fgMuted">No sets logged yet — open to keep training.</p>
           )}
-          <p className="text-sm text-fgMuted">Open this day’s workout to keep logging.</p>
         </Link>
       ) : (
         <div className="app-card grid gap-3 text-center">
           <p className="text-fgMuted">Nothing logged on this day yet.</p>
-          <Link className="button-primary mx-auto inline-flex min-h-11 items-center gap-2" to={logHref}>
+          <Link
+            className="button-primary mx-auto inline-flex min-h-9 items-center gap-2"
+            to={logHref}
+            state={{ from: '/grow' }}
+          >
             <Dumbbell size={16} />
             Log workout
           </Link>

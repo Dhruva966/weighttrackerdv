@@ -44,9 +44,6 @@ export function LiftProgress() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-medium text-fg">Lift progress</h2>
-          <p className="text-sm text-fgMuted">
-            Working weight over time from logged sets (including board baseline).
-          </p>
         </div>
         {exercisesWithSets.length > 0 ? (
           <select

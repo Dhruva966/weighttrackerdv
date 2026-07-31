@@ -353,7 +353,125 @@ describe('workoutStore', () => {
 
       expect(exercise.slug).toBe('cable-fly');
       expect(exercise.source).toBe('user-created');
+      expect(exercise.archived).toBe(false);
       expect(useWorkoutStore.getState().exercises[0].id).toBe(exercise.id);
+    });
+
+    it('allocates a unique slug when the base slug is already taken', () => {
+      const first = useWorkoutStore.getState().addExercise({
+        name: 'Lat Pulldown',
+        muscleGroup: 'back',
+        equipment: 'cable',
+      });
+      const second = useWorkoutStore.getState().addExercise({
+        name: 'Lat Pulldown',
+        muscleGroup: 'back',
+        equipment: 'cable',
+      });
+
+      // Starter catalog already owns `lat-pulldown`.
+      expect(first.slug).toBe('lat-pulldown-2');
+      expect(second.slug).toBe('lat-pulldown-3');
+      expect(useWorkoutStore.getState().exercises.filter((item) => item.name === 'Lat Pulldown').length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('is immediately findable via catalog search after create', async () => {
+      const { searchExercises } = await import('../hooks/useExercises');
+      const exercise = useWorkoutStore.getState().addExercise({
+        name: 'Zorp Cable Kickback Deluxe',
+        muscleGroup: 'glutes',
+        equipment: 'cable',
+      });
+
+      const hits = searchExercises(useWorkoutStore.getState().exercises, 'Zorp Cable Kickback Deluxe');
+      expect(hits[0]?.id).toBe(exercise.id);
+      expect(hits.some((item) => item.id === exercise.id)).toBe(true);
+    });
+  });
+
+  describe('updateExercise', () => {
+    it('updates muscle group and equipment in place without changing id or slug', () => {
+      const created = useWorkoutStore.getState().addExercise({
+        name: 'Mis-tagged Row',
+        muscleGroup: 'cardio',
+        equipment: 'other',
+        setupNotes: ['Old note'],
+      });
+
+      const syncSpy = vi.spyOn(supabaseSync, 'syncExercise').mockResolvedValue(undefined);
+      const updated = useWorkoutStore.getState().updateExercise(created.id, {
+        name: 'Chest-supported Row',
+        muscleGroup: 'back',
+        equipment: 'machine',
+        setupNotes: ['Seat 4', 'Chest pad mid'],
+      });
+
+      expect(updated?.id).toBe(created.id);
+      expect(updated?.slug).toBe(created.slug);
+      expect(updated?.name).toBe('Chest-supported Row');
+      expect(updated?.muscleGroup).toBe('back');
+      expect(updated?.equipment).toBe('machine');
+      expect(updated?.setupNotes).toEqual(['Seat 4', 'Chest pad mid']);
+
+      const stored = useWorkoutStore.getState().exercises.find((item) => item.id === created.id);
+      expect(stored?.muscleGroup).toBe('back');
+      expect(syncSpy).toHaveBeenCalledWith(expect.objectContaining({ id: created.id, muscleGroup: 'back' }));
+      syncSpy.mockRestore();
+    });
+
+    it('preserves existing image when no new photo is provided', () => {
+      const created = useWorkoutStore.getState().addExercise({
+        name: 'Photo Keep',
+        muscleGroup: 'arms',
+        equipment: 'dumbbell',
+        imageUrl: 'blob:keep-me',
+      });
+
+      const updated = useWorkoutStore.getState().updateExercise(created.id, {
+        name: 'Photo Keep',
+        muscleGroup: 'biceps',
+        equipment: 'dumbbell',
+      });
+
+      expect(updated?.imageUrl).toBe('blob:keep-me');
+      expect(updated?.imageStyle).toBe('photo');
+    });
+
+    it('reflects the new muscle group in Library filters immediately', async () => {
+      const { searchExercises } = await import('../hooks/useExercises');
+      const created = useWorkoutStore.getState().addExercise({
+        name: 'Filter Flip Lift',
+        muscleGroup: 'cardio',
+        equipment: 'machine',
+      });
+
+      useWorkoutStore.getState().updateExercise(created.id, {
+        name: 'Filter Flip Lift',
+        muscleGroup: 'chest',
+        equipment: 'machine',
+      });
+
+      const chest = useWorkoutStore.getState().exercises.filter((item) => item.muscleGroup === 'chest');
+      expect(chest.some((item) => item.id === created.id)).toBe(true);
+      expect(
+        useWorkoutStore.getState().exercises.some((item) => item.id === created.id && item.muscleGroup === 'cardio'),
+      ).toBe(false);
+
+      const hits = searchExercises(
+        useWorkoutStore.getState().exercises.filter((item) => item.muscleGroup === 'chest'),
+        'Filter Flip Lift',
+      );
+      expect(hits[0]?.id).toBe(created.id);
+    });
+
+    it('returns undefined for unknown ids', () => {
+      expect(
+        useWorkoutStore.getState().updateExercise('missing-id', {
+          name: 'Nope',
+          muscleGroup: 'arms',
+          equipment: 'other',
+        }),
+      ).toBeUndefined();
     });
   });
 
@@ -539,6 +657,104 @@ describe('workoutStore', () => {
       expect(
         useWorkoutStore.getState().exercises.filter((item) => item.id === remoteExerciseRow.id),
       ).toHaveLength(1);
+    });
+
+    it('skips remote exercises whose slug already exists locally', () => {
+      const local = starterExercises.find((item) => item.slug === 'close-grip-pulldown');
+      expect(local).toBeDefined();
+      const remoteDuplicate = remoteExercise({
+        slug: 'close-grip-pulldown',
+        name: 'Close-Grip Pulldown (Cable)',
+        source: 'pdf-import',
+      });
+
+      useWorkoutStore.getState().hydrateFromRemote({
+        exercises: [remoteDuplicate],
+        sessions: [],
+        sets: [],
+        goals: [],
+      });
+
+      const matches = useWorkoutStore.getState().exercises.filter((item) => item.slug === 'close-grip-pulldown');
+      expect(matches).toHaveLength(1);
+      expect(matches[0]?.id).toBe(local!.id);
+    });
+
+    it('gap-fills imageUrl from a same-slug remote row when local has no photo', () => {
+      const local = starterExercises.find((item) => item.slug === 'close-grip-pulldown');
+      expect(local).toBeDefined();
+      expect(local!.imageUrl).toBeUndefined();
+
+      useWorkoutStore.getState().hydrateFromRemote({
+        exercises: [
+          remoteExercise({
+            slug: 'close-grip-pulldown',
+            name: 'Close Grip Pulldown',
+            imageUrl: 'https://example.com/close-grip.jpg',
+            imageStyle: 'photo',
+            source: 'pdf-import',
+          }),
+        ],
+        sessions: [],
+        sets: [],
+        goals: [],
+      });
+
+      const matches = useWorkoutStore.getState().exercises.filter((item) => item.slug === 'close-grip-pulldown');
+      expect(matches).toHaveLength(1);
+      expect(matches[0]?.id).toBe(local!.id);
+      expect(matches[0]?.imageUrl).toBe('https://example.com/close-grip.jpg');
+      expect(matches[0]?.imageStyle).toBe('photo');
+    });
+
+    it('does not overwrite an existing local imageUrl from remote', () => {
+      const local = starterExercises.find((item) => item.slug === 'close-grip-pulldown');
+      expect(local).toBeDefined();
+
+      useWorkoutStore.setState((state) => ({
+        exercises: state.exercises.map((item) =>
+          item.slug === 'close-grip-pulldown'
+            ? { ...item, imageUrl: 'https://example.com/local.jpg', imageStyle: 'photo' as const }
+            : item,
+        ),
+      }));
+
+      useWorkoutStore.getState().hydrateFromRemote({
+        exercises: [
+          remoteExercise({
+            slug: 'close-grip-pulldown',
+            imageUrl: 'https://example.com/remote.jpg',
+            imageStyle: 'photo',
+          }),
+        ],
+        sessions: [],
+        sets: [],
+        goals: [],
+      });
+
+      const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'close-grip-pulldown');
+      expect(match?.imageUrl).toBe('https://example.com/local.jpg');
+    });
+
+    it('prefers verified IMG_3417.pdf icons over remote FEDB stock for the same slug', () => {
+      useWorkoutStore.getState().hydrateFromRemote({
+        exercises: [
+          remoteExercise({
+            slug: 'arnold-press-dumbbell',
+            name: 'Arnold Press (Dumbbell)',
+            imageUrl: 'https://example.com/fedb-arnold.jpg',
+            imageStyle: 'photo',
+            source: 'pdf-import',
+          }),
+        ],
+        sessions: [],
+        sets: [],
+        goals: [],
+      });
+
+      const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'arnold-press-dumbbell');
+      expect(match?.imageUrl).toBe('/exercise-icons/arnold-press-dumbbell.jpg');
+      expect(match?.imageStyle).toBe('photo');
     });
   });
 });

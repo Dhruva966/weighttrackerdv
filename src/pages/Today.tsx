@@ -57,7 +57,7 @@ export function Today() {
             <EncouragementLine />
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Link className="button-primary min-h-11" to="/move">
+            <Link className="button-primary min-h-9" to="/move">
               Open Move
             </Link>
           </div>
@@ -104,7 +104,7 @@ export function Today() {
                 ? 'No lifts or walks yet — try “walking 30 min” in the bar or open Move.'
                 : trainingDetails.join(' · ')}
             </p>
-            <Link className="button-secondary mt-4 inline-flex min-h-11" to="/move">
+            <Link className="button-secondary mt-4 inline-flex min-h-9" to="/move">
               Open Move
             </Link>
           </div>

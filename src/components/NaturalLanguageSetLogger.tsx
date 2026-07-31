@@ -1,38 +1,52 @@
-import { useState } from 'react';
-import {
-  isExerciseLogLlmConfigured,
-  isSupabaseLlmConfigured,
-  looksLikeSetAttempt,
-} from '../lib/exercise-log-parse';
-import { useUiStore } from '../stores/uiStore';
+import { useMemo, useState } from 'react';
+import { looksLikeSetAttempt } from '../lib/exercise-log-parse';
+import { previousWorkoutLogPlaceholder } from '../lib/previousWorkoutPlaceholder';
 import { useWorkoutStore } from '../stores/workoutStore';
 import type { Exercise } from '../types';
 import { SetRow } from './SetRow';
+
+type EditRunner = (label: string, run: () => void | Promise<void>) => void | Promise<void>;
 
 export function NaturalLanguageSetLogger({
   sessionId,
   exercise,
   disabled = false,
+  onEdit,
 }: {
   sessionId: string;
   exercise: Exercise;
   disabled?: boolean;
+  /** Wraps mutations so Session undo/redo can snapshot before/after. */
+  onEdit?: EditRunner;
 }) {
   const logExerciseNotes = useWorkoutStore((state) => state.logExerciseNotes);
   const removeSet = useWorkoutStore((state) => state.removeSet);
-  const showPreviewNotice = useUiStore((state) => state.showPreviewNotice);
   const sets = useWorkoutStore((state) => state.sets);
+  const sessions = useWorkoutStore((state) => state.sessions);
   const exerciseSets = sets.filter((setItem) => setItem.sessionId === sessionId && setItem.exerciseId === exercise.id);
+  const placeholder = useMemo(
+    () => previousWorkoutLogPlaceholder(sets, sessions, exercise.id, sessionId),
+    [sets, sessions, exercise.id, sessionId],
+  );
   const [text, setText] = useState('');
   const [message, setMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  function handleDeleteSet(setId: string) {
+  async function runEdit(label: string, run: () => void | Promise<void>) {
+    if (onEdit) {
+      await onEdit(label, run);
+      return;
+    }
+    await run();
+  }
+
+  async function handleDeleteSet(setId: string) {
     if (disabled) {
       return;
     }
-    removeSet(setId);
-    showPreviewNotice('Set deleted.');
+    await runEdit('Set deleted', () => {
+      removeSet(setId);
+    });
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -45,10 +59,12 @@ export function NaturalLanguageSetLogger({
     setMessage('');
 
     try {
-      const result = await logExerciseNotes(sessionId, exercise.id, text);
+      let result = { imported: 0, notes: [] as string[] };
+      await runEdit('Logged sets', async () => {
+        result = await logExerciseNotes(sessionId, exercise.id, text);
+      });
+
       if (result.imported > 0) {
-        const noteSuffix = result.notes.length > 0 ? ' Notes saved.' : '';
-        setMessage(`Logged ${result.imported} set${result.imported === 1 ? '' : 's'}.${noteSuffix}`);
         setText('');
         return;
       }
@@ -65,7 +81,7 @@ export function NaturalLanguageSetLogger({
         return;
       }
 
-      setMessage('Could not find sets. Try "115 for 8 7 7" or "144 for 2 sets of 7".');
+      setMessage('Could not find sets. Try weight and reps, like "144 for 2 sets of 7".');
     } catch {
       setMessage('Could not parse that log. Try again with weight and reps.');
     } finally {
@@ -74,7 +90,7 @@ export function NaturalLanguageSetLogger({
   }
 
   return (
-    <form className="grid gap-3 border-t border-border pt-3" onSubmit={handleSubmit}>
+    <form className="grid gap-2 border-t border-border pt-3" onSubmit={handleSubmit}>
       {exercise.setupNotes?.length ? (
         <ul className="grid gap-1.5">
           {exercise.setupNotes.map((note) => (
@@ -87,23 +103,17 @@ export function NaturalLanguageSetLogger({
           ))}
         </ul>
       ) : null}
-      <label className="grid gap-2">
-        <span className="label">Log in your own words</span>
+      <label className="grid gap-1.5">
+        <span className="label">Log</span>
         <textarea
-          className="field min-h-28 py-3"
+          className="field min-h-9 resize-y py-1.5 placeholder:text-fgMuted/55"
           disabled={disabled || isSaving}
+          rows={1}
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder={'115 for 8 7 7\nfirst set was 8 reps, second 7, third 7\nlast rep helped by a friend'}
+          placeholder={placeholder}
         />
       </label>
-      <p className="text-xs text-fgMuted">
-        {isSupabaseLlmConfigured()
-          ? 'Claude (via Supabase) reads messy English including number words; clean shorthand stays on-device.'
-          : isExerciseLogLlmConfigured()
-            ? 'Browser Groq fallback is active. Prefer ANTHROPIC_API_KEY in Supabase secrets.'
-            : 'On-device shorthand only. Store ANTHROPIC_API_KEY in Supabase secrets for natural language.'}
-      </p>
       <button className="button-primary" type="submit" disabled={disabled || isSaving || !text.trim()}>
         {isSaving ? 'Parsing…' : 'Log sets'}
       </button>

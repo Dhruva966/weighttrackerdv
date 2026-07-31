@@ -552,6 +552,27 @@
     "needsReviewReason": "Ambiguous whether this means a climbing wall/rope or a stairclimber-style cardio machine; no equipment tag shown."
   },
   {
+    "name": "Close-Grip Front Lat Pulldown",
+    "slug": "close-grip-pulldown",
+    "muscleGroup": "back",
+    "equipment": "cable",
+    "secondaryMuscles": [
+      "biceps",
+      "middle back",
+      "shoulders"
+    ],
+    "setupNotes": [],
+    "aliases": [
+      "Close Grip Pulldown",
+      "Close-Grip Pulldown",
+      "Close-Grip Pulldown (Cable)"
+    ],
+    "visibleWeightLb": null,
+    "visibleReps": null,
+    "sourcePage": 14,
+    "needsReview": false
+  },
+  {
     "name": "Concentration Curl (Dumbbell)",
     "slug": "concentration-curl-dumbbell",
     "muscleGroup": "biceps",

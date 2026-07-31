@@ -45,7 +45,7 @@ flowchart TD
 | `/goals` | Editable daily intentions |
 | `/log` | Redirect → `/move` |
 | `/history` | Redirect → `/grow` |
-| `/progress`, `/calendar`, `/settings`, `/onboarding` | Redirects (`/calendar` → `/move`) |
+| `/progress`, `/calendar`, `/settings`, `/onboarding` | Redirects (`/calendar` → `/grow`) |
 
 ## Local-first diary (not yet Supabase tables)
 Persisted under `aloo-diary-v1` / `aloo-ui-v1`:

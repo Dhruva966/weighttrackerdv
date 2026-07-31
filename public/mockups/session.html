@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aloo — Session reorder mockups</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fffefb;
+        --fg: #2b261c;
+        --muted: #7a7164;
+        --accent: #c4a35a;
+        --border: #e6ddce;
+        --surface: #ffffff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: var(--fg);
+        background:
+          radial-gradient(ellipse 95% 65% at 0% 0%, rgba(196, 163, 90, 0.16), transparent 52%),
+          radial-gradient(ellipse 70% 45% at 100% 8%, rgba(243, 235, 218, 0.9), transparent 48%),
+          linear-gradient(180deg, #fffefb 0%, #fbf7f0 42%, #f5efe4 100%);
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 254, 251, 0.88);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 1.25rem;
+      }
+      header .inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1.25rem;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+      h1 { margin: 0; font-size: 1.55rem; font-weight: 600; letter-spacing: -0.02em; }
+      header p { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.95rem; max-width: 40rem; }
+      nav { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+      nav a {
+        color: var(--fg);
+        text-decoration: none;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: 999px;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.85rem;
+      }
+      nav a:hover { border-color: var(--accent); background: rgba(196, 163, 90, 0.12); }
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem 1.25rem 4rem;
+        display: grid;
+        gap: 2.5rem;
+      }
+      .rule {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        padding: 1rem 1.15rem;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .rule strong { color: var(--fg); }
+      .card {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: minmax(220px, 320px) 1fr;
+        align-items: start;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        padding: 1.1rem;
+        box-shadow: 0 1px 2px rgba(43, 38, 28, 0.04);
+      }
+      @media (max-width: 800px) {
+        .card { grid-template-columns: 1fr; }
+      }
+      .phone {
+        margin: 0 auto;
+        width: min(100%, 320px);
+        border-radius: 1.25rem;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: #f6f0e4;
+      }
+      .phone img { display: block; width: 100%; height: auto; }
+      .meta h2 { margin: 0; font-size: 1.35rem; }
+      .meta .letter { display: inline-block; margin-right: 0.4rem; color: var(--accent); font-weight: 700; }
+      .meta p { margin: 0.65rem 0 0; color: var(--muted); line-height: 1.55; max-width: 42rem; }
+      .meta ol { margin: 0.85rem 0 0; padding-left: 1.2rem; line-height: 1.55; }
+      .open {
+        display: inline-flex;
+        margin-top: 1rem;
+        min-height: 2.5rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 0.7rem;
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: #fffefb;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .open:hover { background: #b08d3a; border-color: #b08d3a; }
+      .section-label {
+        margin: 0.5rem 0 0;
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="inner">
+        <div>
+          <h1>Aloo · Session reorder mockups</h1>
+          <p>
+            Shared rule: <strong>Your exercises (done)</strong> stays at the top.
+            Move <strong>Log movement</strong> and <strong>Add exercises for today</strong> below everything.
+          </p>
+        </div>
+        <nav>
+          <a href="#s1">1</a>
+          <a href="#s2">2</a>
+          <a href="#s3">3</a>
+          <a href="#s4">4</a>
+          <a href="#s5">5</a>
+          <a href="./session-v2.html">v2 (tabular)</a>
+          <a href="./index.html">Move gallery</a>
+          <a href="/">← App</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="rule">
+        <strong>Reorder vs current Session:</strong>
+        today the page is Log movement → Add exercises → Your exercises.
+        These five put <strong>Your exercises first</strong>, then push both screenshot blocks
+        (Log movement + Add exercises) to the bottom.
+      </div>
+
+      <article class="card" id="s1">
+        <div class="phone">
+          <img src="./session-mockup-1-done-first-stack.png" alt="Session mockup 1: Done first stack" />
+        </div>
+        <div class="meta">
+          <p class="section-label">Concept 1</p>
+          <h2><span class="letter">1</span> Done-first stack</h2>
+          <p>Straight reorder of today’s Session: exercises with logged sets on top; tools at the bottom.</p>
+          <ol>
+            <li>Your exercises (expanded logger + sets)</li>
+            <li>Save as template</li>
+            <li>Log movement (moved down)</li>
+            <li>Add exercises for today (moved down)</li>
+          </ol>
+          <a class="open" href="./session-mockup-1-done-first-stack.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="s2">
+        <div class="phone">
+          <img src="./session-mockup-2-active-lift-hero.png" alt="Session mockup 2: Active lift hero" />
+        </div>
+        <div class="meta">
+          <p class="section-label">Concept 2</p>
+          <h2><span class="letter">2</span> Active lift hero</h2>
+          <p>One focused exercise card dominates the top; other done exercises stay slim above/around it.</p>
+          <ol>
+            <li>Your exercises / active lift (top)</li>
+            <li>Log movement (below)</li>
+            <li>Add exercises for today (bottom)</li>
+          </ol>
+          <a class="open" href="./session-mockup-2-active-lift-hero.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="s3">
+        <div class="phone">
+          <img src="./session-mockup-3-accordion-first.png" alt="Session mockup 3: Accordion first" />
+        </div>
+        <div class="meta">
+          <p class="section-label">Concept 3</p>
+          <h2><span class="letter">3</span> Accordion first</h2>
+          <p>Muscle-grouped accordion list for logging; screenshot sections stay fully below.</p>
+          <ol>
+            <li>Your exercises accordion (top)</li>
+            <li>Save as template</li>
+            <li>Log movement</li>
+            <li>Add exercises for today</li>
+          </ol>
+          <a class="open" href="./session-mockup-3-accordion-first.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="s4">
+        <div class="phone">
+          <img src="./session-mockup-4-two-zone.png" alt="Session mockup 4: Two-zone scroll" />
+        </div>
+        <div class="meta">
+          <p class="section-label">Concept 4</p>
+          <h2><span class="letter">4</span> Two-zone scroll</h2>
+          <p>Top zone = workout progress. Quiet mist panel below holds both screenshot blocks together.</p>
+          <ol>
+            <li>Summary + Your exercises (top)</li>
+            <li>Secondary panel: Log movement + Add exercises</li>
+          </ol>
+          <a class="open" href="./session-mockup-4-two-zone.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="s5">
+        <div class="phone">
+          <img src="./session-mockup-5-sets-board.png" alt="Session mockup 5: Sets board" />
+        </div>
+        <div class="meta">
+          <p class="section-label">Concept 5</p>
+          <h2><span class="letter">5</span> Sets board</h2>
+          <p>Done work as inline set chips at the top; Log movement + Add exercises sit at the very bottom like your screenshots.</p>
+          <ol>
+            <li>Your exercises board with set chips (top)</li>
+            <li>Log movement (below)</li>
+            <li>Add exercises for today (bottom)</li>
+          </ol>
+          <a class="open" href="./session-mockup-5-sets-board.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>

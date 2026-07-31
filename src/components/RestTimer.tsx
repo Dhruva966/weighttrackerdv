@@ -65,17 +65,17 @@ export function RestTimer({ activeKey }: { activeKey: string }) {
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {status === 'running' ? (
-          <button className="button-secondary min-h-11 px-3" type="button" onClick={pause}>
+          <button className="button-secondary min-h-9 px-3" type="button" onClick={pause}>
             <Pause size={16} aria-hidden />
             Pause
           </button>
         ) : (
-          <button className="button-primary min-h-11 px-3" type="button" onClick={start}>
+          <button className="button-primary min-h-9 px-3" type="button" onClick={start}>
             <Play size={16} aria-hidden />
             {status === 'paused' ? 'Resume' : 'Start'}
           </button>
         )}
-        <button className="button-secondary min-h-11 px-3" type="button" onClick={reset}>
+        <button className="button-secondary min-h-9 px-3" type="button" onClick={reset}>
           Reset
         </button>
       </div>

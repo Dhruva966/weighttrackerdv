@@ -4,11 +4,16 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   server: {
-    host: '0.0.0.0',
+    // Listen on IPv4 + IPv6 so `localhost` works when the browser prefers ::1
+    host: true,
+    port: 5173,
+    strictPort: true,
     allowedHosts: true,
   },
   preview: {
-    host: '0.0.0.0',
+    host: true,
+    port: 4173,
+    strictPort: true,
     allowedHosts: true,
   },
   plugins: [
@@ -45,5 +50,6 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.claude/**'],
   },
 });

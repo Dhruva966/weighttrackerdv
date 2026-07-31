@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aloo — Move page mockups</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fffefb;
+        --fg: #2b261c;
+        --muted: #7a7164;
+        --accent: #c4a35a;
+        --border: #e6ddce;
+        --surface: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: var(--fg);
+        background:
+          radial-gradient(ellipse 95% 65% at 0% 0%, rgba(196, 163, 90, 0.16), transparent 52%),
+          radial-gradient(ellipse 70% 45% at 100% 8%, rgba(243, 235, 218, 0.9), transparent 48%),
+          linear-gradient(180deg, #fffefb 0%, #fbf7f0 42%, #f5efe4 100%);
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 254, 251, 0.88);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 1.25rem;
+      }
+
+      header .inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1.25rem;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.55rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+
+      nav a {
+        color: var(--fg);
+        text-decoration: none;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: 999px;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.85rem;
+      }
+
+      nav a:hover,
+      nav a:focus-visible {
+        border-color: var(--accent);
+        background: rgba(196, 163, 90, 0.12);
+      }
+
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem 1.25rem 4rem;
+        display: grid;
+        gap: 2.5rem;
+      }
+
+      .card {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: minmax(220px, 320px) 1fr;
+        align-items: start;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        padding: 1.1rem;
+        box-shadow: 0 1px 2px rgba(43, 38, 28, 0.04);
+      }
+
+      @media (max-width: 800px) {
+        .card {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .phone {
+        margin: 0 auto;
+        width: min(100%, 320px);
+        border-radius: 1.25rem;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: #f6f0e4;
+      }
+
+      .phone img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .meta h2 {
+        margin: 0;
+        font-size: 1.35rem;
+      }
+
+      .meta .letter {
+        display: inline-block;
+        margin-right: 0.4rem;
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .meta p {
+        margin: 0.65rem 0 0;
+        color: var(--muted);
+        line-height: 1.55;
+        max-width: 42rem;
+      }
+
+      .meta ul {
+        margin: 0.85rem 0 0;
+        padding-left: 1.15rem;
+        color: var(--fg);
+        line-height: 1.55;
+      }
+
+      .open {
+        display: inline-flex;
+        margin-top: 1rem;
+        align-items: center;
+        gap: 0.35rem;
+        min-height: 2.5rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 0.7rem;
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: #fffefb;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .open:hover {
+        background: #b08d3a;
+        border-color: #b08d3a;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="inner">
+        <div>
+          <h1>Aloo · Move mockups</h1>
+          <p>Template-first / workout-first directions — pick a letter and note edits.</p>
+        </div>
+        <nav>
+          <a href="#a">A</a>
+          <a href="#b">B</a>
+          <a href="#c">C</a>
+          <a href="#d">D</a>
+          <a href="#e">E</a>
+          <a href="#f">F</a>
+          <a href="#g">G</a>
+          <a href="#h">H</a>
+          <a href="#i">I</a>
+          <a href="./session.html">Session v1</a>
+          <a href="./session-v2.html">Session v2 (tabular)</a>
+          <a href="/">← App</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <article class="card" id="a">
+        <div class="phone">
+          <img src="./move-mockup-a-template-stack.png" alt="Move mockup A: Template stack" />
+        </div>
+        <div class="meta">
+          <h2><span class="letter">A</span> Template stack</h2>
+          <p>Full cards with Start on each. Closest to the current shipped Move.</p>
+          <ul>
+            <li>Primary: stacked template cards</li>
+            <li>Secondary: start empty</li>
+          </ul>
+          <a class="open" href="./move-mockup-a-template-stack.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="b">
+        <div class="phone">
+          <img src="./move-mockup-b-hero-start.png" alt="Move mockup B: Hero start" />
+        </div>
+        <div class="meta">
+          <h2><span class="letter">B</span> Hero start</h2>
+          <p>One dominant suggested workout; other templates as a secondary strip.</p>
+          <ul>
+            <li>Primary: single Start CTA</li>
+            <li>Alternates as horizontal chips/cards</li>
+          </ul>
+          <a class="open" href="./move-mockup-b-hero-start.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="c">
+        <div class="phone">
+          <img src="./move-mockup-c-continue-templates.png" alt="Move mockup C: Continue + templates" />
+        </div>
+        <div class="meta">
+          <h2><span class="letter">C</span> Continue + templates</h2>
+          <p>Open-session banner first, then compact template rows.</p>
+          <ul>
+            <li>Resume path when a workout is in progress</li>
+            <li>Templates stay reachable below</li>
+          </ul>
+          <a class="open" href="./move-mockup-c-continue-templates.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="d">
+        <div class="phone">
+          <img src="./move-mockup-d-smart-suggest.png" alt="Move mockup D: Smart suggest" />
+        </div>
+        <div class="meta">
+          <h2><span class="letter">D</span> Smart suggest</h2>
+          <p>“Ready for Pull Day?” based on last workout — one editorial CTA.</p>
+          <ul>
+            <li>Primary: suggested next template</li>
+            <li>Others listed quietly underneath</li>
+          </ul>
+          <a class="open" href="./move-mockup-d-smart-suggest.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="e">
+        <div class="phone">
+          <img src="./move-mockup-e-tile-grid.png" alt="Move mockup E: Tile grid" />
+        </div>
+        <div class="meta">
+          <h2><span class="letter">E</span> Tile grid</h2>
+          <p>2×2 large tiles including a New template tile.</p>
+          <ul>
+            <li>Tap a tile to start</li>
+            <li>Empty workout as a quiet full-width action</li>
+          </ul>
+          <a class="open" href="./move-mockup-e-tile-grid.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="f">
+        <div class="phone">
+          <img src="./move-mockup-f-editorial-rows.png" alt="Move mockup F: Editorial rows" />
+        </div>
+        <div class="meta">
+          <h2><span class="letter">F</span> Editorial rows</h2>
+          <p>Sparse serif list with hairlines; sticky empty-start bar.</p>
+          <ul>
+            <li>Minimal chrome</li>
+            <li>Name + Start per row</li>
+          </ul>
+          <a class="open" href="./move-mockup-f-editorial-rows.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="g">
+        <div class="phone">
+          <img src="./move-mockup-g-start-sheet.png" alt="Move mockup G: Start sheet" />
+        </div>
+        <div class="meta">
+          <h2><span class="letter">G</span> Start sheet</h2>
+          <p>Bottom sheet flow: My templates / Examples → Begin.</p>
+          <ul>
+            <li>Radio-style template pick</li>
+            <li>Pinned Begin CTA</li>
+          </ul>
+          <a class="open" href="./move-mockup-g-start-sheet.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="h">
+        <div class="phone">
+          <img src="./move-mockup-h-favorites-recents.png" alt="Move mockup H: Favorites + recents" />
+        </div>
+        <div class="meta">
+          <h2><span class="letter">H</span> Favorites + recents</h2>
+          <p>Favorite strip on top, recently used list below.</p>
+          <ul>
+            <li>Fast re-start of common templates</li>
+            <li>Recents with last-used hint</li>
+          </ul>
+          <a class="open" href="./move-mockup-h-favorites-recents.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+
+      <article class="card" id="i">
+        <div class="phone">
+          <img src="./move-mockup-i-dual-path.png" alt="Move mockup I: Dual path" />
+        </div>
+        <div class="meta">
+          <h2><span class="letter">I</span> Dual path</h2>
+          <p>Two big doors: start from template vs empty workout.</p>
+          <ul>
+            <li>Clear fork at the top</li>
+            <li>Template preview underneath</li>
+          </ul>
+          <a class="open" href="./move-mockup-i-dual-path.png" target="_blank" rel="noreferrer">Open full size</a>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>

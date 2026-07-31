@@ -252,3 +252,10 @@ model = "codex-1"
 | Shipping | `/ship` then `/land-and-deploy` equivalent | Release |
 | Post-deploy | `/canary` equivalent | Release |
 | Weekly | `/retro` plus `/learn` equivalent | Reflect |
+
+## Cursor Cloud specific instructions
+
+- **Single app service:** Vite React PWA only (`pnpm dev`). No Docker Compose, no local DB process. Gym sync needs `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` in `.env.local` (see `.env.example`); without them the app still boots — diary/UI/templates are local-first and `getSupabase()` returns null.
+- **Commands:** See root `package.json` / README — `pnpm test` (Vitest), `pnpm build` (`tsc` + Vite; there is no separate ESLint script), `pnpm dev`.
+- **Product surface:** Move (`/move`, also `/`) is the template-first workout home. Calendar history lives on Grow (`/grow`); `/calendar` redirects there. Full template management is `/templates`; Move inlines saved + example templates for one-tap start.
+- **Gotcha:** pnpm may report ignored `esbuild` build scripts; optional `@esbuild/linux-x64` packages still install and Vite works. Prefer non-interactive fixes over `pnpm approve-builds` (interactive).
