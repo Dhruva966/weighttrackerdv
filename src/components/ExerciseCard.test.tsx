@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import type { Exercise } from '../types';
@@ -26,10 +26,10 @@ function renderCard(exercise: Exercise) {
 }
 
 describe('ExerciseCard', () => {
-  it('renders a photo before its name and links to the exercise detail', () => {
+  it('shows no-photo before its name and links to the exercise detail (people URLs blocked)', () => {
     renderCard({ ...baseExercise, imageUrl: 'https://example.com/incline-press.jpg' });
 
-    const image = screen.getByRole('img', { name: 'Incline Dumbbell Press' });
+    const image = screen.getByRole('img', { name: 'No photo available for Incline Dumbbell Press' });
     const name = screen.getByRole('heading', { name: 'Incline Dumbbell Press' });
 
     expect(image.compareDocumentPosition(name) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -50,10 +50,8 @@ describe('ExerciseCard', () => {
     expect(screen.queryByRole('img', { name: 'Incline Dumbbell Press' })).not.toBeInTheDocument();
   });
 
-  it('replaces a failed image with the accessible no-photo state', () => {
+  it('treats blocked people-photo hosts as no-photo without waiting for error', () => {
     renderCard({ ...baseExercise, imageUrl: 'https://example.com/missing.jpg' });
-
-    fireEvent.error(screen.getByRole('img', { name: 'Incline Dumbbell Press' }));
 
     expect(screen.getByRole('img', { name: 'No photo available for Incline Dumbbell Press' })).toBeInTheDocument();
     expect(screen.queryByRole('img', { name: 'Incline Dumbbell Press' })).not.toBeInTheDocument();

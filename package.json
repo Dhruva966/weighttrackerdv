@@ -13,6 +13,7 @@
     "import:pdf-exercises": "tsx scripts/import-exercise-manifest.ts",
     "apply:pdf-icons": "tsx scripts/apply-pdf-icons.ts",
     "purge:stock-reseed-pdf": "tsx scripts/purge-stock-reseed-pdf-icons.ts",
+    "purge:people-photos": "tsx scripts/purge-all-people-photos.ts",
     "check:supabase": "tsx scripts/check-supabase.ts",
     "check:groq": "tsx scripts/check-groq.ts",
     "supabase:secrets": "tsx scripts/push-supabase-secrets.ts",

@@ -283,8 +283,11 @@ export function resolvePdfIconSlug(slug: string, equipment?: EquipmentKind): str
   return undefined;
 }
 
-/** Local `/exercise-icons/<slug>.jpg` when a verified PDF crop exists for this exercise. */
-export function pdfIconUrl(slug: string, equipment?: EquipmentKind): string | undefined {
-  const resolved = resolvePdfIconSlug(slug, equipment);
-  return resolved ? `/exercise-icons/${resolved}.jpg` : undefined;
+/**
+ * Local `/exercise-icons/<slug>.jpg` candidate.
+ * Disabled: those files are Strong anatomical people demos, not silhouettes.
+ * Re-enable only after true silhouette assets replace `public/exercise-icons/`.
+ */
+export function pdfIconUrl(_slug: string, _equipment?: EquipmentKind): string | undefined {
+  return undefined;
 }

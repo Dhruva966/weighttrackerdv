@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import type { Exercise } from '../types';
 import { ExerciseImage, exerciseImageCandidates } from './ExerciseImage';
 
@@ -27,62 +27,80 @@ const boardBicep: Exercise = {
   source: 'user-board',
 };
 
+const peopleRemote =
+  'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/triceps-pushdown-cable-straight-bar.jpg';
+
 describe('exerciseImageCandidates', () => {
-  it('prefers durable remote imageUrl over local PDF icon (Vercel has no icon binaries)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('returns no candidates for Strong people-photo Storage URLs while blocked', () => {
     expect(
       exerciseImageCandidates({
         ...pdfPaired,
-        imageUrl: 'https://example.com/remote.jpg',
+        imageUrl: peopleRemote,
       }),
-    ).toEqual([
-      'https://example.com/remote.jpg',
-      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
-    ]);
+    ).toEqual([]);
   });
 
-  it('aliases board short slugs onto verified PDF crops when no remote URL', () => {
-    expect(exerciseImageCandidates(boardBicep)).toEqual(['/exercise-icons/bicep-curl-dumbbell.jpg']);
+  it('ignores stock people-photo hosts', () => {
+    expect(
+      exerciseImageCandidates({
+        ...pdfPaired,
+        imageUrl: 'https://cdn.example.com/fedb/triceps-pushdown.jpg',
+      }),
+    ).toEqual([]);
   });
 
-  it('ignores stamped local /exercise-icons paths stored as imageUrl', () => {
+  it('does not invent Storage URLs from slug while people images are blocked', () => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://svcjdtlmmrisrkjqdsjt.supabase.co');
+    expect(exerciseImageCandidates(pdfPaired)).toEqual([]);
+  });
+
+  it('does not use local Strong people-icon paths', () => {
+    expect(exerciseImageCandidates(boardBicep)).toEqual([]);
     expect(
       exerciseImageCandidates({
         ...pdfPaired,
         imageUrl: '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
       }),
-    ).toEqual(['/exercise-icons/triceps-pushdown-cable-straight-bar.jpg']);
+    ).toEqual([]);
   });
 });
 
 describe('ExerciseImage', () => {
-  it('renders remote img first when imageUrl is https', () => {
-    render(
-      <ExerciseImage
-        exercise={{ ...pdfPaired, imageUrl: 'https://example.com/remote.jpg' }}
-        size="sm"
-      />,
-    );
-
-    expect(screen.getByRole('img', { name: pdfPaired.name })).toHaveAttribute(
-      'src',
-      'https://example.com/remote.jpg',
-    );
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
-  it('falls back to local PDF icon when remote errors', () => {
+  it('does not render Strong people-photo Storage URLs', () => {
     render(
       <ExerciseImage
-        exercise={{ ...pdfPaired, imageUrl: 'https://example.com/fallback.jpg' }}
+        exercise={{ ...pdfPaired, imageUrl: peopleRemote }}
         size="sm"
       />,
     );
 
-    fireEvent.error(screen.getByRole('img', { name: pdfPaired.name }));
+    expect(
+      screen.getByRole('img', { name: `No photo available for ${pdfPaired.name}` }),
+    ).toBeInTheDocument();
+  });
 
-    expect(screen.getByRole('img', { name: pdfPaired.name })).toHaveAttribute(
-      'src',
-      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
+  it('does not render stock people-photo URLs', () => {
+    render(
+      <ExerciseImage
+        exercise={{
+          ...pdfPaired,
+          imageUrl: 'https://cdn.example.com/fedb/triceps-pushdown.jpg',
+        }}
+        size="sm"
+      />,
     );
+
+    expect(
+      screen.getByRole('img', { name: `No photo available for ${pdfPaired.name}` }),
+    ).toBeInTheDocument();
   });
 
   it('shows no-photo when no candidates remain', () => {
@@ -99,5 +117,25 @@ describe('ExerciseImage', () => {
     expect(
       screen.getByRole('img', { name: 'No photo available for Totally Unknown' }),
     ).toBeInTheDocument();
+  });
+
+  it('keeps letter-tile style exercises name-only', () => {
+    render(
+      <ExerciseImage
+        exercise={{
+          id: 'ex-yoga',
+          slug: 'yoga',
+          name: 'Yoga',
+          muscleGroup: 'full-body',
+          secondaryMuscles: [],
+          equipment: 'other',
+          instructions: [],
+          imageStyle: 'name-only',
+          source: 'pdf-import',
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('img', { name: 'No photo available for Yoga' })).toBeInTheDocument();
   });
 });

@@ -242,6 +242,7 @@ describe('active session flow', () => {
       ...starterExercises[0],
       slug: 'triceps-pushdown-cable-straight-bar',
       name: 'Triceps Pushdown (Cable - Straight Bar)',
+      // People-photo URLs (any host, including former Storage demos) must not render.
       imageUrl: 'https://example.com/press.jpg',
       imageStyle: 'photo' as const,
     };
@@ -266,10 +267,9 @@ describe('active session flow', () => {
       </QueryClientProvider>,
     );
 
-    expect(screen.getByRole('img', { name: withPhoto.name })).toHaveAttribute(
-      'src',
-      'https://example.com/press.jpg',
-    );
+    expect(
+      screen.getByRole('img', { name: `No photo available for ${withPhoto.name}` }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('img', { name: `No photo available for ${withoutPhoto.name}` }),
     ).toBeInTheDocument();
