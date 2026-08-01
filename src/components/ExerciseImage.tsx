@@ -1,37 +1,38 @@
 import { useEffect, useState } from 'react';
 import { pdfIconUrl } from '../data/pdfIconSlugs';
+import {
+  canonicalPdfStorageUrl,
+  isAllowedPersistedImageUrl,
+  isAllowedRenderImageUrl,
+} from '../lib/exercise-image-policy';
 import type { Exercise } from '../types';
 
-function isDurableRemoteUrl(url: string): boolean {
-  return /^https?:\/\//i.test(url) || url.startsWith('blob:');
-}
-
 /**
- * Prefer durable Supabase/blob URLs first. Local `/exercise-icons/*` are gitignored
- * and are not deployed to Vercel (SPA returns HTML 200), so putting them first
- * blanked Library photos in production even when `image_url` was fine.
+ * While BLOCK_PEOPLE_EXERCISE_IMAGES is on, candidates stay empty (No photo).
+ * When re-enabled: prefer allowlisted Storage silhouettes, then local crops.
+ * Never surface stock/FEDB/Strong people-photo hosts.
  */
 export function exerciseImageCandidates(exercise: Pick<Exercise, 'slug' | 'equipment' | 'imageUrl'>): string[] {
-  const local = pdfIconUrl(exercise.slug, exercise.equipment);
-  const remote = exercise.imageUrl?.trim();
   const candidates: string[] = [];
+  const push = (url: string | undefined) => {
+    const trimmed = url?.trim();
+    if (!trimmed || !isAllowedRenderImageUrl(trimmed) || candidates.includes(trimmed)) {
+      return;
+    }
+    candidates.push(trimmed);
+  };
 
-  if (remote && isDurableRemoteUrl(remote)) {
-    candidates.push(remote);
+  const remote = exercise.imageUrl?.trim();
+  if (remote && isAllowedPersistedImageUrl(remote)) {
+    push(remote);
   }
 
-  if (local && !candidates.includes(local)) {
-    candidates.push(local);
-  }
+  push(canonicalPdfStorageUrl(exercise.slug, exercise.equipment));
+  push(pdfIconUrl(exercise.slug, exercise.equipment));
 
-  // Non-http stored paths (rare) after durable remotes / local crops.
-  if (
-    remote &&
-    !isDurableRemoteUrl(remote) &&
-    !remote.startsWith('/exercise-icons/') &&
-    !candidates.includes(remote)
-  ) {
-    candidates.push(remote);
+  // Rare non-http allowlisted paths already covered by isAllowedRenderImageUrl above.
+  if (remote && isAllowedRenderImageUrl(remote)) {
+    push(remote);
   }
 
   return candidates;

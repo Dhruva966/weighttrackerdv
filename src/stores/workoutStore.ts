@@ -12,6 +12,12 @@ import {
   remapSetExerciseIds,
 } from '../data/exercise-merges';
 import { toDayKey } from '../lib/calendar';
+import {
+  EXERCISE_IMAGE_POLICY_VERSION,
+  isAllowedPersistedImageUrl,
+  pickPreferredImageUrl,
+  sanitizeExerciseImage,
+} from '../lib/exercise-image-policy';
 import { slugify } from '../lib/fmt';
 import { getDeviceTimeZone } from '../lib/local-day';
 import { formatImportedSessionNotes, parseBrainDump } from '../lib/liftImport';
@@ -24,32 +30,6 @@ import type { SessionSnapshot } from '../lib/session-history';
 import type { EquipmentKind, Exercise, Goal, LoggedSet, MuscleGroup, WorkoutSession } from '../types';
 import { usePrStore } from './prStore';
 
-/**
- * Local `/exercise-icons/*.jpg` paths are UI-only candidates (see ExerciseImage).
- * Never persist them as the exercise's imageUrl — they overwrite Supabase Storage URLs
- * and then block gap-fill when the binaries are gitignored / missing.
- */
-function isLocalPdfIconPath(url: string | undefined): boolean {
-  return Boolean(url?.startsWith('/exercise-icons/'));
-}
-
-/** True when the row has a real stored photo (remote or blob), not a missing local icon stamp. */
-function hasStoredPhoto(url: string | undefined): boolean {
-  const trimmed = url?.trim();
-  return Boolean(trimmed) && !isLocalPdfIconPath(trimmed);
-}
-
-function sanitizeExerciseImage(exercise: Exercise): Exercise {
-  if (!isLocalPdfIconPath(exercise.imageUrl)) {
-    return exercise;
-  }
-  return {
-    ...exercise,
-    imageUrl: undefined,
-    imageStyle: exercise.imageStyle === 'photo' ? 'name-only' : exercise.imageStyle,
-  };
-}
-
 type ExerciseInput = {
   name: string;
   muscleGroup: MuscleGroup;
@@ -60,6 +40,9 @@ type ExerciseInput = {
 
 /** Bump when re-introducing or changing board baseline seed so cleared browsers re-merge. */
 export const BOARD_HISTORY_SEED_VERSION = 6;
+
+/** Re-exported so tests / bootstrap can assert clients ran the PDF-only image policy. */
+export { EXERCISE_IMAGE_POLICY_VERSION };
 
 function withoutBaselineSessions<T extends { id: string }>(sessions: T[]): T[] {
   return sessions.filter((session) => !isBoardBaselineSession(session.id));
@@ -73,6 +56,8 @@ type WorkoutState = {
   historyCleared?: boolean;
   /** Tracks which board baseline seed is present; bump `BOARD_HISTORY_SEED_VERSION` to re-seed. */
   boardHistorySeedVersion?: number;
+  /** Bump `EXERCISE_IMAGE_POLICY_VERSION` when allowlist rules change; merge always re-sanitizes. */
+  exerciseImagePolicyVersion?: number;
   createSession: (options?: { startedAt?: string }) => WorkoutSession;
   endSession: (sessionId: string) => void;
   /** Clears endedAt so a day’s session can accept more sets (soft reopen). */
@@ -123,10 +108,9 @@ function unionPreferLocal<T extends { id: string }>(local: T[], remote: T[]): T[
 
 /**
  * Prefer local exercise identity on id/slug conflicts (board starter + pdf-import must not
- * double). Gap-fill imageUrl/imageStyle from remote when the local row has no real photo —
- * how Supabase `exercise-images` backfills reach Library. Local `/exercise-icons/` stamps
- * are ignored so missing gitignored binaries cannot block remote URLs; ExerciseImage still
- * prefers a local crop at render time and falls back to imageUrl on error.
+ * double). Allowlisted Supabase PDF `imageUrl`s from remote replace empty/stock local URLs —
+ * how purge+reseed reaches Library/picker after browsers cached FEDB people photos.
+ * Local `/exercise-icons/` stamps and non–exercise-images hosts are stripped on sanitize.
  */
 function unionExercisesPreferLocal(local: Exercise[], remote: Exercise[]): Exercise[] {
   const remoteById = new Map(remote.map((item) => [item.id, item]));
@@ -139,28 +123,30 @@ function unionExercisesPreferLocal(local: Exercise[], remote: Exercise[]): Exerc
       return cleaned;
     }
 
-    // Remote cleared a bad letter-tile / placeholder — drop the stale local URL too.
-    if (!remoteMatch.imageUrl && cleaned.imageUrl) {
+    const remoteClean = sanitizeExerciseImage(remoteMatch);
+    const preferredUrl = pickPreferredImageUrl(cleaned.imageUrl, remoteClean.imageUrl);
+    const name = remoteMatch.name || cleaned.name;
+
+    // Remote cleared a letter-tile / name-only row — drop stale local stock too.
+    if (!remoteClean.imageUrl && cleaned.imageUrl) {
       return {
         ...cleaned,
+        name,
         imageUrl: undefined,
         imageStyle: remoteMatch.imageStyle === 'name-only' ? 'name-only' : cleaned.imageStyle,
-        name: remoteMatch.name || cleaned.name,
       };
     }
 
-    if (hasStoredPhoto(cleaned.imageUrl) || !remoteMatch.imageUrl) {
-      return remoteMatch.name && remoteMatch.name !== cleaned.name
-        ? { ...cleaned, name: remoteMatch.name }
-        : cleaned;
+    if (preferredUrl && preferredUrl !== cleaned.imageUrl) {
+      return {
+        ...cleaned,
+        name,
+        imageUrl: preferredUrl,
+        imageStyle: remoteClean.imageUrl === preferredUrl ? (remoteClean.imageStyle ?? 'photo') : cleaned.imageStyle,
+      };
     }
 
-    return {
-      ...cleaned,
-      name: remoteMatch.name || cleaned.name,
-      imageUrl: remoteMatch.imageUrl,
-      imageStyle: remoteMatch.imageStyle ?? 'photo',
-    };
+    return name !== cleaned.name ? { ...cleaned, name } : cleaned;
   });
 
   const localIds = new Set(merged.map((item) => item.id));
@@ -177,15 +163,20 @@ function mergeExercises(required: Exercise[], persisted: Exercise[] | undefined)
   const merged = required.map((item) => {
     const stored = persistedById.get(item.id);
     if (!stored) {
-      return item;
+      return sanitizeExerciseImage(item);
     }
-    const storedUrl = hasStoredPhoto(stored.imageUrl) ? stored.imageUrl : undefined;
-    return {
+    const cleanedStored = sanitizeExerciseImage(stored);
+    const storedUrl = isAllowedPersistedImageUrl(cleanedStored.imageUrl)
+      ? cleanedStored.imageUrl
+      : undefined;
+    const starterUrl = isAllowedPersistedImageUrl(item.imageUrl) ? item.imageUrl : undefined;
+    const imageUrl = storedUrl ?? starterUrl;
+    return sanitizeExerciseImage({
       ...item,
       archived: stored.archived,
-      imageUrl: storedUrl ?? item.imageUrl,
-      imageStyle: storedUrl ? stored.imageStyle : item.imageStyle,
-    };
+      imageUrl,
+      imageStyle: imageUrl ? (storedUrl ? cleanedStored.imageStyle : item.imageStyle) : 'name-only',
+    });
   });
 
   return [
@@ -323,6 +314,7 @@ export const useWorkoutStore = create<WorkoutState>()(
       sets: starterSets,
       historyCleared: false,
       boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
+      exerciseImagePolicyVersion: EXERCISE_IMAGE_POLICY_VERSION,
       createSession: (options) => {
         const startedAt = options?.startedAt ?? new Date().toISOString();
         const timezone = getDeviceTimeZone();
@@ -747,6 +739,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           ...stored,
           historyCleared: needsReseed ? false : Boolean(stored?.historyCleared),
           boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
+          exerciseImagePolicyVersion: EXERCISE_IMAGE_POLICY_VERSION,
           exercises,
           goals: mergeById(starterGoals, stored?.goals),
           // Never re-introduce baseline sessions as real gym history.

@@ -687,13 +687,15 @@ describe('workoutStore', () => {
       const local = starterExercises.find((item) => item.slug === 'close-grip-pulldown');
       expect(local).toBeDefined();
       expect(local!.imageUrl).toBeUndefined();
+      const remotePdf =
+        'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/close-grip-pulldown.jpg';
 
       useWorkoutStore.getState().hydrateFromRemote({
         exercises: [
           remoteExercise({
             slug: 'close-grip-pulldown',
             name: 'Close Grip Pulldown',
-            imageUrl: 'https://example.com/close-grip.jpg',
+            imageUrl: remotePdf,
             imageStyle: 'photo',
             source: 'pdf-import',
           }),
@@ -706,18 +708,25 @@ describe('workoutStore', () => {
       const matches = useWorkoutStore.getState().exercises.filter((item) => item.slug === 'close-grip-pulldown');
       expect(matches).toHaveLength(1);
       expect(matches[0]?.id).toBe(local!.id);
-      expect(matches[0]?.imageUrl).toBe('https://example.com/close-grip.jpg');
-      expect(matches[0]?.imageStyle).toBe('photo');
+      // People-image block: Strong Storage URLs are stripped, not gap-filled.
+      expect(matches[0]?.imageUrl).toBeUndefined();
+      expect(matches[0]?.imageStyle).toBe('name-only');
     });
 
-    it('does not overwrite an existing local imageUrl from remote', () => {
+    it('replaces stale local stock people-photo URLs with remote PDF crops', () => {
       const local = starterExercises.find((item) => item.slug === 'close-grip-pulldown');
       expect(local).toBeDefined();
+      const remotePdf =
+        'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/close-grip-pulldown.jpg';
 
       useWorkoutStore.setState((state) => ({
         exercises: state.exercises.map((item) =>
           item.slug === 'close-grip-pulldown'
-            ? { ...item, imageUrl: 'https://example.com/local.jpg', imageStyle: 'photo' as const }
+            ? {
+                ...item,
+                imageUrl: 'https://cdn.example.com/fedb/close-grip.jpg',
+                imageStyle: 'photo' as const,
+              }
             : item,
         ),
       }));
@@ -726,7 +735,7 @@ describe('workoutStore', () => {
         exercises: [
           remoteExercise({
             slug: 'close-grip-pulldown',
-            imageUrl: 'https://example.com/remote.jpg',
+            imageUrl: remotePdf,
             imageStyle: 'photo',
           }),
         ],
@@ -736,10 +745,47 @@ describe('workoutStore', () => {
       });
 
       const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'close-grip-pulldown');
-      expect(match?.imageUrl).toBe('https://example.com/local.jpg');
+      // Both local stock and remote Strong people demos are stripped.
+      expect(match?.imageUrl).toBeUndefined();
+      expect(match?.imageStyle).toBe('name-only');
+    });
+
+    it('keeps an existing allowlisted local imageUrl when remote has none', () => {
+      const local = starterExercises.find((item) => item.slug === 'close-grip-pulldown');
+      expect(local).toBeDefined();
+      const localPdf =
+        'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/close-grip-pulldown.jpg';
+
+      useWorkoutStore.setState((state) => ({
+        exercises: state.exercises.map((item) =>
+          item.slug === 'close-grip-pulldown'
+            ? { ...item, imageUrl: localPdf, imageStyle: 'photo' as const }
+            : item,
+        ),
+      }));
+
+      useWorkoutStore.getState().hydrateFromRemote({
+        exercises: [
+          remoteExercise({
+            slug: 'close-grip-pulldown',
+            imageUrl: undefined,
+            imageStyle: 'name-only',
+          }),
+        ],
+        sessions: [],
+        sets: [],
+        goals: [],
+      });
+
+      const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'close-grip-pulldown');
+      // Remote name-only clears stale photos; block also strips Storage people demos.
+      expect(match?.imageUrl).toBeUndefined();
+      expect(match?.imageStyle).toBe('name-only');
     });
 
     it('gap-fills imageUrl from remote even when a stale local PDF icon path was stamped', () => {
+      const remotePdf =
+        'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/arnold-press-dumbbell.jpg';
       useWorkoutStore.setState((state) => ({
         exercises: [
           ...state.exercises,
@@ -767,7 +813,7 @@ describe('workoutStore', () => {
             id: 'ex-arnold-press-dumbbell',
             slug: 'arnold-press-dumbbell',
             name: 'Arnold Press (Dumbbell)',
-            imageUrl: 'https://example.com/fedb-arnold.jpg',
+            imageUrl: remotePdf,
             imageStyle: 'photo',
             source: 'pdf-import',
           }),
@@ -778,17 +824,19 @@ describe('workoutStore', () => {
       });
 
       const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'arnold-press-dumbbell');
-      expect(match?.imageUrl).toBe('https://example.com/fedb-arnold.jpg');
-      expect(match?.imageStyle).toBe('photo');
+      expect(match?.imageUrl).toBeUndefined();
+      expect(match?.imageStyle).toBe('name-only');
     });
 
     it('keeps remote Supabase imageUrl instead of stamping a local PDF icon path into the store', () => {
+      const remotePdf =
+        'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/arnold-press-dumbbell.jpg';
       useWorkoutStore.getState().hydrateFromRemote({
         exercises: [
           remoteExercise({
             slug: 'arnold-press-dumbbell',
             name: 'Arnold Press (Dumbbell)',
-            imageUrl: 'https://example.com/fedb-arnold.jpg',
+            imageUrl: remotePdf,
             imageStyle: 'photo',
             source: 'pdf-import',
           }),
@@ -799,8 +847,29 @@ describe('workoutStore', () => {
       });
 
       const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'arnold-press-dumbbell');
-      expect(match?.imageUrl).toBe('https://example.com/fedb-arnold.jpg');
-      expect(match?.imageStyle).toBe('photo');
+      expect(match?.imageUrl).toBeUndefined();
+      expect(match?.imageStyle).toBe('name-only');
+    });
+
+    it('strips non-allowlisted remote stock URLs on hydrate', () => {
+      useWorkoutStore.getState().hydrateFromRemote({
+        exercises: [
+          remoteExercise({
+            slug: 'stock-only-row',
+            name: 'Stock Only',
+            imageUrl: 'https://cdn.example.com/fedb/stock.jpg',
+            imageStyle: 'photo',
+            source: 'free-exercise-db',
+          }),
+        ],
+        sessions: [],
+        sets: [],
+        goals: [],
+      });
+
+      const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'stock-only-row');
+      expect(match?.imageUrl).toBeUndefined();
+      expect(match?.imageStyle).toBe('name-only');
     });
   });
 });
