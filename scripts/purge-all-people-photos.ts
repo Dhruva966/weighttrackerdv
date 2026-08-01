@@ -21,9 +21,17 @@ function requireEnv(name: string): string {
   return value;
 }
 
-async function listAllStorageObjects(
-  supabase: ReturnType<typeof createClient>,
-): Promise<string[]> {
+async function listAllStorageObjects(supabase: {
+  storage: {
+    from: (bucket: string) => {
+      list: (
+        path: string,
+        options: { limit: number; offset: number; sortBy: { column: string; order: string } },
+      ) => Promise<{ data: { name: string }[] | null; error: { message: string } | null }>;
+      remove: (paths: string[]) => Promise<{ error: { message: string } | null }>;
+    };
+  };
+}): Promise<string[]> {
   const names: string[] = [];
   let offset = 0;
   const limit = 100;
