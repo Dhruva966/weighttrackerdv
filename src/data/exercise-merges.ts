@@ -74,6 +74,13 @@ export const EXERCISE_HARD_DELETES: readonly string[] = [
   'zorp-library-create',
 ];
 
+const HARD_DELETE_SET = new Set(EXERCISE_HARD_DELETES);
+
+/** True for retired test lifts / hard-deleted catalog rows that must not reappear via local sync. */
+export function isHardDeletedExerciseSlug(slug: string): boolean {
+  return HARD_DELETE_SET.has(slug) || slug.startsWith('zorp-');
+}
+
 /** Old board slug → surviving PDF slug. */
 export const EXERCISE_MERGE_BY_FROM: Readonly<Record<string, string>> = Object.fromEntries(
   EXERCISE_MERGES.map((row) => [row.from, row.to]),
@@ -136,6 +143,9 @@ export function mergeExerciseCatalog<T extends MergeableExercise>(exercises: T[]
   const bySlug = new Map<string, T>();
 
   for (const exercise of exercises) {
+    if (isHardDeletedExerciseSlug(exercise.slug) || isHardDeletedExerciseSlug(canonicalExerciseSlug(exercise.slug))) {
+      continue;
+    }
     const canonical = canonicalExerciseSlug(exercise.slug);
     const incoming: T = {
       ...exercise,
