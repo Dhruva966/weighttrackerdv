@@ -222,10 +222,24 @@ export const useTemplateStore = create<TemplateState>()(
         return get().createTemplate(name, exerciseIds);
       },
       hydrateFromRemote: (remote) => {
-        set((state) => ({
-          templates: unionPreferLocal(state.templates, remote.templates),
-          templateExercises: unionPreferLocal(state.templateExercises, remote.templateExercises),
-        }));
+        set((state) => {
+          const templateExercises = unionPreferLocal(
+            state.templateExercises,
+            remote.templateExercises,
+          );
+          const nonEmptyIds = new Set(templateExercises.map((item) => item.templateId));
+          // Drop empty remote shells ("No exercises yet") and delete them server-side.
+          for (const remoteTemplate of remote.templates) {
+            if (!nonEmptyIds.has(remoteTemplate.id)) {
+              void deleteSyncedTemplate(remoteTemplate.id);
+            }
+          }
+          const remoteNonEmpty = remote.templates.filter((item) => nonEmptyIds.has(item.id));
+          return {
+            templates: unionPreferLocal(state.templates, remoteNonEmpty),
+            templateExercises,
+          };
+        });
       },
     }),
     {

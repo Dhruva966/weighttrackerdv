@@ -1,11 +1,8 @@
 /**
- * DISABLED — previous reseed uploaded Strong anatomical people demos as "PDF crops".
- * Do not re-upload those files.
+ * Re-enable path: purge leftover Storage noise is optional; prefer `pnpm apply:pdf-icons`
+ * to upload verified IMG_3417 PDF diagram crops only (skips letter tiles).
  *
- *   pnpm purge:people-photos
+ * This entrypoint now delegates to apply-pdf-icons so `pnpm purge:stock-reseed-pdf`
+ * is no longer a hard fail.
  */
-console.error(
-  'purge:stock-reseed-pdf is disabled — it re-uploads Strong people demos.\n' +
-    'Use: pnpm purge:people-photos',
-);
-process.exit(1);
+import './apply-pdf-icons.ts';

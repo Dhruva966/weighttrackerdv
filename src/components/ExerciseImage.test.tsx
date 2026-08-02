@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { Exercise } from '../types';
 import { ExerciseImage, exerciseImageCandidates } from './ExerciseImage';
 
@@ -27,7 +27,7 @@ const boardBicep: Exercise = {
   source: 'user-board',
 };
 
-const peopleRemote =
+const storagePdf =
   'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/triceps-pushdown-cable-straight-bar.jpg';
 
 describe('exerciseImageCandidates', () => {
@@ -35,13 +35,17 @@ describe('exerciseImageCandidates', () => {
     vi.unstubAllEnvs();
   });
 
-  it('returns no candidates for Strong people-photo Storage URLs while blocked', () => {
+  it('prefers allowlisted Storage PDF URL, then local PDF diagram', () => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://svcjdtlmmrisrkjqdsjt.supabase.co');
     expect(
       exerciseImageCandidates({
         ...pdfPaired,
-        imageUrl: peopleRemote,
+        imageUrl: storagePdf,
       }),
-    ).toEqual([]);
+    ).toEqual([
+      storagePdf,
+      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
+    ]);
   });
 
   it('ignores stock people-photo hosts', () => {
@@ -50,22 +54,21 @@ describe('exerciseImageCandidates', () => {
         ...pdfPaired,
         imageUrl: 'https://cdn.example.com/fedb/triceps-pushdown.jpg',
       }),
-    ).toEqual([]);
+    ).toEqual(['/exercise-icons/triceps-pushdown-cable-straight-bar.jpg']);
   });
 
-  it('does not invent Storage URLs from slug while people images are blocked', () => {
+  it('aliases board short slugs onto verified PDF diagram crops', () => {
+    expect(exerciseImageCandidates(boardBicep)).toEqual([
+      '/exercise-icons/bicep-curl-dumbbell.jpg',
+    ]);
+  });
+
+  it('builds canonical Storage candidate when env is set', () => {
     vi.stubEnv('VITE_SUPABASE_URL', 'https://svcjdtlmmrisrkjqdsjt.supabase.co');
-    expect(exerciseImageCandidates(pdfPaired)).toEqual([]);
-  });
-
-  it('does not use local Strong people-icon paths', () => {
-    expect(exerciseImageCandidates(boardBicep)).toEqual([]);
-    expect(
-      exerciseImageCandidates({
-        ...pdfPaired,
-        imageUrl: '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
-      }),
-    ).toEqual([]);
+    expect(exerciseImageCandidates(pdfPaired)).toEqual([
+      'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/triceps-pushdown-cable-straight-bar.jpg',
+      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
+    ]);
   });
 });
 
@@ -74,17 +77,15 @@ describe('ExerciseImage', () => {
     vi.unstubAllEnvs();
   });
 
-  it('does not render Strong people-photo Storage URLs', () => {
+  it('renders Storage PDF diagram when allowlisted', () => {
     render(
       <ExerciseImage
-        exercise={{ ...pdfPaired, imageUrl: peopleRemote }}
+        exercise={{ ...pdfPaired, imageUrl: storagePdf }}
         size="sm"
       />,
     );
 
-    expect(
-      screen.getByRole('img', { name: `No photo available for ${pdfPaired.name}` }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: pdfPaired.name })).toHaveAttribute('src', storagePdf);
   });
 
   it('does not render stock people-photo URLs', () => {
@@ -98,9 +99,26 @@ describe('ExerciseImage', () => {
       />,
     );
 
-    expect(
-      screen.getByRole('img', { name: `No photo available for ${pdfPaired.name}` }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: pdfPaired.name })).toHaveAttribute(
+      'src',
+      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
+    );
+  });
+
+  it('falls back to local PDF icon when remote errors', () => {
+    render(
+      <ExerciseImage
+        exercise={{ ...pdfPaired, imageUrl: storagePdf }}
+        size="sm"
+      />,
+    );
+
+    fireEvent.error(screen.getByRole('img', { name: pdfPaired.name }));
+
+    expect(screen.getByRole('img', { name: pdfPaired.name })).toHaveAttribute(
+      'src',
+      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
+    );
   });
 
   it('shows no-photo when no candidates remain', () => {

@@ -1,4 +1,5 @@
 import type { Exercise } from '../types';
+import { canonicalExerciseSlug } from './exercise-merges';
 
 /**
  * Read-only starter suggestions in the universal Templates list. Dhruva's usual
@@ -21,7 +22,7 @@ export const exampleTemplates: ExampleTemplate[] = [
     exerciseSlugs: [
       'bench-press-barbell',
       'incline-chest-press-machine',
-      'tricep-extension-machine-w-pad',
+      'triceps-extension-machine',
       'lateral-raise-machine',
       'crunch-machine',
     ],
@@ -36,7 +37,7 @@ export const exampleTemplates: ExampleTemplate[] = [
       'bicep-curl-dumbbell',
       'lateral-raise-machine',
       'crunch-machine',
-      'low-back-raise',
+      'back-extension',
     ],
   },
   {
@@ -69,7 +70,7 @@ export const exampleTemplates: ExampleTemplate[] = [
     exerciseSlugs: [
       'shoulder-press-machine',
       'lateral-raise-machine',
-      'lat-raise',
+      'lateral-raise-dumbbell',
       'bicep-curl-dumbbell',
       'hammer-curl-cable',
       'preacher-curl-machine',
@@ -80,5 +81,7 @@ export const exampleTemplates: ExampleTemplate[] = [
 /** Resolves an example template's slugs against the live catalog, dropping any that no longer exist. */
 export function resolveExampleTemplateExerciseIds(template: ExampleTemplate, exercises: Exercise[]): string[] {
   const bySlug = new Map(exercises.map((exercise) => [exercise.slug, exercise.id]));
-  return template.exerciseSlugs.map((slug) => bySlug.get(slug)).filter((id): id is string => id !== undefined);
+  return template.exerciseSlugs
+    .map((slug) => bySlug.get(canonicalExerciseSlug(slug)))
+    .filter((id): id is string => id !== undefined);
 }

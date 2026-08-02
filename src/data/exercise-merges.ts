@@ -9,7 +9,9 @@ export const EXERCISE_MERGES: ReadonlyArray<{ from: string; to: string }> = [
   { from: 'cable-fly', to: 'chest-fly' },
   { from: 'cable-chest-fly', to: 'chest-fly' },
   { from: 'cable-fly-custom', to: 'chest-fly' },
-  { from: 'tricep-machine-extension', to: 'tricep-extension-machine-w-pad' },
+  // Board shorthand + pad-machine board name both land on the PDF machine extension.
+  { from: 'tricep-machine-extension', to: 'triceps-extension-machine' },
+  { from: 'tricep-extension-machine-w-pad', to: 'triceps-extension-machine' },
   { from: 'hack-squat', to: 'hack-squat-barbell' },
   { from: 'leg-press-linear', to: 'leg-press' },
   { from: 'hamstring-curl-laying', to: 'lying-leg-curl-machine' },
@@ -29,10 +31,47 @@ export const EXERCISE_MERGES: ReadonlyArray<{ from: string; to: string }> = [
   { from: 'calf-raise-sitting', to: 'seated-calf-raise-machine' },
   { from: 'quad-extension', to: 'leg-extension-machine' },
   { from: 'ab-crunch-corner-machine', to: 'crunch-machine' },
-  // Round 3
+  // Round 3 — Shoulder Press: keep BOTH Machine and Dumbell (owner spelling).
   { from: 'shoulder-press', to: 'shoulder-press-machine' },
+  { from: 'shoulder-press-cable-machine', to: 'shoulder-press-machine' },
+  { from: 'shoulder-press-plate-loaded', to: 'shoulder-press-machine' },
+  { from: 'shoulder-press-dumbbell', to: 'shoulder-press-dumbell' },
   { from: 'squat-machine', to: 'squat-curved-stand' },
   { from: 'seated-calf-raise-plate-loaded', to: 'seated-calf-raise-machine' },
+  // Round 4 — user-approved collapses
+  { from: 'lat-pulldown-cable-2', to: 'lat-pulldown-cable' },
+  { from: 'lat-pulldown-cable-3', to: 'lat-pulldown-cable' },
+  { from: 'single-arm-dumbell-row', to: 'bent-over-one-arm-row-dumbbell' },
+  { from: 'kipping-pull-up', to: 'pull-up' },
+  { from: 'cycling', to: 'cycling-indoor' },
+  { from: 'strict-military-press-barbell', to: 'overhead-press-barbell' },
+  // Lateral raises: keep Machine + Dumbbell + Slanted (board) + Cable only.
+  { from: 'lat-raise', to: 'lateral-raise-dumbbell' },
+  { from: 'seated-lateral-raise-padded-machine', to: 'lateral-raise-machine' },
+  { from: 'lateral-raise-band', to: 'lateral-raise-dumbbell' },
+  // Round 5 — user-approved collapses (2026-08-02)
+  { from: 'wide-pull-up', to: 'pull-up' }, // "Pull Up Normal"
+  { from: 'straight-bar-tricep-extension-machine', to: 'triceps-extension-machine' },
+  { from: 'pendlay-row-barbell', to: 'bent-over-row-barbell' }, // "Barbell Row"
+  { from: 'seated-leg-press-machine', to: 'leg-press' },
+  { from: 'lat-pulldown-machine', to: 'lat-pulldown-cable' },
+  { from: 'seated-overhead-press-barbell', to: 'overhead-press-barbell' },
+  { from: 'seated-overhead-press-dumbbell', to: 'overhead-press-dumbbell' },
+  { from: 'low-back-raise', to: 'back-extension' },
+  { from: 'shrug-smith-machine', to: 'shrug-machine' },
+];
+
+/** Hard-delete (or archive if FK-blocked) — not merges. Keep rope + overhead tricep variants. */
+export const EXERCISE_HARD_DELETES: readonly string[] = [
+  'calf-press-on-seated-leg-press',
+  'calf-press-on-leg-press',
+  'triceps-extension-cable',
+  'bent-over-row-underhand-barbell',
+  'pullover-machine',
+  'pullover-dumbbell',
+  'zorp-mis-tagged-lift',
+  'zorp-picker-create',
+  'zorp-library-create',
 ];
 
 /** Old board slug → surviving PDF slug. */

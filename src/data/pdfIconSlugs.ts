@@ -257,9 +257,23 @@ const PDF_ICON_ALIASES: Record<string, string> = {
   'dumbbell-preacher-curl': 'preacher-curl-dumbbell',
   'hamstring-curl-laying': 'lying-leg-curl-machine',
   'tricep-machine-extension': 'triceps-extension-machine',
+  'tricep-extension-machine-w-pad': 'triceps-extension-machine',
   'calf-raise-standing-smith': 'standing-calf-raise-smith-machine',
   'reverse-bar-curl': 'reverse-curl-barbell',
   'leg-raise': 'flat-leg-raise',
+  'single-arm-dumbell-row': 'bent-over-one-arm-row-dumbbell',
+  'strict-military-press-barbell': 'overhead-press-barbell',
+  'kipping-pull-up': 'pull-up',
+  'cycling': 'cycling-indoor',
+  'wide-pull-up': 'pull-up',
+  'straight-bar-tricep-extension-machine': 'triceps-extension-machine',
+  'pendlay-row-barbell': 'bent-over-row-barbell',
+  'seated-leg-press-machine': 'leg-press',
+  'lat-pulldown-machine': 'lat-pulldown-cable',
+  'seated-overhead-press-barbell': 'overhead-press-barbell',
+  'seated-overhead-press-dumbbell': 'overhead-press-dumbbell',
+  'low-back-raise': 'back-extension',
+  'shrug-smith-machine': 'shrug-machine',
 };
 
 /** Resolve a catalog slug to a verified local PDF icon filename slug. */
@@ -283,11 +297,8 @@ export function resolvePdfIconSlug(slug: string, equipment?: EquipmentKind): str
   return undefined;
 }
 
-/**
- * Local `/exercise-icons/<slug>.jpg` candidate.
- * Disabled: those files are Strong anatomical people demos, not silhouettes.
- * Re-enable only after true silhouette assets replace `public/exercise-icons/`.
- */
-export function pdfIconUrl(_slug: string, _equipment?: EquipmentKind): string | undefined {
-  return undefined;
+/** Local `/exercise-icons/<slug>.jpg` when a verified PDF diagram crop exists. */
+export function pdfIconUrl(slug: string, equipment?: EquipmentKind): string | undefined {
+  const resolved = resolvePdfIconSlug(slug, equipment);
+  return resolved ? `/exercise-icons/${resolved}.jpg` : undefined;
 }
