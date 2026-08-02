@@ -115,4 +115,14 @@ describe('exercise-merges', () => {
     );
     expect(canonicalExerciseSlug('lateral-raise-cable')).toBe('lateral-raise-cable');
   });
+
+  it('drops hard-deleted and zorp-* rows from the merged catalog', () => {
+    const merged = mergeExerciseCatalog([
+      { id: 'keep', slug: 'pull-up' },
+      { id: 'z1', slug: 'zorp-mis-tagged-lift' },
+      { id: 'z2', slug: 'zorp-cable-kickback-deluxe' },
+      { id: 'd1', slug: 'triceps-extension-cable' },
+    ]);
+    expect(merged.map((row) => row.slug)).toEqual(['pull-up']);
+  });
 });
