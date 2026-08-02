@@ -3,24 +3,24 @@ import type { EquipmentKind, Exercise, ImageStyle } from '../types';
 
 /**
  * Bump when image allowlist / sanitize rules change so clients re-strip stale URLs.
- * v2: Strong IMG_3417 "PDF crops" were anatomical people demos — block all exercise
- * images until true silhouettes are curated and re-uploaded.
+ * v3: verified IMG_3417 PDF diagram crops (anatomical illustrations, not photos) are
+ * allowlisted again via Storage `exercise-images` + local `/exercise-icons/`.
+ * Stock/FEDB/CDN people photographs remain rejected.
  */
-export const EXERCISE_IMAGE_POLICY_VERSION = 2;
+export const EXERCISE_IMAGE_POLICY_VERSION = 3;
 
 /**
- * Hard block: do not persist or render exercise thumbnails. The previous Storage
- * reseed and local `/exercise-icons/` files depict people (Strong anatomical demos).
- * Flip to false only after verified silhouette-only assets are in `exercise-images`.
+ * Legacy nuclear switch. Kept false so verified PDF diagrams can render.
+ * People photos are still blocked by the Storage-only persist allowlist below —
+ * do not reintroduce arbitrary https hosts.
  */
-export const BLOCK_PEOPLE_EXERCISE_IMAGES = true;
+export const BLOCK_PEOPLE_EXERCISE_IMAGES = false;
 
 const EXERCISE_IMAGES_PUBLIC = '/storage/v1/object/public/exercise-images/';
 
 /**
  * Durable URLs we may persist and display: Supabase `exercise-images` public objects.
  * Stock/FEDB/CDN people photos and arbitrary https hosts are rejected.
- * When BLOCK_PEOPLE_EXERCISE_IMAGES is on, nothing is allowlisted for persistence.
  */
 export function isAllowedPersistedImageUrl(url: string | undefined | null): boolean {
   if (BLOCK_PEOPLE_EXERCISE_IMAGES) return false;
@@ -42,7 +42,7 @@ export function isLocalPdfIconPath(url: string | undefined | null): boolean {
 
 /**
  * True when the URL may appear in <img> candidates.
- * Blob previews (create form) stay allowed; people-photo icons/Storage are blocked.
+ * Blob previews (create form), local PDF diagrams, and Storage PDF crops are allowed.
  */
 export function isAllowedRenderImageUrl(url: string | undefined | null): boolean {
   const trimmed = url?.trim();
@@ -53,7 +53,7 @@ export function isAllowedRenderImageUrl(url: string | undefined | null): boolean
   return isAllowedPersistedImageUrl(trimmed);
 }
 
-/** Canonical public Storage URL — disabled while people images are blocked. */
+/** Canonical public Storage URL for a verified PDF diagram slug. */
 export function canonicalPdfStorageUrl(
   slug: string,
   equipment?: EquipmentKind,
@@ -67,7 +67,7 @@ export function canonicalPdfStorageUrl(
 
 /**
  * Strip stock/people/local-icon URLs from a catalog row.
- * While BLOCK_PEOPLE_EXERCISE_IMAGES is on, clears every persisted imageUrl.
+ * Keep only allowlisted Storage PDF diagram URLs.
  */
 export function sanitizeExerciseImage(exercise: Exercise): Exercise {
   if (!exercise.imageUrl && exercise.imageStyle !== 'photo') {

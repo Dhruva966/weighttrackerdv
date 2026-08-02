@@ -8,9 +8,8 @@ import {
 import type { Exercise } from '../types';
 
 /**
- * While BLOCK_PEOPLE_EXERCISE_IMAGES is on, candidates stay empty (No photo).
- * When re-enabled: prefer allowlisted Storage silhouettes, then local crops.
- * Never surface stock/FEDB/Strong people-photo hosts.
+ * Prefer durable allowlisted Storage silhouettes, then local PDF diagram crops.
+ * Never surface stock/FEDB people-photo hosts.
  */
 export function exerciseImageCandidates(exercise: Pick<Exercise, 'slug' | 'equipment' | 'imageUrl'>): string[] {
   const candidates: string[] = [];

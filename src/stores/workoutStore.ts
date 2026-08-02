@@ -39,7 +39,7 @@ type ExerciseInput = {
 };
 
 /** Bump when re-introducing or changing board baseline seed so cleared browsers re-merge. */
-export const BOARD_HISTORY_SEED_VERSION = 6;
+export const BOARD_HISTORY_SEED_VERSION = 9;
 
 /** Re-exported so tests / bootstrap can assert clients ran the PDF-only image policy. */
 export { EXERCISE_IMAGE_POLICY_VERSION };

@@ -241,5 +241,23 @@ describe('templateStore', () => {
       expect(state.templates.filter((item) => item.id === remoteTemplate.id)).toHaveLength(1);
       expect(state.exercisesFor(remoteTemplate.id)).toEqual([starterExercises[1].id]);
     });
+
+    it('drops empty remote templates ("No exercises yet") instead of hydrating them', () => {
+      const emptyRemote = {
+        id: crypto.randomUUID(),
+        userId: 'user-1',
+        name: 'Empty Push',
+        createdAt: '2026-07-01T00:00:00.000Z',
+        updatedAt: '2026-07-01T00:00:00.000Z',
+      };
+
+      useTemplateStore.getState().hydrateFromRemote({
+        templates: [emptyRemote],
+        templateExercises: [],
+      });
+
+      expect(useTemplateStore.getState().templates.find((item) => item.id === emptyRemote.id)).toBeUndefined();
+      expect(supabaseSync.deleteSyncedTemplate).toHaveBeenCalledWith(emptyRemote.id);
+    });
   });
 });

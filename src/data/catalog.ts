@@ -54,30 +54,29 @@ function exercise(
 }
 
 export const starterExercises: Exercise[] = [
-  exercise('shoulder-press-cable-machine', 'Shoulder Press Cable Machine', 'shoulders', 'machine', ['triceps'], [
+  // Merged into imaged PDF rows — keep board setup notes on the survivor slug.
+  exercise('shoulder-press-machine', 'Shoulder Press (Machine)', 'shoulders', 'machine', ['triceps'], [
     'Seat / machine level 12',
   ]),
-  // Merged into imaged PDF rows — keep board setup notes on the survivor slug.
-  exercise('tricep-extension-machine-w-pad', 'tricep extension (machine w/ pad)', 'triceps', 'machine'),
+  exercise('shoulder-press-dumbell', 'Shoulder Press (Dumbell)', 'shoulders', 'dumbbell', ['triceps']),
+  exercise('triceps-extension-machine', 'Triceps Extension (Machine)', 'triceps', 'machine'),
   exercise('preacher-curl-dumbbell', 'Preacher Curl (Dumbbell)', 'biceps', 'dumbbell', ['forearms']),
-  exercise('slanted-lat-raise-dumbbell-seated', 'Slanted Lat Raise Dumbbell Seated', 'shoulders', 'dumbbell', [], [
+  exercise('slanted-lat-raise-dumbbell-seated', 'Slanted Lateral Raise (Dumbell)', 'shoulders', 'dumbbell', [], [
     'Seated slanted bench setup',
   ]),
   exercise('forearm-curl', 'Forearm Curl', 'forearms', 'dumbbell'),
-  exercise('straight-bar-tricep-extension-machine', 'Straight Bar Tricep Extension Machine', 'triceps', 'machine'),
   exercise('bicep-curl-dumbbell', 'Bicep Curl (Dumbbell)', 'biceps', 'dumbbell'),
   exercise('rope-tricep-extension', 'Rope Tricep Extension', 'triceps', 'cable'),
-  exercise('lat-raise', 'Lat Raise', 'shoulders', 'dumbbell'),
+  exercise('lateral-raise-dumbbell', 'Lateral Raise (Dumbbell)', 'shoulders', 'dumbbell'),
+  exercise('lateral-raise-cable', 'Lateral Raise (Cable)', 'shoulders', 'cable'),
   exercise('preacher-curl-machine', 'Preacher Curl Machine', 'biceps', 'machine', [], ['Level 2.5 seat']),
-  exercise('shoulder-press-machine', 'Shoulder Press (Machine)', 'shoulders', 'machine', ['triceps']),
-  exercise('lateral-raise-machine', 'Lateral Raise Machine', 'shoulders', 'machine', [], ['Level 19']),
+  exercise('lateral-raise-machine', 'Lateral Raise (Machine)', 'shoulders', 'machine', [], ['Level 19']),
   exercise('tricep-rope-overhead-extension', 'Tricep Rope Overhead Extension', 'triceps', 'cable', [], [
     'Level 10',
     'Pin just above usual mark',
   ]),
   exercise('reverse-curl-barbell', 'Reverse Curl (Barbell)', 'biceps', 'barbell', ['forearms']),
   exercise('hammer-curl-cable', 'Hammer Curl (Cable)', 'biceps', 'cable', ['forearms']),
-  exercise('seated-lateral-raise-padded-machine', 'Seated Lateral Raise Padded Machine', 'shoulders', 'machine'),
 
   exercise('squat-curved-stand', 'Squat Curved Stand', 'legs', 'machine', ['glutes'], ['3 plates plus 25 each side']),
   exercise('seated-calf-raise-machine', 'Seated Calf Raise (Machine)', 'calves', 'machine'),
@@ -113,7 +112,7 @@ export const starterExercises: Exercise[] = [
 
   exercise('low-row-machine', 'Low Row Machine', 'back', 'machine'),
   exercise('bench-press-smith-machine', 'Bench Press (Smith Machine)', 'chest', 'machine', ['triceps']),
-  exercise('low-back-raise', 'Low Back Raise', 'back', 'bodyweight'),
+  exercise('back-extension', 'Back Extension', 'back', 'bodyweight'),
   exercise('abs-home', 'Abs Home', 'core', 'other'),
   exercise('tricep-extension-home', 'Tricep Extension Home', 'triceps', 'other'),
 ];
@@ -150,22 +149,20 @@ export const starterSessions: WorkoutSession[] = [
 ];
 
 const baselineRows: Array<{ slug: string; weightLb: number; reps?: number; progression?: number[] }> = [
-  { slug: 'shoulder-press-cable-machine', weightLb: 120 },
-  { slug: 'tricep-extension-machine-w-pad', weightLb: 125 },
+  { slug: 'shoulder-press-machine', weightLb: 65, progression: [35, 45, 55, 65] },
+  { slug: 'shoulder-press-dumbell', weightLb: 50 },
+  { slug: 'triceps-extension-machine', weightLb: 170, progression: [125, 140, 155, 170] },
   { slug: 'preacher-curl-dumbbell', weightLb: 42.5 },
   { slug: 'slanted-lat-raise-dumbbell-seated', weightLb: 25 },
   { slug: 'forearm-curl', weightLb: 57.5 },
-  { slug: 'straight-bar-tricep-extension-machine', weightLb: 170 },
   { slug: 'bicep-curl-dumbbell', weightLb: 45, progression: [25, 30, 35, 45] },
   { slug: 'rope-tricep-extension', weightLb: 72.5, progression: [47, 57, 65, 72.5] },
-  { slug: 'lat-raise', weightLb: 32, progression: [20, 25, 27.5, 32] },
+  { slug: 'lateral-raise-dumbbell', weightLb: 32, progression: [20, 25, 27.5, 32] },
   { slug: 'preacher-curl-machine', weightLb: 115 },
-  { slug: 'shoulder-press-machine', weightLb: 65, progression: [35, 45, 55, 65] },
   { slug: 'lateral-raise-machine', weightLb: 20 },
   { slug: 'tricep-rope-overhead-extension', weightLb: 60 },
   { slug: 'reverse-curl-barbell', weightLb: 80 },
   { slug: 'hammer-curl-cable', weightLb: 67.5 },
-  { slug: 'seated-lateral-raise-padded-machine', weightLb: 130 },
 
   { slug: 'squat-curved-stand', weightLb: 365 },
   { slug: 'seated-calf-raise-machine', weightLb: 110 },
@@ -192,7 +189,7 @@ const baselineRows: Array<{ slug: string; weightLb: number; reps?: number; progr
 
   { slug: 'low-row-machine', weightLb: 75 },
   { slug: 'bench-press-smith-machine', weightLb: 175 },
-  { slug: 'low-back-raise', weightLb: 100 },
+  { slug: 'back-extension', weightLb: 100 },
   { slug: 'abs-home', weightLb: 48 },
   { slug: 'tricep-extension-home', weightLb: 70 },
 ];
