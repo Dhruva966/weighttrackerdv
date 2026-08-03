@@ -124,6 +124,8 @@ describe('exercise-merges', () => {
       { id: 'd1', slug: 'triceps-extension-cable' },
       { id: 'd2', slug: 'upright-row-barbell' },
       { id: 'd3', slug: 'abs-home' },
+      { id: 'd4', slug: 'skating' },
+      { id: 'd5', slug: 'skiing' },
       { id: 'keep-row', slug: 'bent-over-row-dumbbell' },
     ]);
     expect(merged.map((row) => row.slug).sort()).toEqual([

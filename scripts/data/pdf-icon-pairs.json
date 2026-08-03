@@ -5,7 +5,7 @@
     "/Users/dhruvavutukury/conductor/workspaces/WeightTrackerDV/west-monroe/.context/attachments/pQWi5w/IMG_3417.pdf"
   ],
   "note": "Icons cropped from Strong app library screenshots in IMG_3417.pdf (not personal gym photos). Matched by OCR name; unmatched left name-only.",
-  "pairedCount": 212,
+  "pairedCount": 210,
   "unmatchedCount": 1,
   "pairs": [
     {
@@ -2287,34 +2287,6 @@
       "box": {
         "left": 36,
         "top": 1090,
-        "size": 96
-      }
-    },
-    {
-      "slug": "skating",
-      "name": "Skating",
-      "manifestSourcePage": 23,
-      "ocrPage": 23,
-      "ocrText": "Skating",
-      "matchRatio": 1,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/skating.jpg",
-      "box": {
-        "left": 36,
-        "top": 1219,
-        "size": 96
-      }
-    },
-    {
-      "slug": "skiing",
-      "name": "Skiing",
-      "manifestSourcePage": 23,
-      "ocrPage": 23,
-      "ocrText": "Skiing",
-      "matchRatio": 1,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/skiing.jpg",
-      "box": {
-        "left": 33,
-        "top": 1347,
         "size": 96
       }
     },

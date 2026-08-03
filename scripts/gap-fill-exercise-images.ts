@@ -35,6 +35,7 @@ const GAP_ALIASES: ReadonlyArray<{ slug: string; cropSlug: string }> = [
   { slug: 'walking', cropSlug: 'running' },
   { slug: 'hiking', cropSlug: 'running' },
   { slug: 'yoga', cropSlug: 'stretching' },
+  { slug: 'cable-curl', cropSlug: 'bicep-curl-cable' },
 ];
 
 /** Test / junk rows that should not appear in the live library. */

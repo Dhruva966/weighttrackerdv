@@ -555,7 +555,7 @@
     "visibleReps": null,
     "sourcePage": 7,
     "needsReview": true,
-    "needsReviewReason": "Shown as '(Stability Ball)' which has no dedicated EquipmentKind — mapped to other."
+    "needsReviewReason": "Shown as '(Stability Ball)' which has no dedicated EquipmentKind \u2014 mapped to other."
   },
   {
     "name": "Cycling",
@@ -713,7 +713,7 @@
     "visibleReps": null,
     "sourcePage": 8,
     "needsReview": true,
-    "needsReviewReason": "Shown as '(Plate)' (holding a weight plate), not a machine/barbell/dumbbell — mapped to other."
+    "needsReviewReason": "Shown as '(Plate)' (holding a weight plate), not a machine/barbell/dumbbell \u2014 mapped to other."
   },
   {
     "name": "Front Squat (Barbell)",
@@ -1085,7 +1085,7 @@
     "visibleReps": null,
     "sourcePage": 12,
     "needsReview": true,
-    "needsReviewReason": "Source app labels this 'Legs' but it's a shoulder/triceps-dominant bodyweight press; mapped to shoulders — verify against source screenshot."
+    "needsReviewReason": "Source app labels this 'Legs' but it's a shoulder/triceps-dominant bodyweight press; mapped to shoulders \u2014 verify against source screenshot."
   },
   {
     "name": "Hang Clean (Barbell)",
@@ -1693,7 +1693,7 @@
     "visibleReps": null,
     "sourcePage": 18,
     "needsReview": true,
-    "needsReviewReason": "Source app category 'Olympic' has no MuscleGroup match in this repo's type; mapped to full-body since these are total-body compound lifts. No equipment tag shown, unlike sibling Olympic lifts on this list that explicitly say (Barbell) — inferred barbell by convention."
+    "needsReviewReason": "Source app category 'Olympic' has no MuscleGroup match in this repo's type; mapped to full-body since these are total-body compound lifts. No equipment tag shown, unlike sibling Olympic lifts on this list that explicitly say (Barbell) \u2014 inferred barbell by convention."
   },
   {
     "name": "Power Snatch (Barbell)",
@@ -1836,7 +1836,7 @@
     "visibleReps": null,
     "sourcePage": 19,
     "needsReview": true,
-    "needsReviewReason": "No equipment tag shown; push press is commonly barbell but could be dumbbell — flagging for confirmation."
+    "needsReviewReason": "No equipment tag shown; push press is commonly barbell but could be dumbbell \u2014 flagging for confirmation."
   },
   {
     "name": "Push Up",
@@ -2253,34 +2253,6 @@
     "visibleReps": null,
     "sourcePage": 23,
     "needsReview": false
-  },
-  {
-    "name": "Skating",
-    "slug": "skating",
-    "muscleGroup": "cardio",
-    "equipment": "other",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 23,
-    "needsReview": true,
-    "needsReviewReason": "Requires skates; no exact EquipmentKind fit."
-  },
-  {
-    "name": "Skiing",
-    "slug": "skiing",
-    "muscleGroup": "cardio",
-    "equipment": "other",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 23,
-    "needsReview": true,
-    "needsReviewReason": "Requires skis; no exact EquipmentKind fit."
   },
   {
     "name": "Skullcrusher (Barbell)",
@@ -2720,7 +2692,7 @@
     "visibleReps": null,
     "sourcePage": 28,
     "needsReview": true,
-    "needsReviewReason": "No equipment tag shown; a T-bar row station/landmine is the conventional apparatus — mapped to machine."
+    "needsReviewReason": "No equipment tag shown; a T-bar row station/landmine is the conventional apparatus \u2014 mapped to machine."
   },
   {
     "name": "Torso Rotation (Machine)",
