@@ -78,8 +78,6 @@ async function main(): Promise<void> {
     'press-under-barbell',
     'pullover-machine',
     'seated-calf-raise-machine',
-    'skating',
-    'skiing',
     'snowboarding',
     'strict-military-press-barbell',
     'swimming',
