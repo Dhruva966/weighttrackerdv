@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import type { Exercise } from '../types';
 import { ExerciseImage, exerciseImageCandidates } from './ExerciseImage';
 
@@ -29,13 +29,14 @@ const boardBicep: Exercise = {
 
 const storagePdf =
   'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/triceps-pushdown-cable-straight-bar.jpg';
+const storagePdfBusted = `${storagePdf}?v=6`;
 
 describe('exerciseImageCandidates', () => {
   afterEach(() => {
     vi.unstubAllEnvs();
   });
 
-  it('prefers allowlisted Storage PDF URL, then local PDF diagram', () => {
+  it('prefers Storage hollow-model PDF URLs when present', () => {
     vi.stubEnv('VITE_SUPABASE_URL', 'https://svcjdtlmmrisrkjqdsjt.supabase.co');
     expect(
       exerciseImageCandidates({
@@ -43,32 +44,29 @@ describe('exerciseImageCandidates', () => {
         imageUrl: storagePdf,
       }),
     ).toEqual([
-      storagePdf,
+      storagePdfBusted,
       '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
     ]);
   });
 
-  it('ignores stock people-photo hosts', () => {
+  it('ignores stock real-person photo hosts but still offers hollow-model PDF art', () => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://svcjdtlmmrisrkjqdsjt.supabase.co');
     expect(
       exerciseImageCandidates({
         ...pdfPaired,
         imageUrl: 'https://cdn.example.com/fedb/triceps-pushdown.jpg',
       }),
-    ).toEqual(['/exercise-icons/triceps-pushdown-cable-straight-bar.jpg']);
-  });
-
-  it('aliases board short slugs onto verified PDF diagram crops', () => {
-    expect(exerciseImageCandidates(boardBicep)).toEqual([
-      '/exercise-icons/bicep-curl-dumbbell.jpg',
-    ]);
-  });
-
-  it('builds canonical Storage candidate when env is set', () => {
-    vi.stubEnv('VITE_SUPABASE_URL', 'https://svcjdtlmmrisrkjqdsjt.supabase.co');
-    expect(exerciseImageCandidates(pdfPaired)).toEqual([
-      'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/triceps-pushdown-cable-straight-bar.jpg',
+    ).toEqual([
+      'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/triceps-pushdown-cable-straight-bar.jpg?v=6',
       '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
     ]);
+  });
+
+  it('aliases board slugs onto Strong crops when a PDF pair exists', () => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://svcjdtlmmrisrkjqdsjt.supabase.co');
+    const candidates = exerciseImageCandidates(boardBicep);
+    expect(candidates[0]).toContain('/storage/v1/object/public/exercise-images/');
+    expect(candidates).toContain('/exercise-icons/bicep-curl-dumbbell.jpg');
   });
 });
 
@@ -77,7 +75,7 @@ describe('ExerciseImage', () => {
     vi.unstubAllEnvs();
   });
 
-  it('renders Storage PDF diagram when allowlisted', () => {
+  it('renders Storage hollow-model PDF image when URL is allowlisted', () => {
     render(
       <ExerciseImage
         exercise={{ ...pdfPaired, imageUrl: storagePdf }}
@@ -85,10 +83,11 @@ describe('ExerciseImage', () => {
       />,
     );
 
-    expect(screen.getByRole('img', { name: pdfPaired.name })).toHaveAttribute('src', storagePdf);
+    expect(screen.getByRole('img', { name: pdfPaired.name })).toHaveAttribute('src', storagePdfBusted);
   });
 
-  it('does not render stock people-photo URLs', () => {
+  it('falls back to Storage hollow-model art when stock hosts are rejected', () => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://svcjdtlmmrisrkjqdsjt.supabase.co');
     render(
       <ExerciseImage
         exercise={{
@@ -99,25 +98,10 @@ describe('ExerciseImage', () => {
       />,
     );
 
-    expect(screen.getByRole('img', { name: pdfPaired.name })).toHaveAttribute(
+    const img = screen.getByRole('img', { name: pdfPaired.name });
+    expect(img).toHaveAttribute(
       'src',
-      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
-    );
-  });
-
-  it('falls back to local PDF icon when remote errors', () => {
-    render(
-      <ExerciseImage
-        exercise={{ ...pdfPaired, imageUrl: storagePdf }}
-        size="sm"
-      />,
-    );
-
-    fireEvent.error(screen.getByRole('img', { name: pdfPaired.name }));
-
-    expect(screen.getByRole('img', { name: pdfPaired.name })).toHaveAttribute(
-      'src',
-      '/exercise-icons/triceps-pushdown-cable-straight-bar.jpg',
+      'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/triceps-pushdown-cable-straight-bar.jpg?v=6',
     );
   });
 
@@ -137,7 +121,28 @@ describe('ExerciseImage', () => {
     ).toBeInTheDocument();
   });
 
-  it('keeps letter-tile style exercises name-only', () => {
+  it('keeps letter-tile cardio with no crop as name-only', () => {
+    render(
+      <ExerciseImage
+        exercise={{
+          id: 'ex-swimming',
+          slug: 'swimming',
+          name: 'Swimming',
+          muscleGroup: 'cardio',
+          secondaryMuscles: [],
+          equipment: 'other',
+          instructions: [],
+          imageStyle: 'name-only',
+          source: 'pdf-import',
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('img', { name: 'No photo available for Swimming' })).toBeInTheDocument();
+  });
+
+  it('aliases yoga letter-tile to stretching hollow-model crop', () => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://svcjdtlmmrisrkjqdsjt.supabase.co');
     render(
       <ExerciseImage
         exercise={{
@@ -154,6 +159,9 @@ describe('ExerciseImage', () => {
       />,
     );
 
-    expect(screen.getByRole('img', { name: 'No photo available for Yoga' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Yoga' })).toHaveAttribute(
+      'src',
+      'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/stretching.jpg?v=6',
+    );
   });
 });

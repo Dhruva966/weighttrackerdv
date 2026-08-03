@@ -1,9 +1,12 @@
 /**
- * Upload verified IMG_3417.pdf diagram crops (anatomical illustrations, not photos) to `exercise-images` and set exercise.image_url.
- * Does not touch unmatched / name-only rows. Prefer this over FEDB backfill.
+ * Apply IMG_3417 Strong library hollow-model / mannequin diagram crops to Supabase.
  *
- *   pnpm apply:pdf-icons
- *   pnpm apply:pdf-icons -- --dry-run
+ * These crops are diagram-style figures (not real-person photos). A prior purge treated them
+ * as people demos; they are restored as intended PDF exercise art.
+ *
+ * Flag name is historical — still required to acknowledge the restore:
+ *   pnpm apply:pdf-icons -- --force-people-demos
+ *   pnpm apply:pdf-icons -- --dry-run --force-people-demos
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -45,6 +48,18 @@ function resolveIconFile(pair: IconPair): string | null {
 
 async function main(): Promise<void> {
   const dryRun = process.argv.includes('--dry-run');
+  const forcePeopleDemos = process.argv.includes('--force-people-demos');
+  if (!forcePeopleDemos) {
+    console.error(
+      [
+        'Refusing without --force-people-demos (historical flag name).',
+        'IMG_3417 crops are hollow/mannequin diagram figures restored as PDF exercise art.',
+        'Pass --force-people-demos to acknowledge the bulk Storage + DB update.',
+      ].join('\n'),
+    );
+    process.exit(1);
+  }
+
   const url = requireEnv('VITE_SUPABASE_URL');
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? requireEnv('VITE_SUPABASE_ANON_KEY');
   const supabase = createClient(url, key);

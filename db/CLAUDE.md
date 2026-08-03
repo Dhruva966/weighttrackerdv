@@ -1,6 +1,6 @@
 # Database Subsystem
 
-Purpose: Own Supabase schema, storage, seed data, offline write contracts, and database-side rules for the **Aloo** PWA (gym path). Body weight / walks currently also exist as **local** diary state in `src/stores/diaryStore.ts` — do not assume they are synced until a migration and client sync land. Food/meal UI is archived under `archive/food/`.
+Purpose: Own Supabase schema, storage, seed data, offline write contracts, and database-side rules for the **Lift** PWA (gym path). Body weight / walks currently also exist as **local** diary state in `src/stores/diaryStore.ts` — do not assume they are synced until a migration and client sync land. Food/meal UI is archived under `archive/food/`.
 
 Return to the root instructions before changing shared contracts: [../CLAUDE.md](../CLAUDE.md).
 

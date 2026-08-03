@@ -1,10 +1,17 @@
 import { useMemo, useState } from 'react';
-import { looksLikeSetAttempt } from '../lib/exercise-log-parse';
+import {
+  looksLikeDurationAttempt,
+  looksLikeSetAttempt,
+} from '../lib/exercise-log-parse';
 import { previousWorkoutLogPlaceholder } from '../lib/previousWorkoutPlaceholder';
 import { useWorkoutStore } from '../stores/workoutStore';
 import type { Exercise } from '../types';
 import { CardioSetLogger } from './CardioSetLogger';
 import { SetRow } from './SetRow';
+
+const DURATION_HINT = 'Try duration like "15 minutes", "15 min", or "10m".';
+const LIFT_HINT = 'Try weight and reps, like "144 for 2 sets of 7".';
+const COMBINED_HINT = `${LIFT_HINT} Or ${DURATION_HINT.charAt(0).toLowerCase()}${DURATION_HINT.slice(1)}`;
 
 type EditRunner = (label: string, run: () => void | Promise<void>) => void | Promise<void>;
 
@@ -73,9 +80,11 @@ export function NaturalLanguageSetLogger({
       }
 
       if (result.notes.length > 0) {
-        if (looksLikeSetAttempt(text)) {
+        if (looksLikeDurationAttempt(text)) {
+          setMessage(`Could not parse duration — saved as notes instead. ${DURATION_HINT}`);
+        } else if (looksLikeSetAttempt(text)) {
           setMessage(
-            'Could not parse weight/reps from that — saved as notes instead. Try "144 for 2 sets of 7" or check Anthropic is configured in Supabase secrets.',
+            `Could not parse weight/reps from that — saved as notes instead. ${LIFT_HINT} Or check Anthropic is configured in Supabase secrets.`,
           );
         } else {
           setMessage('Saved notes for this exercise.');
@@ -84,9 +93,17 @@ export function NaturalLanguageSetLogger({
         return;
       }
 
-      setMessage('Could not find sets. Try weight and reps, like "144 for 2 sets of 7".');
+      if (looksLikeDurationAttempt(text)) {
+        setMessage(`Could not find a duration. ${DURATION_HINT}`);
+      } else {
+        setMessage(`Could not find sets. ${COMBINED_HINT}`);
+      }
     } catch {
-      setMessage('Could not parse that log. Try again with weight and reps.');
+      setMessage(
+        looksLikeDurationAttempt(text)
+          ? `Could not parse that log. ${DURATION_HINT}`
+          : `Could not parse that log. ${COMBINED_HINT}`,
+      );
     } finally {
       setIsSaving(false);
     }

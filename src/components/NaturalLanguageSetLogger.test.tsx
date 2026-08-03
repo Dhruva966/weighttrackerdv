@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { starterExercises, starterGoals, starterSets } from '../data/catalog';
 import { USER_ID } from '../lib/user';
@@ -18,11 +18,23 @@ const baseExercise: Exercise = {
   source: 'user-created',
 };
 
+const stretchingExercise: Exercise = {
+  id: 'ex-stretching',
+  slug: 'stretching',
+  name: 'Stretching',
+  muscleGroup: 'full-body',
+  secondaryMuscles: [],
+  equipment: 'bodyweight',
+  instructions: [],
+  imageStyle: 'name-only',
+  source: 'user-created',
+};
+
 beforeEach(() => {
   useWorkoutStore.setState({
-    exercises: starterExercises,
+    exercises: [...starterExercises, stretchingExercise],
     goals: starterGoals,
-    sessions: [],
+    sessions: [{ id: 'session-1', userId: USER_ID, startedAt: '2026-07-30T12:00:00.000Z' }],
     sets: starterSets,
     historyCleared: false,
     boardHistorySeedVersion: BOARD_HISTORY_SEED_VERSION,
@@ -105,5 +117,42 @@ describe('NaturalLanguageSetLogger', () => {
     render(<NaturalLanguageSetLogger sessionId="session-1" exercise={baseExercise} />);
 
     expect(screen.getByLabelText(/^log$/i)).toHaveAttribute('placeholder', '44, 8, 3');
+  });
+
+  it('logs duration-only text for Stretching as a cardio duration set', async () => {
+    render(
+      <NaturalLanguageSetLogger sessionId="session-1" exercise={stretchingExercise} />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/^log$/i), { target: { value: '15 minutes' } });
+    fireEvent.click(screen.getByRole('button', { name: /log sets/i }));
+
+    await waitFor(() => {
+      const logged = useWorkoutStore
+        .getState()
+        .sets.find(
+          (setItem) =>
+            setItem.sessionId === 'session-1' && setItem.exerciseId === stretchingExercise.id,
+        );
+      expect(logged?.durationSec).toBe(900);
+    });
+
+    expect(screen.queryByText(/could not find sets/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/15 min/i)).toBeInTheDocument();
+  });
+
+  it('hints duration when a duration attempt fails to parse', async () => {
+    render(
+      <NaturalLanguageSetLogger sessionId="session-1" exercise={stretchingExercise} />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/^log$/i), {
+      target: { value: '15 min then 10 min' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /log sets/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/try duration like/i)).toBeInTheDocument();
+    });
   });
 });

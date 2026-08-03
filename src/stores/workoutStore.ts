@@ -39,7 +39,7 @@ type ExerciseInput = {
 };
 
 /** Bump when re-introducing or changing board baseline seed so cleared browsers re-merge. */
-export const BOARD_HISTORY_SEED_VERSION = 10;
+export const BOARD_HISTORY_SEED_VERSION = 11;
 
 /** Re-exported so tests / bootstrap can assert clients ran the PDF-only image policy. */
 export { EXERCISE_IMAGE_POLICY_VERSION };
@@ -641,6 +641,10 @@ export const useWorkoutStore = create<WorkoutState>()(
             weightLb: entry.weightLb,
             reps: entry.reps,
             isWarmup: false,
+            ...(entry.level != null ? { level: entry.level } : {}),
+            ...(entry.speed != null ? { speed: entry.speed } : {}),
+            ...(entry.durationSec != null ? { durationSec: entry.durationSec } : {}),
+            ...(entry.calories != null ? { calories: entry.calories } : {}),
           });
           imported += 1;
         }

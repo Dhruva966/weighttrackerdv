@@ -1,6 +1,6 @@
 # Archived Food Logging
 
-Food, meal, macro, and calorie tracking is intentionally out of the active Aloo UI for this pass.
+Food, meal, macro, and calorie tracking is intentionally out of the active Lift UI for this pass.
 
 Archived code in this folder preserves the previous meal logging implementation for a later rebuild:
 

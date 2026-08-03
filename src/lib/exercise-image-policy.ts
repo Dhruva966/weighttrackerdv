@@ -3,16 +3,17 @@ import type { EquipmentKind, Exercise, ImageStyle } from '../types';
 
 /**
  * Bump when image allowlist / sanitize rules change so clients re-strip stale URLs.
- * v3: verified IMG_3417 PDF diagram crops (anatomical illustrations, not photos) are
- * allowlisted again via Storage `exercise-images` + local `/exercise-icons/`.
- * Stock/FEDB/CDN people photographs remain rejected.
+ * v5: IMG_3417 Strong crops are hollow/mannequin diagram figures — allowed as PDF art.
+ * v6: Cache-bust Storage display URLs so browsers drop stale pre-purge people-photo bytes
+ *     that shared the same object path as the hollow-model crops.
+ * Still reject stock/FEDB/CDN real-person photos — only Supabase `exercise-images` (+ local crop paths for UI).
  */
-export const EXERCISE_IMAGE_POLICY_VERSION = 3;
+export const EXERCISE_IMAGE_POLICY_VERSION = 6;
 
 /**
- * Legacy nuclear switch. Kept false so verified PDF diagrams can render.
- * People photos are still blocked by the Storage-only persist allowlist below —
- * do not reintroduce arbitrary https hosts.
+ * Legacy nuclear switch (kept for emergency rollback). When true, hides all catalog images.
+ * Off in v5: hollow-model Strong PDF crops are intended exercise art, not real-person photos.
+ * Blob previews on the create form remain allowed for user uploads either way.
  */
 export const BLOCK_PEOPLE_EXERCISE_IMAGES = false;
 
@@ -20,7 +21,8 @@ const EXERCISE_IMAGES_PUBLIC = '/storage/v1/object/public/exercise-images/';
 
 /**
  * Durable URLs we may persist and display: Supabase `exercise-images` public objects.
- * Stock/FEDB/CDN people photos and arbitrary https hosts are rejected.
+ * Stock/FEDB/CDN real-person photos and arbitrary https hosts are rejected.
+ * While BLOCK_PEOPLE_EXERCISE_IMAGES is true, nothing is allowlisted.
  */
 export function isAllowedPersistedImageUrl(url: string | undefined | null): boolean {
   if (BLOCK_PEOPLE_EXERCISE_IMAGES) return false;
@@ -42,7 +44,7 @@ export function isLocalPdfIconPath(url: string | undefined | null): boolean {
 
 /**
  * True when the URL may appear in <img> candidates.
- * Blob previews (create form), local PDF diagrams, and Storage PDF crops are allowed.
+ * Blob previews (create form) stay allowed; stock/FEDB hosts stay blocked.
  */
 export function isAllowedRenderImageUrl(url: string | undefined | null): boolean {
   const trimmed = url?.trim();
@@ -62,12 +64,29 @@ export function canonicalPdfStorageUrl(
   const resolved = resolvePdfIconSlug(slug, equipment);
   const base = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
   if (!resolved || !base) return undefined;
-  return `${base}${EXERCISE_IMAGES_PUBLIC}${resolved}.jpg`;
+  return withExerciseImageCacheBust(`${base}${EXERCISE_IMAGES_PUBLIC}${resolved}.jpg`);
+}
+
+/**
+ * Append policy version so <img> requests skip browser caches of older people-photo
+ * bytes that once lived at the same Storage object path.
+ * Persist without the query string; only display URLs need the bust.
+ */
+export function withExerciseImageCacheBust(url: string | undefined | null): string | undefined {
+  const trimmed = url?.trim();
+  if (!trimmed || !isAllowedPersistedImageUrl(trimmed)) return undefined;
+  try {
+    const parsed = new URL(trimmed);
+    parsed.searchParams.set('v', String(EXERCISE_IMAGE_POLICY_VERSION));
+    return parsed.toString();
+  } catch {
+    return undefined;
+  }
 }
 
 /**
  * Strip stock/people/local-icon URLs from a catalog row.
- * Keep only allowlisted Storage PDF diagram URLs.
+ * Keep only allowlisted Storage PDF diagram URLs when the block is off.
  */
 export function sanitizeExerciseImage(exercise: Exercise): Exercise {
   if (!exercise.imageUrl && exercise.imageStyle !== 'photo') {

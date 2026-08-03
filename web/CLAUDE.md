@@ -1,6 +1,6 @@
 # Web Subsystem
 
-Purpose: Build the mobile-first React PWA (**Aloo**) for diary-style weight/walk logging plus gym sessions, with offline-tolerant gym sync. Food/meal UI is archived under `archive/food/`.
+Purpose: Build the mobile-first React PWA (**Lift**) for diary-style weight/walk logging plus gym sessions, with offline-tolerant gym sync. Food/meal UI is archived under `archive/food/`.
 
 Return to the root instructions before changing shared contracts: [../CLAUDE.md](../CLAUDE.md).
 
@@ -18,7 +18,7 @@ Return to the root instructions before changing shared contracts: [../CLAUDE.md]
 | Styles (gold theme) | `../src/index.css`, `../tailwind.config.js` |
 | Pages | `../src/pages/` (Today, Move, Session, History/Grow, Goals, Settings/You, Library) |
 | Hooks / lib | `../src/hooks/`, `../src/lib/` |
-| Static/PWA assets | `../public/` (manifest name **Aloo**) |
+| Static/PWA assets | `../public/` (manifest name **Lift**) |
 | Deployment guide | `../DEPLOYMENT.md` |
 | Current handoff | `../HANDOFF.md` |
 

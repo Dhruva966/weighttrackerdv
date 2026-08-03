@@ -1,6 +1,7 @@
 import { BookOpen, Dumbbell, Home, Sparkles, User } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { AppLogo } from './components/AppLogo';
 import { LiftProgress } from './components/LiftProgress';
 import { InteractiveGymCalendar } from './components/InteractiveGymCalendar';
 import { Nav } from './components/Nav';
@@ -33,8 +34,8 @@ function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-border/70 bg-bg/85 px-5 py-3.5 backdrop-blur-md">
       <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
-        <Link to="/" className="page-title text-[1.55rem] tracking-[-0.02em]">
-          Aloo
+        <Link to="/" className="page-title text-[1.55rem] tracking-[-0.02em]" aria-label="Lift home">
+          <AppLogo size={30} />
         </Link>
         <Link className="icon-button" to="/you" aria-label="You and settings">
           <User size={18} strokeWidth={1.5} />

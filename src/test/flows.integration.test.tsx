@@ -80,8 +80,9 @@ describe('app shell', () => {
     cleanup();
   });
 
-  it('renders Aloo Today with universal command bar', () => {
+  it('renders Lift Today with universal command bar', () => {
     renderApp('/today');
+    expect(screen.getByRole('link', { name: /lift home/i })).toBeInTheDocument();
     expect(screen.getByText(/hi dhruva/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /your pot of gold is filling/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /body weight/i })).toBeInTheDocument();
@@ -190,7 +191,11 @@ describe('active session flow', () => {
     fireEvent.change(screen.getByPlaceholderText(/search exercises to add/i), {
       target: { value: exercise.name },
     });
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(exercise.name, 'i') }));
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: (accessibleName) => accessibleName.includes(exercise.name),
+      }),
+    );
 
     await waitFor(() => {
       expect(screen.getByText(/your exercises/i)).toBeInTheDocument();
@@ -237,14 +242,14 @@ describe('active session flow', () => {
     });
   });
 
-  it('shows photos or no-photo placeholders beside planned exercises', () => {
+  it('shows hollow-model PDF art or no-photo placeholders beside planned exercises', () => {
     const withPhoto = {
       ...starterExercises[0],
       slug: 'triceps-pushdown-cable-straight-bar',
       name: 'Triceps Pushdown (Cable - Straight Bar)',
-      // People-photo URLs (any host, including former Storage demos) must not render.
-      imageUrl: 'https://example.com/press.jpg',
-      imageStyle: 'photo' as const,
+      imageUrl:
+        'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/triceps-pushdown-cable-straight-bar.jpg',
+      imageStyle: 'silhouette' as const,
     };
     const withoutPhoto = {
       ...starterExercises[1],
@@ -267,9 +272,10 @@ describe('active session flow', () => {
       </QueryClientProvider>,
     );
 
-    expect(
-      screen.getByRole('img', { name: `No photo available for ${withPhoto.name}` }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: withPhoto.name })).toHaveAttribute(
+      'src',
+      withPhoto.imageUrl,
+    );
     expect(
       screen.getByRole('img', { name: `No photo available for ${withoutPhoto.name}` }),
     ).toBeInTheDocument();
@@ -322,7 +328,11 @@ describe('active session flow', () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.click(screen.getAllByRole('button', { name: new RegExp(exercise.name, 'i') })[0]!);
+    fireEvent.click(
+      screen.getAllByRole('button', {
+        name: (accessibleName) => accessibleName.includes(exercise.name),
+      })[0]!,
+    );
     fireEvent.change(screen.getByLabelText(/^log$/i), {
       target: { value: '95 for 8' },
     });

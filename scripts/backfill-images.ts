@@ -1,7 +1,7 @@
 /**
  * DISABLED — Free Exercise DB / stock photographic backfill.
  *
- * Aloo exercise images must come only from verified IMG_3417.pdf silhouette crops:
+ * Lift exercise images must come only from verified IMG_3417.pdf silhouette crops:
  *   pnpm apply:pdf-icons
  *   pnpm purge:stock-reseed-pdf
  *

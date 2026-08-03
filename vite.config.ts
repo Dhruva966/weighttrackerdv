@@ -20,17 +20,18 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'favicon-64.png', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'Weight Tracker',
+        name: 'Lift',
         short_name: 'Lift',
         start_url: '/',
         display: 'standalone',
-        background_color: '#FFFFFF',
-        theme_color: '#4A3B2A',
+        background_color: '#FFFEFB',
+        theme_color: '#C4A35A',
         icons: [
-          { src: '/favicon.svg', sizes: '192x192', type: 'image/svg+xml' },
-          { src: '/favicon.svg', sizes: '512x512', type: 'image/svg+xml' },
+          { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
         ],
       },
       workbox: {
