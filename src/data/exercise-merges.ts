@@ -115,7 +115,7 @@ export const EXERCISE_HARD_DELETES: readonly string[] = [
   'upright-row-dumbbell',
   'v-up',
   'zercher-squat-barbell',
-  // Round 6 follow-up — letter-tile cardio junk (no hollow-model crop).
+  // Round 8 (2026-08-03) — letter-tile cardio junk (no hollow-model crop).
   'skating',
   'skiing',
 ];
