@@ -6,7 +6,9 @@ vi.mock('./supabase', () => ({
 
 import {
   commitExerciseLogDraft,
+  looksLikeDurationAttempt,
   looksLikeSetAttempt,
+  parseDurationOnlyLog,
   parseExerciseLogSmart,
 } from './exercise-log-parse';
 
@@ -61,10 +63,83 @@ describe('looksLikeSetAttempt', () => {
   });
 });
 
+describe('parseDurationOnlyLog', () => {
+  it('parses minutes, min, m, hour, and seconds', () => {
+    expect(parseDurationOnlyLog('15 minutes')).toEqual({ durationSec: 900 });
+    expect(parseDurationOnlyLog('15 min')).toEqual({ durationSec: 900 });
+    expect(parseDurationOnlyLog('10m')).toEqual({ durationSec: 600 });
+    expect(parseDurationOnlyLog('1 hour')).toEqual({ durationSec: 3600 });
+    expect(parseDurationOnlyLog('90 sec')).toEqual({ durationSec: 90 });
+    expect(parseDurationOnlyLog('2.5 hours')).toEqual({ durationSec: 9000 });
+  });
+
+  it('parses a single embedded duration with filler words', () => {
+    expect(parseDurationOnlyLog('around 15 minutes or so')).toEqual({ durationSec: 900 });
+    expect(parseDurationOnlyLog('did about 10m')).toEqual({ durationSec: 600 });
+  });
+
+  it('rejects lift shorthand, multi-duration, and empty input', () => {
+    expect(parseDurationOnlyLog('144 for 2 sets of 7')).toBeNull();
+    expect(parseDurationOnlyLog('205 x 3')).toBeNull();
+    expect(parseDurationOnlyLog('15 min then 10 min')).toBeNull();
+    expect(parseDurationOnlyLog('')).toBeNull();
+    expect(parseDurationOnlyLog('minutes')).toBeNull();
+  });
+});
+
+describe('looksLikeDurationAttempt', () => {
+  it('detects duration phrases for error hints', () => {
+    expect(looksLikeDurationAttempt('15 minutes')).toBe(true);
+    expect(looksLikeDurationAttempt('did about 10m')).toBe(true);
+    expect(looksLikeDurationAttempt('144 for 2 sets of 7')).toBe(false);
+  });
+});
+
 describe('parseExerciseLogSmart', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.unstubAllEnvs();
+  });
+
+  it('parses duration shorthand on-device without an API call', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(parseExerciseLogSmart('15 minutes', 'Stretching')).resolves.toEqual({
+      sets: [{ weightLb: 0, reps: 0, durationSec: 900 }],
+      notes: [],
+    });
+    await expect(parseExerciseLogSmart('15 min', 'Stretching')).resolves.toEqual({
+      sets: [{ weightLb: 0, reps: 0, durationSec: 900 }],
+      notes: [],
+    });
+    await expect(parseExerciseLogSmart('10m', 'plank')).resolves.toEqual({
+      sets: [{ weightLb: 0, reps: 0, durationSec: 600 }],
+      notes: [],
+    });
+    await expect(parseExerciseLogSmart('1 hour', 'yoga')).resolves.toEqual({
+      sets: [{ weightLb: 0, reps: 0, durationSec: 3600 }],
+      notes: [],
+    });
+    await expect(parseExerciseLogSmart('around 15 minutes or so', 'Stretching')).resolves.toEqual({
+      sets: [{ weightLb: 0, reps: 0, durationSec: 900 }],
+      notes: [],
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('does not call the LLM for unparseable duration attempts', async () => {
+    vi.stubEnv('VITE_GROQ_API_KEY', 'test-key');
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(parseExerciseLogSmart('15 min then 10 min', 'Stretching')).resolves.toEqual({
+      sets: [],
+      notes: [],
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('uses the free local parser for clean shorthand without an API key', async () => {

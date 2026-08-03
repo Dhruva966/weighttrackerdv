@@ -2,12 +2,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Exercise } from '../types';
 import {
   BLOCK_PEOPLE_EXERCISE_IMAGES,
+  EXERCISE_IMAGE_POLICY_VERSION,
   canonicalPdfStorageUrl,
   isAllowedPersistedImageUrl,
   isAllowedRenderImageUrl,
   isLocalPdfIconPath,
   pickPreferredImageUrl,
   sanitizeExerciseImage,
+  withExerciseImageCacheBust,
 } from './exercise-image-policy';
 
 const bucket =
@@ -18,14 +20,15 @@ describe('exercise-image-policy', () => {
     vi.unstubAllEnvs();
   });
 
-  it('allows Storage PDF diagram URLs and rejects stock people-photo hosts', () => {
+  it('allows Supabase exercise-images hollow-model PDF art (v6)', () => {
     expect(BLOCK_PEOPLE_EXERCISE_IMAGES).toBe(false);
+    expect(EXERCISE_IMAGE_POLICY_VERSION).toBe(6);
     expect(isAllowedPersistedImageUrl(bucket)).toBe(true);
     expect(isAllowedPersistedImageUrl('https://cdn.example.com/fedb/bench.jpg')).toBe(false);
     expect(isAllowedPersistedImageUrl('/exercise-icons/bench-press-barbell.jpg')).toBe(false);
   });
 
-  it('allows local PDF diagrams and Storage URLs for render; blocks stock hosts', () => {
+  it('allows blob previews, local Strong crops, and Storage; blocks other hosts', () => {
     expect(isLocalPdfIconPath('/exercise-icons/bench-press-barbell.jpg')).toBe(true);
     expect(isAllowedRenderImageUrl('/exercise-icons/bench-press-barbell.jpg')).toBe(true);
     expect(isAllowedRenderImageUrl(bucket)).toBe(true);
@@ -33,7 +36,7 @@ describe('exercise-image-policy', () => {
     expect(isAllowedRenderImageUrl('blob:http://localhost/1')).toBe(true);
   });
 
-  it('strips stock people-photo URLs on sanitize', () => {
+  it('strips stock real-person photo URLs on sanitize', () => {
     const exercise: Exercise = {
       id: '1',
       slug: 'triceps-pushdown-cable-straight-bar',
@@ -55,7 +58,7 @@ describe('exercise-image-policy', () => {
     });
   });
 
-  it('keeps allowlisted Storage PDF diagram URLs on sanitize', () => {
+  it('keeps Storage hollow-model PDF URLs on sanitize', () => {
     const exercise: Exercise = {
       id: '1',
       slug: 'bench-press-barbell',
@@ -72,15 +75,27 @@ describe('exercise-image-policy', () => {
     expect(sanitizeExerciseImage(exercise)).toEqual(exercise);
   });
 
-  it('builds canonical Storage URLs for verified PDF diagram slugs', () => {
+  it('builds canonical Storage URLs for known PDF icon slugs', () => {
     vi.stubEnv('VITE_SUPABASE_URL', 'https://svcjdtlmmrisrkjqdsjt.supabase.co');
     expect(canonicalPdfStorageUrl('bicep-curl', 'dumbbell')).toBe(
-      'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/bicep-curl-dumbbell.jpg',
+      'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/bicep-curl-dumbbell.jpg?v=6',
+    );
+    expect(canonicalPdfStorageUrl('close-grip-pulldown')).toBe(
+      'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/lat-pulldown-underhand-cable.jpg?v=6',
+    );
+    expect(canonicalPdfStorageUrl('seated-calf-raise-machine')).toBe(
+      'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/seated-calf-raise-plate-loaded.jpg?v=6',
     );
     expect(canonicalPdfStorageUrl('totally-unknown-exercise')).toBeUndefined();
   });
 
-  it('prefers allowlisted remote PDF URLs over empty local', () => {
+  it('cache-busts Storage display URLs without changing allowlist checks', () => {
+    expect(isAllowedPersistedImageUrl(`${bucket}?v=6`)).toBe(true);
+    expect(withExerciseImageCacheBust(bucket)).toBe(`${bucket}?v=6`);
+    expect(withExerciseImageCacheBust('https://cdn.example.com/fedb/bench.jpg')).toBeUndefined();
+  });
+
+  it('prefers allowlisted Storage URLs over stock hosts', () => {
     expect(pickPreferredImageUrl(undefined, bucket)).toBe(bucket);
     expect(pickPreferredImageUrl('https://cdn.example.com/stock.jpg', bucket)).toBe(bucket);
     expect(pickPreferredImageUrl('https://cdn.example.com/stock.jpg', undefined)).toBeUndefined();

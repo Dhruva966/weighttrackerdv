@@ -785,19 +785,19 @@ describe('workoutStore', () => {
 
     it('gap-fills imageUrl from remote even when a stale local PDF icon path was stamped', () => {
       const remotePdf =
-        'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/arnold-press-dumbbell.jpg';
+        'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/front-raise-dumbbell.jpg';
       useWorkoutStore.setState((state) => ({
         exercises: [
           ...state.exercises,
           {
-            id: 'ex-arnold-press-dumbbell',
-            slug: 'arnold-press-dumbbell',
-            name: 'Arnold Press (Dumbbell)',
+            id: 'ex-front-raise-dumbbell',
+            slug: 'front-raise-dumbbell',
+            name: 'Front Raise (Dumbbell)',
             muscleGroup: 'shoulders' as const,
             secondaryMuscles: [],
             equipment: 'dumbbell' as const,
             instructions: [],
-            imageUrl: '/exercise-icons/arnold-press-dumbbell.jpg',
+            imageUrl: '/exercise-icons/front-raise-dumbbell.jpg',
             imageStyle: 'photo' as const,
             source: 'pdf-import',
             archived: false,
@@ -810,9 +810,9 @@ describe('workoutStore', () => {
       useWorkoutStore.getState().hydrateFromRemote({
         exercises: [
           remoteExercise({
-            id: 'ex-arnold-press-dumbbell',
-            slug: 'arnold-press-dumbbell',
-            name: 'Arnold Press (Dumbbell)',
+            id: 'ex-front-raise-dumbbell',
+            slug: 'front-raise-dumbbell',
+            name: 'Front Raise (Dumbbell)',
             imageUrl: remotePdf,
             imageStyle: 'photo',
             source: 'pdf-import',
@@ -823,19 +823,19 @@ describe('workoutStore', () => {
         goals: [],
       });
 
-      const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'arnold-press-dumbbell');
-      expect(match?.imageUrl).toBeUndefined();
-      expect(match?.imageStyle).toBe('name-only');
+      const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'front-raise-dumbbell');
+      expect(match?.imageUrl).toBe(remotePdf);
+      expect(match?.imageStyle).toBe('photo');
     });
 
     it('keeps remote Supabase imageUrl instead of stamping a local PDF icon path into the store', () => {
       const remotePdf =
-        'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/arnold-press-dumbbell.jpg';
+        'https://svcjdtlmmrisrkjqdsjt.supabase.co/storage/v1/object/public/exercise-images/front-raise-dumbbell.jpg';
       useWorkoutStore.getState().hydrateFromRemote({
         exercises: [
           remoteExercise({
-            slug: 'arnold-press-dumbbell',
-            name: 'Arnold Press (Dumbbell)',
+            slug: 'front-raise-dumbbell',
+            name: 'Front Raise (Dumbbell)',
             imageUrl: remotePdf,
             imageStyle: 'photo',
             source: 'pdf-import',
@@ -846,9 +846,9 @@ describe('workoutStore', () => {
         goals: [],
       });
 
-      const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'arnold-press-dumbbell');
-      expect(match?.imageUrl).toBeUndefined();
-      expect(match?.imageStyle).toBe('name-only');
+      const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'front-raise-dumbbell');
+      expect(match?.imageUrl).toBe(remotePdf);
+      expect(match?.imageStyle).toBe('photo');
     });
 
     it('strips non-allowlisted remote stock URLs on hydrate', () => {

@@ -14,46 +14,6 @@
     "needsReviewReason": "Specific implement (wheel); no equipment tag shown and no exact EquipmentKind fit."
   },
   {
-    "name": "Aerobics",
-    "slug": "aerobics",
-    "muscleGroup": "cardio",
-    "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 1,
-    "needsReview": false
-  },
-  {
-    "name": "Arnold Press (Dumbbell)",
-    "slug": "arnold-press-dumbbell",
-    "muscleGroup": "shoulders",
-    "equipment": "dumbbell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 1,
-    "needsReview": false
-  },
-  {
-    "name": "Around the World",
-    "slug": "around-the-world",
-    "muscleGroup": "chest",
-    "equipment": "dumbbell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 1,
-    "needsReview": true,
-    "needsReviewReason": "No equipment tag shown; this is conventionally a dumbbell shoulder exercise — inferred, not confirmed from the page."
-  },
-  {
     "name": "Back Extension",
     "slug": "back-extension",
     "muscleGroup": "back",
@@ -78,34 +38,6 @@
     "visibleReps": null,
     "sourcePage": 1,
     "needsReview": false
-  },
-  {
-    "name": "Ball Slams",
-    "slug": "ball-slams",
-    "muscleGroup": "full-body",
-    "equipment": "other",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 1,
-    "needsReview": true,
-    "needsReviewReason": "Uses a slam ball implement; no exact EquipmentKind fit."
-  },
-  {
-    "name": "Battle Ropes",
-    "slug": "battle-ropes",
-    "muscleGroup": "cardio",
-    "equipment": "other",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 1,
-    "needsReview": true,
-    "needsReviewReason": "Uses heavy ropes; no exact EquipmentKind fit."
   },
   {
     "name": "Bent Over One Arm Row (Dumbbell)",
@@ -233,39 +165,10 @@
     "needsReview": false
   },
   {
-    "name": "Bench Dip",
-    "slug": "bench-dip",
-    "muscleGroup": "triceps",
-    "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 3,
-    "needsReview": false
-  },
-  {
     "name": "Bench Press (Barbell)",
     "slug": "bench-press-barbell",
     "muscleGroup": "chest",
     "equipment": "barbell",
-    "secondaryMuscles": [
-      "triceps",
-      "shoulders"
-    ],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 3,
-    "needsReview": false
-  },
-  {
-    "name": "Bench Press (Cable)",
-    "slug": "bench-press-cable",
-    "muscleGroup": "chest",
-    "equipment": "cable",
     "secondaryMuscles": [
       "triceps",
       "shoulders"
@@ -307,52 +210,6 @@
     "visibleWeightLb": null,
     "visibleReps": null,
     "sourcePage": 3,
-    "needsReview": false
-  },
-  {
-    "name": "Bench Press - Close Grip (Barbell)",
-    "slug": "bench-press-close-grip-barbell",
-    "muscleGroup": "arms",
-    "equipment": "barbell",
-    "secondaryMuscles": [
-      "triceps",
-      "shoulders"
-    ],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 3,
-    "needsReview": true,
-    "needsReviewReason": "Source category is generic 'Arms' and the exercise name doesn't clearly specify biceps/triceps/forearms."
-  },
-  {
-    "name": "Bench Press - Wide Grip (Barbell)",
-    "slug": "bench-press-wide-grip-barbell",
-    "muscleGroup": "chest",
-    "equipment": "barbell",
-    "secondaryMuscles": [
-      "triceps",
-      "shoulders"
-    ],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 3,
-    "needsReview": false
-  },
-  {
-    "name": "Bicycle Crunch",
-    "slug": "bicycle-crunch",
-    "muscleGroup": "core",
-    "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 4,
     "needsReview": false
   },
   {
@@ -493,63 +350,6 @@
     "visibleReps": null,
     "sourcePage": 5,
     "needsReview": false
-  },
-  {
-    "name": "Chin Up (Assisted)",
-    "slug": "chin-up-assisted",
-    "muscleGroup": "back",
-    "equipment": "machine",
-    "secondaryMuscles": [
-      "biceps"
-    ],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 5,
-    "needsReview": false
-  },
-  {
-    "name": "Clean (Barbell)",
-    "slug": "clean-barbell",
-    "muscleGroup": "full-body",
-    "equipment": "barbell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 5,
-    "needsReview": true,
-    "needsReviewReason": "Source app category 'Olympic' has no MuscleGroup match in this repo's type; mapped to full-body since these are total-body compound lifts."
-  },
-  {
-    "name": "Clean and Jerk (Barbell)",
-    "slug": "clean-and-jerk-barbell",
-    "muscleGroup": "full-body",
-    "equipment": "barbell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 5,
-    "needsReview": true,
-    "needsReviewReason": "Source app category 'Olympic' has no MuscleGroup match in this repo's type; mapped to full-body since these are total-body compound lifts."
-  },
-  {
-    "name": "Climbing",
-    "slug": "climbing",
-    "muscleGroup": "cardio",
-    "equipment": "other",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 5,
-    "needsReview": true,
-    "needsReviewReason": "Ambiguous whether this means a climbing wall/rope or a stairclimber-style cardio machine; no equipment tag shown."
   },
   {
     "name": "Close-Grip Front Lat Pulldown",
@@ -854,35 +654,6 @@
     "slug": "flat-leg-raise",
     "muscleGroup": "core",
     "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 8,
-    "needsReview": false
-  },
-  {
-    "name": "Floor Press (Barbell)",
-    "slug": "floor-press-barbell",
-    "muscleGroup": "chest",
-    "equipment": "barbell",
-    "secondaryMuscles": [
-      "triceps",
-      "shoulders"
-    ],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 8,
-    "needsReview": false
-  },
-  {
-    "name": "Front Raise (Band)",
-    "slug": "front-raise-band",
-    "muscleGroup": "shoulders",
-    "equipment": "band",
     "secondaryMuscles": [],
     "setupNotes": [],
     "aliases": [],
@@ -1503,19 +1274,6 @@
     "needsReview": false
   },
   {
-    "name": "Jackknife Sit Up",
-    "slug": "jackknife-sit-up",
-    "muscleGroup": "core",
-    "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 13,
-    "needsReview": false
-  },
-  {
     "name": "Jump Rope",
     "slug": "jump-rope",
     "muscleGroup": "cardio",
@@ -1528,19 +1286,6 @@
     "sourcePage": 13,
     "needsReview": true,
     "needsReviewReason": "Uses a jump rope implement; no exact EquipmentKind fit."
-  },
-  {
-    "name": "Knees to Elbows",
-    "slug": "knees-to-elbows",
-    "muscleGroup": "core",
-    "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 14,
-    "needsReview": false
   },
   {
     "name": "Lat Pulldown (Cable)",
@@ -1659,108 +1404,11 @@
     "needsReview": false
   },
   {
-    "name": "Jump Shrug (Barbell)",
-    "slug": "jump-shrug-barbell",
-    "muscleGroup": "full-body",
-    "equipment": "barbell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 15,
-    "needsReview": true,
-    "needsReviewReason": "Source app category 'Olympic' has no MuscleGroup match in this repo's type; mapped to full-body since these are total-body compound lifts."
-  },
-  {
-    "name": "Jump Squat",
-    "slug": "jump-squat",
-    "muscleGroup": "legs",
-    "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 15,
-    "needsReview": false
-  },
-  {
     "name": "Jumping Jack",
     "slug": "jumping-jack",
     "muscleGroup": "full-body",
     "equipment": "bodyweight",
     "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 15,
-    "needsReview": false
-  },
-  {
-    "name": "Kettlebell Swing",
-    "slug": "kettlebell-swing",
-    "muscleGroup": "full-body",
-    "equipment": "kettlebell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 15,
-    "needsReview": false
-  },
-  {
-    "name": "Kettlebell Turkish Get Up",
-    "slug": "kettlebell-turkish-get-up",
-    "muscleGroup": "full-body",
-    "equipment": "kettlebell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 15,
-    "needsReview": false
-  },
-  {
-    "name": "Kipping Pull Up",
-    "slug": "kipping-pull-up",
-    "muscleGroup": "back",
-    "equipment": "bodyweight",
-    "secondaryMuscles": [
-      "biceps"
-    ],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 15,
-    "needsReview": false
-  },
-  {
-    "name": "Knee Raise (Captain's Chair)",
-    "slug": "knee-raise-captain-s-chair",
-    "muscleGroup": "core",
-    "equipment": "machine",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 15,
-    "needsReview": true,
-    "needsReviewReason": "Captain's Chair is a fixed apparatus/frame with no exact EquipmentKind match — mapped to machine as closest fit."
-  },
-  {
-    "name": "Kneeling Pulldown (Band)",
-    "slug": "kneeling-pulldown-band",
-    "muscleGroup": "back",
-    "equipment": "band",
-    "secondaryMuscles": [
-      "biceps"
-    ],
     "setupNotes": [],
     "aliases": [],
     "visibleWeightLb": null,
@@ -2911,19 +2559,6 @@
     "needsReview": false
   },
   {
-    "name": "Straight Leg Deadlift (Band)",
-    "slug": "straight-leg-deadlift-band",
-    "muscleGroup": "legs",
-    "equipment": "band",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 26,
-    "needsReview": false
-  },
-  {
     "name": "Stretching",
     "slug": "stretching",
     "muscleGroup": "full-body",
@@ -2977,19 +2612,6 @@
     "needsReview": false
   },
   {
-    "name": "Superman",
-    "slug": "superman",
-    "muscleGroup": "core",
-    "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 26,
-    "needsReview": false
-  },
-  {
     "name": "Swimming",
     "slug": "swimming",
     "muscleGroup": "cardio",
@@ -3033,36 +2655,10 @@
     "needsReview": false
   },
   {
-    "name": "Squat Row (Band)",
-    "slug": "squat-row-band",
-    "muscleGroup": "full-body",
-    "equipment": "band",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 27,
-    "needsReview": false
-  },
-  {
     "name": "Standing Calf Raise (Barbell)",
     "slug": "standing-calf-raise-barbell",
     "muscleGroup": "calves",
     "equipment": "barbell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 27,
-    "needsReview": false
-  },
-  {
-    "name": "Standing Calf Raise (Bodyweight)",
-    "slug": "standing-calf-raise-bodyweight",
-    "muscleGroup": "calves",
-    "equipment": "bodyweight",
     "secondaryMuscles": [],
     "setupNotes": [],
     "aliases": [],
@@ -3111,20 +2707,6 @@
     "needsReview": false
   },
   {
-    "name": "Step-up",
-    "slug": "step-up",
-    "muscleGroup": "legs",
-    "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 27,
-    "needsReview": true,
-    "needsReviewReason": "No equipment tag shown; often loaded with dumbbells in practice, but shown here as the plain/bodyweight variant."
-  },
-  {
     "name": "T Bar Row",
     "slug": "t-bar-row",
     "muscleGroup": "back",
@@ -3139,45 +2721,6 @@
     "sourcePage": 28,
     "needsReview": true,
     "needsReviewReason": "No equipment tag shown; a T-bar row station/landmine is the conventional apparatus — mapped to machine."
-  },
-  {
-    "name": "Thruster (Barbell)",
-    "slug": "thruster-barbell",
-    "muscleGroup": "full-body",
-    "equipment": "barbell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 28,
-    "needsReview": false
-  },
-  {
-    "name": "Thruster (Kettlebell)",
-    "slug": "thruster-kettlebell",
-    "muscleGroup": "full-body",
-    "equipment": "kettlebell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 28,
-    "needsReview": false
-  },
-  {
-    "name": "Toes To Bar",
-    "slug": "toes-to-bar",
-    "muscleGroup": "core",
-    "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 28,
-    "needsReview": false
   },
   {
     "name": "Torso Rotation (Machine)",
@@ -3247,19 +2790,6 @@
     "needsReviewReason": "No equipment tag shown, and unlike the explicit Barbell/Cable/Dumbbell/Machine variants elsewhere in this list, this generic entry does not specify one."
   },
   {
-    "name": "V Up",
-    "slug": "v-up",
-    "muscleGroup": "core",
-    "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 29,
-    "needsReview": false
-  },
-  {
     "name": "Walking",
     "slug": "walking",
     "muscleGroup": "cardio",
@@ -3306,19 +2836,6 @@
     "slug": "yoga",
     "muscleGroup": "cardio",
     "equipment": "bodyweight",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 29,
-    "needsReview": false
-  },
-  {
-    "name": "Zercher Squat (Barbell)",
-    "slug": "zercher-squat-barbell",
-    "muscleGroup": "legs",
-    "equipment": "barbell",
     "secondaryMuscles": [],
     "setupNotes": [],
     "aliases": [],
@@ -3403,46 +2920,6 @@
     "setupNotes": [
       "Straight bar attachment"
     ],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 30,
-    "needsReview": false
-  },
-  {
-    "name": "Upright Row (Barbell)",
-    "slug": "upright-row-barbell",
-    "muscleGroup": "back",
-    "equipment": "barbell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 30,
-    "needsReview": false
-  },
-  {
-    "name": "Upright Row (Cable)",
-    "slug": "upright-row-cable",
-    "muscleGroup": "arms",
-    "equipment": "cable",
-    "secondaryMuscles": [],
-    "setupNotes": [],
-    "aliases": [],
-    "visibleWeightLb": null,
-    "visibleReps": null,
-    "sourcePage": 30,
-    "needsReview": true,
-    "needsReviewReason": "Source category is generic 'Arms' and the exercise name doesn't clearly specify biceps/triceps/forearms."
-  },
-  {
-    "name": "Upright Row (Dumbbell)",
-    "slug": "upright-row-dumbbell",
-    "muscleGroup": "shoulders",
-    "equipment": "dumbbell",
-    "secondaryMuscles": [],
-    "setupNotes": [],
     "aliases": [],
     "visibleWeightLb": null,
     "visibleReps": null,

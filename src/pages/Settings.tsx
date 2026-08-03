@@ -23,7 +23,7 @@ export function SettingsPage() {
       <section className="app-card grid gap-3">
         <p className="font-medium text-fg">Onboarding (stashed)</p>
         <p className="text-sm leading-relaxed text-fgMuted">
-          Welcome tour is paused. Aloo stays gold-and-white with a pot that fills as you log.
+          Welcome tour is paused. Lift stays gold-and-white with a pot that fills as you log.
         </p>
         <button
           className="button-secondary opacity-70"

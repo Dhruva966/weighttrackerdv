@@ -4,6 +4,7 @@ import {
   isCleanExerciseLogShorthand,
   parseExerciseLog,
   type ParsedExerciseLog,
+  type ParsedExerciseSet,
 } from './liftImport';
 
 /** Stage 1 draft from Claude (or Groq fallback). Stage 2 commits this to sets. */
@@ -34,6 +35,98 @@ const committedLogSchema = z.object({
   ),
   notes: z.array(z.string()).default([]),
 });
+
+/**
+ * Duration-only session logs: "15 minutes", "15 min", "10m", "1 hour", "90 sec".
+ * Bare "m" means minutes (gym convention). Does not match lift shorthand.
+ */
+const durationUnitPattern = /(\d+(?:\.\d+)?)\s*(m|mins?|minutes?|h|hrs?|hours?|s|secs?|seconds?)\b/gi;
+const durationOnlyPattern =
+  /^\s*(\d+(?:\.\d+)?)\s*(m|mins?|minutes?|h|hrs?|hours?|s|secs?|seconds?)\s*$/i;
+
+function durationSecFromMatch(valueRaw: string, unitRaw: string): number | null {
+  const value = Number(valueRaw);
+  if (!Number.isFinite(value) || value <= 0) {
+    return null;
+  }
+
+  const unit = unitRaw.toLowerCase();
+  let durationSec: number;
+  if (/^(h|hrs?|hours?)$/.test(unit)) {
+    durationSec = Math.round(value * 3600);
+  } else if (/^(s|secs?|seconds?)$/.test(unit)) {
+    durationSec = Math.round(value);
+  } else {
+    durationSec = Math.round(value * 60);
+  }
+
+  return durationSec > 0 ? durationSec : null;
+}
+
+/** True when the text looks like a duration attempt (for error hints / LLM skip). */
+export function looksLikeDurationAttempt(text: string): boolean {
+  durationUnitPattern.lastIndex = 0;
+  return durationUnitPattern.test(text.trim());
+}
+
+function looksLikeLiftLog(text: string): boolean {
+  const probe = text.trim();
+  if (!probe) {
+    return false;
+  }
+  if (/\d+\s*(?:lb|lbs)?\s*[x×]\s*\d+/i.test(probe)) {
+    return true;
+  }
+  if (/\b\d+(?:\.\d+)?\s*(?:lb|lbs)\b/i.test(probe) && /\b\d+\s*reps?\b/i.test(probe)) {
+    return true;
+  }
+  if (/\d+\s+for\s+\d+/i.test(probe) && /\b(sets?|reps?)\b/i.test(probe)) {
+    return true;
+  }
+  if (/\b\d+\s*sets?\b/i.test(probe) && /\b\d+\s*reps?\b/i.test(probe)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Parse a duration log into seconds.
+ * Accepts whole-string shorthand (`15 minutes`, `10m`) and single embedded
+ * durations with filler (`around 15 minutes or so`) when the text is not a lift.
+ */
+export function parseDurationOnlyLog(text: string): { durationSec: number } | null {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const only = trimmed.match(durationOnlyPattern);
+  if (only) {
+    const durationSec = durationSecFromMatch(only[1]!, only[2]!);
+    return durationSec != null ? { durationSec } : null;
+  }
+
+  if (looksLikeLiftLog(trimmed)) {
+    return null;
+  }
+
+  durationUnitPattern.lastIndex = 0;
+  const matches = [...trimmed.matchAll(durationUnitPattern)];
+  if (matches.length !== 1) {
+    return null;
+  }
+
+  const durationSec = durationSecFromMatch(matches[0]![1]!, matches[0]![2]!);
+  return durationSec != null ? { durationSec } : null;
+}
+
+export function isCleanDurationShorthand(text: string): boolean {
+  return durationOnlyPattern.test(text.trim());
+}
+
+function durationSet(durationSec: number): ParsedExerciseSet {
+  return { weightLb: 0, reps: 0, durationSec };
+}
 
 function normalizeCommittedSets(
   sets: Array<{ weightLb?: number; reps?: number }> | undefined,
@@ -263,12 +356,22 @@ async function tryRemoteParse(text: string, exerciseName: string): Promise<Parse
  * 1) Claude (via Supabase edge) interprets messy NL → draft JSON
  * 2) Deterministic Zod commit expands to {sets, notes}
  *
- * Clean shorthand (`205 x 3`, `115 for 8 7 7`) stays on-device with no API call.
+ * Clean shorthand (`205 x 3`, `115 for 8 7 7`, `15 minutes`) stays on-device with no API call.
  */
 export async function parseExerciseLogSmart(text: string, exerciseName: string): Promise<ParsedExerciseLog> {
+  const duration = parseDurationOnlyLog(text);
+  if (duration) {
+    return { sets: [durationSet(duration.durationSec)], notes: [] };
+  }
+
   const local = parseExerciseLog(text, exerciseName);
 
   if (isCleanExerciseLogShorthand(text) && local.sets.length > 0) {
+    return local;
+  }
+
+  // Duration attempts are on-device only — do not send them to the weight/reps LLM.
+  if (looksLikeDurationAttempt(text) && local.sets.length === 0) {
     return local;
   }
 

@@ -4,12 +4,14 @@ import {
   canonicalPdfStorageUrl,
   isAllowedPersistedImageUrl,
   isAllowedRenderImageUrl,
+  withExerciseImageCacheBust,
 } from '../lib/exercise-image-policy';
 import type { Exercise } from '../types';
 
 /**
- * Prefer durable allowlisted Storage silhouettes, then local PDF diagram crops.
- * Never surface stock/FEDB people-photo hosts.
+ * Prefer durable allowlisted Storage artwork, then local icon crops.
+ * Hollow-model Strong PDF crops are allowed; stock/FEDB real-person hosts are not.
+ * Storage candidates are cache-busted so stale people-photo bytes never stick.
  */
 export function exerciseImageCandidates(exercise: Pick<Exercise, 'slug' | 'equipment' | 'imageUrl'>): string[] {
   const candidates: string[] = [];
@@ -23,16 +25,11 @@ export function exerciseImageCandidates(exercise: Pick<Exercise, 'slug' | 'equip
 
   const remote = exercise.imageUrl?.trim();
   if (remote && isAllowedPersistedImageUrl(remote)) {
-    push(remote);
+    push(withExerciseImageCacheBust(remote));
   }
 
   push(canonicalPdfStorageUrl(exercise.slug, exercise.equipment));
   push(pdfIconUrl(exercise.slug, exercise.equipment));
-
-  // Rare non-http allowlisted paths already covered by isAllowedRenderImageUrl above.
-  if (remote && isAllowedRenderImageUrl(remote)) {
-    push(remote);
-  }
 
   return candidates;
 }

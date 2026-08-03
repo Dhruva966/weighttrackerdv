@@ -1,8 +1,8 @@
-# Aloo PWA
+# Lift PWA
 
 Mobile-first personal health PWA for **Dhruva** — body weight, walks/cardio, and gym sessions in one app. Food, meal, macro, and calorie logging are archived for a later pass. Built with Vite + React + TypeScript, Supabase-backed where wired, local-first Zustand for diary/UI, installable from iPhone Safari.
 
-**Brand:** Aloo · **Theme:** soft gold + white · **Progress metaphor:** pot of gold that fills with consistency
+**Brand:** Lift · **Theme:** soft gold + white · **Progress metaphor:** pot of gold that fills with consistency
 
 ## Product Flow
 ```mermaid
@@ -83,8 +83,8 @@ Food archive lives under `archive/food/` and is not imported by the active app.
 | `db/CLAUDE.md` | Schema / storage |
 | `HANDOFF.md` | Cross-agent handoff (current) |
 | `DEPLOYMENT.md` | Vercel + Supabase |
-| `decisions/` | ADRs (garden→Aloo gold, voice, context saves) |
+| `decisions/` | ADRs (garden→gold diary, voice, context saves) |
 | `wiki/README.md` | Long-form notes index |
 
 ## Current Status (Jul 2026)
-Current active shape: Aloo gold shell, pot of gold, universal NL/voice bar, walks/weight local diary, editable intentions, real lift charts, template-first Move, catalog exercise merges (board→PDF), editable library cards, and gym sessions (lift + cardio fields) that sync to Supabase when configured. Food UI remains archived under `archive/food/`. Production: https://weighttrackerdv.vercel.app (Vercel auto-deploy from `main`).
+Current active shape: Lift gold shell, pot of gold, universal NL/voice bar, walks/weight local diary, editable intentions, real lift charts, template-first Move, catalog exercise merges (board→PDF), editable library cards, and gym sessions (lift + cardio fields) that sync to Supabase when configured. Food UI remains archived under `archive/food/`. Production: https://weighttrackerdv.vercel.app (Vercel auto-deploy from `main`).

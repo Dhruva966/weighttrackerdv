@@ -26,7 +26,7 @@ function renderCard(exercise: Exercise) {
 }
 
 describe('ExerciseCard', () => {
-  it('shows no-photo before its name and links to the exercise detail (people URLs blocked)', () => {
+  it('shows no-photo before its name and links to the exercise detail (stock hosts blocked)', () => {
     renderCard({ ...baseExercise, imageUrl: 'https://example.com/incline-press.jpg' });
 
     const image = screen.getByRole('img', { name: 'No photo available for Incline Dumbbell Press' });
@@ -50,7 +50,7 @@ describe('ExerciseCard', () => {
     expect(screen.queryByRole('img', { name: 'Incline Dumbbell Press' })).not.toBeInTheDocument();
   });
 
-  it('treats blocked people-photo hosts as no-photo without waiting for error', () => {
+  it('treats blocked stock-photo hosts as no-photo without waiting for error', () => {
     renderCard({ ...baseExercise, imageUrl: 'https://example.com/missing.jpg' });
 
     expect(screen.getByRole('img', { name: 'No photo available for Incline Dumbbell Press' })).toBeInTheDocument();

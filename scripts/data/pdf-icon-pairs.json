@@ -5,7 +5,7 @@
     "/Users/dhruvavutukury/conductor/workspaces/WeightTrackerDV/west-monroe/.context/attachments/pQWi5w/IMG_3417.pdf"
   ],
   "note": "Icons cropped from Strong app library screenshots in IMG_3417.pdf (not personal gym photos). Matched by OCR name; unmatched left name-only.",
-  "pairedCount": 250,
+  "pairedCount": 212,
   "unmatchedCount": 1,
   "pairs": [
     {
@@ -14,53 +14,11 @@
       "manifestSourcePage": 1,
       "ocrPage": 1,
       "ocrText": "Ab Wheel",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/ab-wheel.jpg",
       "box": {
         "left": 36,
         "top": 541,
-        "size": 96
-      }
-    },
-    {
-      "slug": "aerobics",
-      "name": "Aerobics",
-      "manifestSourcePage": 1,
-      "ocrPage": 1,
-      "ocrText": "Aerobics",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/aerobics.jpg",
-      "box": {
-        "left": 36,
-        "top": 669,
-        "size": 96
-      }
-    },
-    {
-      "slug": "arnold-press-dumbbell",
-      "name": "Arnold Press (Dumbbell)",
-      "manifestSourcePage": 1,
-      "ocrPage": 1,
-      "ocrText": "Arnold Press (Dumbbell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/arnold-press-dumbbell.jpg",
-      "box": {
-        "left": 36,
-        "top": 801,
-        "size": 96
-      }
-    },
-    {
-      "slug": "around-the-world",
-      "name": "Around the World",
-      "manifestSourcePage": 1,
-      "ocrPage": 1,
-      "ocrText": "Around the World",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/around-the-world.jpg",
-      "box": {
-        "left": 33,
-        "top": 930,
         "size": 96
       }
     },
@@ -70,7 +28,7 @@
       "manifestSourcePage": 1,
       "ocrPage": 1,
       "ocrText": "Back Extension",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/back-extension.jpg",
       "box": {
         "left": 36,
@@ -84,39 +42,11 @@
       "manifestSourcePage": 1,
       "ocrPage": 1,
       "ocrText": "Back Extension (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/back-extension-machine.jpg",
       "box": {
         "left": 36,
         "top": 1253,
-        "size": 96
-      }
-    },
-    {
-      "slug": "ball-slams",
-      "name": "Ball Slams",
-      "manifestSourcePage": 1,
-      "ocrPage": 1,
-      "ocrText": "Ball Slams",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/ball-slams.jpg",
-      "box": {
-        "left": 36,
-        "top": 1382,
-        "size": 96
-      }
-    },
-    {
-      "slug": "battle-ropes",
-      "name": "Battle Ropes",
-      "manifestSourcePage": 1,
-      "ocrPage": 1,
-      "ocrText": "Battle Ropes",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/battle-ropes.jpg",
-      "box": {
-        "left": 36,
-        "top": 1513,
         "size": 96
       }
     },
@@ -126,7 +56,7 @@
       "manifestSourcePage": 2,
       "ocrPage": 2,
       "ocrText": "Bent Over One Arm Row (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bent-over-one-arm-row-dumbbell.jpg",
       "box": {
         "left": 26,
@@ -140,7 +70,7 @@
       "manifestSourcePage": 2,
       "ocrPage": 2,
       "ocrText": "Bent Over Row (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bent-over-row-band.jpg",
       "box": {
         "left": 26,
@@ -154,7 +84,7 @@
       "manifestSourcePage": 2,
       "ocrPage": 2,
       "ocrText": "Bent Over Row (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bent-over-row-barbell.jpg",
       "box": {
         "left": 26,
@@ -168,7 +98,7 @@
       "manifestSourcePage": 2,
       "ocrPage": 2,
       "ocrText": "Bent Over Row (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bent-over-row-dumbbell.jpg",
       "box": {
         "left": 26,
@@ -182,7 +112,7 @@
       "manifestSourcePage": 2,
       "ocrPage": 2,
       "ocrText": "Bent Over Row - Underhand (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bent-over-row-underhand-barbell.jpg",
       "box": {
         "left": 26,
@@ -196,7 +126,7 @@
       "manifestSourcePage": 2,
       "ocrPage": 2,
       "ocrText": "Bicep Curl (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bicep-curl-barbell.jpg",
       "box": {
         "left": 26,
@@ -210,7 +140,7 @@
       "manifestSourcePage": 2,
       "ocrPage": 2,
       "ocrText": "Bicep Curl (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bicep-curl-cable.jpg",
       "box": {
         "left": 26,
@@ -224,7 +154,7 @@
       "manifestSourcePage": 2,
       "ocrPage": 2,
       "ocrText": "Bicep Curl (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bicep-curl-dumbbell.jpg",
       "box": {
         "left": 26,
@@ -238,25 +168,11 @@
       "manifestSourcePage": 2,
       "ocrPage": 2,
       "ocrText": "Bicep Curl (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bicep-curl-machine.jpg",
       "box": {
         "left": 26,
         "top": 1171,
-        "size": 77
-      }
-    },
-    {
-      "slug": "bench-dip",
-      "name": "Bench Dip",
-      "manifestSourcePage": 3,
-      "ocrPage": 3,
-      "ocrText": "Bench Dip",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bench-dip.jpg",
-      "box": {
-        "left": 26,
-        "top": 557,
         "size": 77
       }
     },
@@ -266,25 +182,11 @@
       "manifestSourcePage": 3,
       "ocrPage": 3,
       "ocrText": "Bench Press (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bench-press-barbell.jpg",
       "box": {
         "left": 26,
         "top": 661,
-        "size": 77
-      }
-    },
-    {
-      "slug": "bench-press-cable",
-      "name": "Bench Press (Cable)",
-      "manifestSourcePage": 3,
-      "ocrPage": 3,
-      "ocrText": "Bench Press (Cable)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bench-press-cable.jpg",
-      "box": {
-        "left": 26,
-        "top": 763,
         "size": 77
       }
     },
@@ -294,7 +196,7 @@
       "manifestSourcePage": 3,
       "ocrPage": 3,
       "ocrText": "Bench Press (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bench-press-dumbbell.jpg",
       "box": {
         "left": 26,
@@ -308,7 +210,7 @@
       "manifestSourcePage": 3,
       "ocrPage": 3,
       "ocrText": "Bench Press (Smith Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bench-press-smith-machine.jpg",
       "box": {
         "left": 26,
@@ -317,54 +219,12 @@
       }
     },
     {
-      "slug": "bench-press-close-grip-barbell",
-      "name": "Bench Press - Close Grip (Barbell)",
-      "manifestSourcePage": 3,
-      "ocrPage": 3,
-      "ocrText": "Bench Press - Close Grip (Barbell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bench-press-close-grip-barbell.jpg",
-      "box": {
-        "left": 26,
-        "top": 1072,
-        "size": 77
-      }
-    },
-    {
-      "slug": "bench-press-wide-grip-barbell",
-      "name": "Bench Press - Wide Grip (Barbell)",
-      "manifestSourcePage": 3,
-      "ocrPage": 3,
-      "ocrText": "Bench Press - Wide Grip (Barbell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bench-press-wide-grip-barbell.jpg",
-      "box": {
-        "left": 26,
-        "top": 1173,
-        "size": 77
-      }
-    },
-    {
-      "slug": "bicycle-crunch",
-      "name": "Bicycle Crunch",
-      "manifestSourcePage": 4,
-      "ocrPage": 4,
-      "ocrText": "Bicycle Crunch",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bicycle-crunch.jpg",
-      "box": {
-        "left": 36,
-        "top": 504,
-        "size": 96
-      }
-    },
-    {
       "slug": "box-jump",
       "name": "Box Jump",
       "manifestSourcePage": 4,
       "ocrPage": 4,
       "ocrText": "Box Jump",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/box-jump.jpg",
       "box": {
         "left": 36,
@@ -378,7 +238,7 @@
       "manifestSourcePage": 4,
       "ocrPage": 4,
       "ocrText": "Box Squat (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/box-squat-barbell.jpg",
       "box": {
         "left": 36,
@@ -392,7 +252,7 @@
       "manifestSourcePage": 4,
       "ocrPage": 4,
       "ocrText": "Bulgarian Split Squat",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/bulgarian-split-squat.jpg",
       "box": {
         "left": 36,
@@ -406,7 +266,7 @@
       "manifestSourcePage": 4,
       "ocrPage": 4,
       "ocrText": "Burpee",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/burpee.jpg",
       "box": {
         "left": 36,
@@ -420,7 +280,7 @@
       "manifestSourcePage": 4,
       "ocrPage": 4,
       "ocrText": "Cable Crossover",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/cable-crossover.jpg",
       "box": {
         "left": 36,
@@ -434,7 +294,7 @@
       "manifestSourcePage": 4,
       "ocrPage": 4,
       "ocrText": "Cable Crunch",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/cable-crunch.jpg",
       "box": {
         "left": 36,
@@ -448,7 +308,7 @@
       "manifestSourcePage": 4,
       "ocrPage": 4,
       "ocrText": "Cable Kickback",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/cable-kickback.jpg",
       "box": {
         "left": 36,
@@ -462,7 +322,7 @@
       "manifestSourcePage": 5,
       "ocrPage": 5,
       "ocrText": "Chest Press (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/chest-press-band.jpg",
       "box": {
         "left": 36,
@@ -476,7 +336,7 @@
       "manifestSourcePage": 5,
       "ocrPage": 5,
       "ocrText": "Chest Press (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/chest-press-machine.jpg",
       "box": {
         "left": 36,
@@ -490,67 +350,11 @@
       "manifestSourcePage": 5,
       "ocrPage": 5,
       "ocrText": "Chin Up",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/chin-up.jpg",
       "box": {
         "left": 36,
         "top": 732,
-        "size": 96
-      }
-    },
-    {
-      "slug": "chin-up-assisted",
-      "name": "Chin Up (Assisted)",
-      "manifestSourcePage": 5,
-      "ocrPage": 5,
-      "ocrText": "Chin Up (Assisted)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/chin-up-assisted.jpg",
-      "box": {
-        "left": 36,
-        "top": 863,
-        "size": 96
-      }
-    },
-    {
-      "slug": "clean-barbell",
-      "name": "Clean (Barbell)",
-      "manifestSourcePage": 5,
-      "ocrPage": 5,
-      "ocrText": "Clean (Barbell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/clean-barbell.jpg",
-      "box": {
-        "left": 36,
-        "top": 992,
-        "size": 96
-      }
-    },
-    {
-      "slug": "clean-and-jerk-barbell",
-      "name": "Clean and Jerk (Barbell)",
-      "manifestSourcePage": 5,
-      "ocrPage": 5,
-      "ocrText": "Clean and Jerk (Barbell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/clean-and-jerk-barbell.jpg",
-      "box": {
-        "left": 36,
-        "top": 1119,
-        "size": 96
-      }
-    },
-    {
-      "slug": "climbing",
-      "name": "Climbing",
-      "manifestSourcePage": 5,
-      "ocrPage": 5,
-      "ocrText": "Climbing",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/climbing.jpg",
-      "box": {
-        "left": 36,
-        "top": 1246,
         "size": 96
       }
     },
@@ -560,7 +364,7 @@
       "manifestSourcePage": 5,
       "ocrPage": 5,
       "ocrText": "Concentration Curl (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/concentration-curl-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -574,7 +378,7 @@
       "manifestSourcePage": 5,
       "ocrPage": 5,
       "ocrText": "Cross Body Crunch",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/cross-body-crunch.jpg",
       "box": {
         "left": 36,
@@ -588,7 +392,7 @@
       "manifestSourcePage": 6,
       "ocrPage": 6,
       "ocrText": "Cable Pull Through",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/cable-pull-through.jpg",
       "box": {
         "left": 26,
@@ -602,7 +406,7 @@
       "manifestSourcePage": 6,
       "ocrPage": 6,
       "ocrText": "Cable Twist",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/cable-twist.jpg",
       "box": {
         "left": 26,
@@ -616,7 +420,7 @@
       "manifestSourcePage": 6,
       "ocrPage": 6,
       "ocrText": "Calf Press on Leg Press",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/calf-press-on-leg-press.jpg",
       "box": {
         "left": 26,
@@ -630,7 +434,7 @@
       "manifestSourcePage": 6,
       "ocrPage": 6,
       "ocrText": "Calf Press on Seated Leg Press",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/calf-press-on-seated-leg-press.jpg",
       "box": {
         "left": 26,
@@ -644,7 +448,7 @@
       "manifestSourcePage": 6,
       "ocrPage": 6,
       "ocrText": "Chest Dip",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/chest-dip.jpg",
       "box": {
         "left": 26,
@@ -658,7 +462,7 @@
       "manifestSourcePage": 6,
       "ocrPage": 6,
       "ocrText": "Chest Dip (Assisted)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/chest-dip-assisted.jpg",
       "box": {
         "left": 24,
@@ -672,7 +476,7 @@
       "manifestSourcePage": 6,
       "ocrPage": 6,
       "ocrText": "Chest Fly",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/chest-fly.jpg",
       "box": {
         "left": 26,
@@ -686,7 +490,7 @@
       "manifestSourcePage": 6,
       "ocrPage": 6,
       "ocrText": "Chest Fly (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/chest-fly-band.jpg",
       "box": {
         "left": 26,
@@ -700,7 +504,7 @@
       "manifestSourcePage": 6,
       "ocrPage": 6,
       "ocrText": "Chest Fly (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/chest-fly-dumbbell.jpg",
       "box": {
         "left": 26,
@@ -714,7 +518,7 @@
       "manifestSourcePage": 7,
       "ocrPage": 7,
       "ocrText": "Crunch",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/crunch.jpg",
       "box": {
         "left": 36,
@@ -728,7 +532,7 @@
       "manifestSourcePage": 7,
       "ocrPage": 7,
       "ocrText": "Crunch (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/crunch-machine.jpg",
       "box": {
         "left": 36,
@@ -742,7 +546,7 @@
       "manifestSourcePage": 7,
       "ocrPage": 7,
       "ocrText": "Crunch (Stability Ball)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/crunch-stability-ball.jpg",
       "box": {
         "left": 36,
@@ -756,7 +560,7 @@
       "manifestSourcePage": 7,
       "ocrPage": 7,
       "ocrText": "Cycling",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/cycling.jpg",
       "box": {
         "left": 36,
@@ -770,7 +574,7 @@
       "manifestSourcePage": 7,
       "ocrPage": 7,
       "ocrText": "Cycling (Indoor)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/cycling-indoor.jpg",
       "box": {
         "left": 36,
@@ -784,7 +588,7 @@
       "manifestSourcePage": 7,
       "ocrPage": 7,
       "ocrText": "Deadlift (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/deadlift-band.jpg",
       "box": {
         "left": 36,
@@ -798,7 +602,7 @@
       "manifestSourcePage": 7,
       "ocrPage": 7,
       "ocrText": "Deadlift (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/deadlift-barbell.jpg",
       "box": {
         "left": 36,
@@ -812,7 +616,7 @@
       "manifestSourcePage": 7,
       "ocrPage": 7,
       "ocrText": "Deadlift (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/deadlift-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -826,7 +630,7 @@
       "manifestSourcePage": 8,
       "ocrPage": 8,
       "ocrText": "Face Pull (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/face-pull-cable.jpg",
       "box": {
         "left": 36,
@@ -840,7 +644,7 @@
       "manifestSourcePage": 8,
       "ocrPage": 8,
       "ocrText": "Flat Knee Raise",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/flat-knee-raise.jpg",
       "box": {
         "left": 36,
@@ -854,39 +658,11 @@
       "manifestSourcePage": 8,
       "ocrPage": 8,
       "ocrText": "Flat Leg Raise",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/flat-leg-raise.jpg",
       "box": {
         "left": 36,
         "top": 702,
-        "size": 96
-      }
-    },
-    {
-      "slug": "floor-press-barbell",
-      "name": "Floor Press (Barbell)",
-      "manifestSourcePage": 8,
-      "ocrPage": 8,
-      "ocrText": "Floor Press (Barbell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/floor-press-barbell.jpg",
-      "box": {
-        "left": 36,
-        "top": 832,
-        "size": 96
-      }
-    },
-    {
-      "slug": "front-raise-band",
-      "name": "Front Raise (Band)",
-      "manifestSourcePage": 8,
-      "ocrPage": 8,
-      "ocrText": "Front Raise (Band)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/front-raise-band.jpg",
-      "box": {
-        "left": 36,
-        "top": 960,
         "size": 96
       }
     },
@@ -896,7 +672,7 @@
       "manifestSourcePage": 8,
       "ocrPage": 8,
       "ocrText": "Front Raise (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/front-raise-barbell.jpg",
       "box": {
         "left": 36,
@@ -910,7 +686,7 @@
       "manifestSourcePage": 8,
       "ocrPage": 8,
       "ocrText": "Front Raise (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/front-raise-cable.jpg",
       "box": {
         "left": 36,
@@ -924,7 +700,7 @@
       "manifestSourcePage": 8,
       "ocrPage": 8,
       "ocrText": "Front Raise (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/front-raise-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -938,7 +714,7 @@
       "manifestSourcePage": 8,
       "ocrPage": 8,
       "ocrText": "Front Raise (Plate)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/front-raise-plate.jpg",
       "box": {
         "left": 36,
@@ -952,7 +728,7 @@
       "manifestSourcePage": 9,
       "ocrPage": 10,
       "ocrText": "Front Squat (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/front-squat-barbell.jpg",
       "box": {
         "left": 36,
@@ -966,7 +742,7 @@
       "manifestSourcePage": 9,
       "ocrPage": 9,
       "ocrText": "Deadlift (Smith Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/deadlift-smith-machine.jpg",
       "box": {
         "left": 26,
@@ -980,7 +756,7 @@
       "manifestSourcePage": 9,
       "ocrPage": 9,
       "ocrText": "Deadlift High Pull (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/deadlift-high-pull-barbell.jpg",
       "box": {
         "left": 26,
@@ -994,7 +770,7 @@
       "manifestSourcePage": 9,
       "ocrPage": 9,
       "ocrText": "Decline Bench Press (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/decline-bench-press-barbell.jpg",
       "box": {
         "left": 26,
@@ -1008,7 +784,7 @@
       "manifestSourcePage": 9,
       "ocrPage": 9,
       "ocrText": "Decline Bench Press (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/decline-bench-press-dumbbell.jpg",
       "box": {
         "left": 26,
@@ -1022,7 +798,7 @@
       "manifestSourcePage": 9,
       "ocrPage": 9,
       "ocrText": "Decline Bench Press (Smith Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/decline-bench-press-smith-machine.jpg",
       "box": {
         "left": 26,
@@ -1036,7 +812,7 @@
       "manifestSourcePage": 9,
       "ocrPage": 9,
       "ocrText": "Decline Crunch",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/decline-crunch.jpg",
       "box": {
         "left": 26,
@@ -1050,7 +826,7 @@
       "manifestSourcePage": 9,
       "ocrPage": 9,
       "ocrText": "Deficit Deadlift (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/deficit-deadlift-barbell.jpg",
       "box": {
         "left": 26,
@@ -1064,7 +840,7 @@
       "manifestSourcePage": 9,
       "ocrPage": 9,
       "ocrText": "Elliptical Machine",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/elliptical-machine.jpg",
       "box": {
         "left": 26,
@@ -1078,7 +854,7 @@
       "manifestSourcePage": 10,
       "ocrPage": 10,
       "ocrText": "Glute Ham Raise",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/glute-ham-raise.jpg",
       "box": {
         "left": 36,
@@ -1092,7 +868,7 @@
       "manifestSourcePage": 10,
       "ocrPage": 10,
       "ocrText": "Glute Kickback (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/glute-kickback-machine.jpg",
       "box": {
         "left": 36,
@@ -1106,7 +882,7 @@
       "manifestSourcePage": 10,
       "ocrPage": 10,
       "ocrText": "Goblet Squat (Kettlebell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/goblet-squat-kettlebell.jpg",
       "box": {
         "left": 36,
@@ -1120,7 +896,7 @@
       "manifestSourcePage": 10,
       "ocrPage": 10,
       "ocrText": "Good Morning (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/good-morning-barbell.jpg",
       "box": {
         "left": 36,
@@ -1134,7 +910,7 @@
       "manifestSourcePage": 10,
       "ocrPage": 10,
       "ocrText": "Hack Squat (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hack-squat-barbell.jpg",
       "box": {
         "left": 36,
@@ -1148,7 +924,7 @@
       "manifestSourcePage": 10,
       "ocrPage": 10,
       "ocrText": "Hammer Curl (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hammer-curl-band.jpg",
       "box": {
         "left": 36,
@@ -1162,7 +938,7 @@
       "manifestSourcePage": 11,
       "ocrPage": 11,
       "ocrText": "Hip Abductor (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hip-abductor-machine.jpg",
       "box": {
         "left": 26,
@@ -1176,7 +952,7 @@
       "manifestSourcePage": 11,
       "ocrPage": 11,
       "ocrText": "Hip Adductor (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hip-adductor-machine.jpg",
       "box": {
         "left": 26,
@@ -1190,7 +966,7 @@
       "manifestSourcePage": 11,
       "ocrPage": 11,
       "ocrText": "Hip Thrust (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hip-thrust-barbell.jpg",
       "box": {
         "left": 26,
@@ -1204,7 +980,7 @@
       "manifestSourcePage": 11,
       "ocrPage": 11,
       "ocrText": "Hip Thrust (Bodyweight)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hip-thrust-bodyweight.jpg",
       "box": {
         "left": 24,
@@ -1218,7 +994,7 @@
       "manifestSourcePage": 11,
       "ocrPage": 11,
       "ocrText": "Incline Bench Press (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/incline-bench-press-barbell.jpg",
       "box": {
         "left": 22,
@@ -1232,7 +1008,7 @@
       "manifestSourcePage": 11,
       "ocrPage": 11,
       "ocrText": "Incline Bench Press (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/incline-bench-press-cable.jpg",
       "box": {
         "left": 24,
@@ -1246,7 +1022,7 @@
       "manifestSourcePage": 11,
       "ocrPage": 11,
       "ocrText": "Incline Bench Press (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/incline-bench-press-dumbbell.jpg",
       "box": {
         "left": 24,
@@ -1260,7 +1036,7 @@
       "manifestSourcePage": 11,
       "ocrPage": 11,
       "ocrText": "Incline Bench Press (Smith Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/incline-bench-press-smith-machine.jpg",
       "box": {
         "left": 22,
@@ -1274,7 +1050,7 @@
       "manifestSourcePage": 12,
       "ocrPage": 12,
       "ocrText": "Hammer Curl (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hammer-curl-cable.jpg",
       "box": {
         "left": 36,
@@ -1288,7 +1064,7 @@
       "manifestSourcePage": 12,
       "ocrPage": 12,
       "ocrText": "Hammer Curl (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hammer-curl-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -1302,7 +1078,7 @@
       "manifestSourcePage": 12,
       "ocrPage": 12,
       "ocrText": "Handstand Push Up",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/handstand-push-up.jpg",
       "box": {
         "left": 36,
@@ -1316,7 +1092,7 @@
       "manifestSourcePage": 12,
       "ocrPage": 12,
       "ocrText": "Hang Clean (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hang-clean-barbell.jpg",
       "box": {
         "left": 36,
@@ -1330,7 +1106,7 @@
       "manifestSourcePage": 12,
       "ocrPage": 12,
       "ocrText": "Hang Snatch (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hang-snatch-barbell.jpg",
       "box": {
         "left": 36,
@@ -1344,7 +1120,7 @@
       "manifestSourcePage": 12,
       "ocrPage": 12,
       "ocrText": "Hanging Knee Raise",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hanging-knee-raise.jpg",
       "box": {
         "left": 36,
@@ -1358,7 +1134,7 @@
       "manifestSourcePage": 12,
       "ocrPage": 12,
       "ocrText": "Hanging Leg Raise",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hanging-leg-raise.jpg",
       "box": {
         "left": 36,
@@ -1372,7 +1148,7 @@
       "manifestSourcePage": 12,
       "ocrPage": 12,
       "ocrText": "High Knee Skips",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/high-knee-skips.jpg",
       "box": {
         "left": 36,
@@ -1386,7 +1162,7 @@
       "manifestSourcePage": 12,
       "ocrPage": 12,
       "ocrText": "Hiking",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/hiking.jpg",
       "box": {
         "left": 36,
@@ -1400,7 +1176,7 @@
       "manifestSourcePage": 13,
       "ocrPage": 13,
       "ocrText": "Incline Chest Fly (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/incline-chest-fly-dumbbell.jpg",
       "box": {
         "left": 24,
@@ -1414,7 +1190,7 @@
       "manifestSourcePage": 13,
       "ocrPage": 13,
       "ocrText": "Incline Chest Press (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/incline-chest-press-machine.jpg",
       "box": {
         "left": 24,
@@ -1428,7 +1204,7 @@
       "manifestSourcePage": 13,
       "ocrPage": 13,
       "ocrText": "Incline Curl (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/incline-curl-dumbbell.jpg",
       "box": {
         "left": 22,
@@ -1442,7 +1218,7 @@
       "manifestSourcePage": 13,
       "ocrPage": 13,
       "ocrText": "Incline Row (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/incline-row-dumbbell.jpg",
       "box": {
         "left": 24,
@@ -1456,7 +1232,7 @@
       "manifestSourcePage": 13,
       "ocrPage": 13,
       "ocrText": "Inverted Row (Bodyweight)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/inverted-row-bodyweight.jpg",
       "box": {
         "left": 24,
@@ -1470,7 +1246,7 @@
       "manifestSourcePage": 13,
       "ocrPage": 13,
       "ocrText": "Iso-Lateral Chest Press (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/iso-lateral-chest-press-machine.jpg",
       "box": {
         "left": 24,
@@ -1484,25 +1260,11 @@
       "manifestSourcePage": 13,
       "ocrPage": 13,
       "ocrText": "Iso-Lateral Row (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/iso-lateral-row-machine.jpg",
       "box": {
         "left": 22,
         "top": 955,
-        "size": 77
-      }
-    },
-    {
-      "slug": "jackknife-sit-up",
-      "name": "Jackknife Sit Up",
-      "manifestSourcePage": 13,
-      "ocrPage": 13,
-      "ocrText": "Jackknife Sit Up",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/jackknife-sit-up.jpg",
-      "box": {
-        "left": 24,
-        "top": 1111,
         "size": 77
       }
     },
@@ -1512,25 +1274,11 @@
       "manifestSourcePage": 13,
       "ocrPage": 13,
       "ocrText": "Jump Rope",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/jump-rope.jpg",
       "box": {
         "left": 24,
         "top": 1213,
-        "size": 77
-      }
-    },
-    {
-      "slug": "knees-to-elbows",
-      "name": "Knees to Elbows",
-      "manifestSourcePage": 14,
-      "ocrPage": 14,
-      "ocrText": "Knees to Elbows",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/knees-to-elbows.jpg",
-      "box": {
-        "left": 24,
-        "top": 337,
         "size": 77
       }
     },
@@ -1540,7 +1288,7 @@
       "manifestSourcePage": 14,
       "ocrPage": 14,
       "ocrText": "Lat Pulldown (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lat-pulldown-cable.jpg",
       "box": {
         "left": 26,
@@ -1554,7 +1302,7 @@
       "manifestSourcePage": 14,
       "ocrPage": 14,
       "ocrText": "Lat Pulldown (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lat-pulldown-machine.jpg",
       "box": {
         "left": 24,
@@ -1568,7 +1316,7 @@
       "manifestSourcePage": 14,
       "ocrPage": 14,
       "ocrText": "Lat Pulldown (Single Arm)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lat-pulldown-single-arm.jpg",
       "box": {
         "left": 26,
@@ -1582,7 +1330,7 @@
       "manifestSourcePage": 14,
       "ocrPage": 14,
       "ocrText": "Lat Pulldown - Underhand (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lat-pulldown-underhand-band.jpg",
       "box": {
         "left": 26,
@@ -1596,7 +1344,7 @@
       "manifestSourcePage": 14,
       "ocrPage": 14,
       "ocrText": "Lat Pulldown - Underhand (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lat-pulldown-underhand-cable.jpg",
       "box": {
         "left": 26,
@@ -1610,7 +1358,7 @@
       "manifestSourcePage": 14,
       "ocrPage": 14,
       "ocrText": "Lat Pulldown - Wide Grip (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lat-pulldown-wide-grip-cable.jpg",
       "box": {
         "left": 24,
@@ -1624,7 +1372,7 @@
       "manifestSourcePage": 14,
       "ocrPage": 14,
       "ocrText": "Lateral Box Jump",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lateral-box-jump.jpg",
       "box": {
         "left": 24,
@@ -1638,7 +1386,7 @@
       "manifestSourcePage": 14,
       "ocrPage": 14,
       "ocrText": "Lateral Raise (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lateral-raise-band.jpg",
       "box": {
         "left": 24,
@@ -1647,114 +1395,16 @@
       }
     },
     {
-      "slug": "jump-shrug-barbell",
-      "name": "Jump Shrug (Barbell)",
-      "manifestSourcePage": 15,
-      "ocrPage": 15,
-      "ocrText": "Jump Shrug (Barbell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/jump-shrug-barbell.jpg",
-      "box": {
-        "left": 36,
-        "top": 485,
-        "size": 96
-      }
-    },
-    {
-      "slug": "jump-squat",
-      "name": "Jump Squat",
-      "manifestSourcePage": 15,
-      "ocrPage": 15,
-      "ocrText": "Jump Squat",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/jump-squat.jpg",
-      "box": {
-        "left": 36,
-        "top": 617,
-        "size": 96
-      }
-    },
-    {
       "slug": "jumping-jack",
       "name": "Jumping Jack",
       "manifestSourcePage": 15,
       "ocrPage": 15,
       "ocrText": "Jumping Jack",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/jumping-jack.jpg",
       "box": {
         "left": 36,
         "top": 746,
-        "size": 96
-      }
-    },
-    {
-      "slug": "kettlebell-swing",
-      "name": "Kettlebell Swing",
-      "manifestSourcePage": 15,
-      "ocrPage": 15,
-      "ocrText": "Kettlebell Swing",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/kettlebell-swing.jpg",
-      "box": {
-        "left": 35,
-        "top": 937,
-        "size": 96
-      }
-    },
-    {
-      "slug": "kettlebell-turkish-get-up",
-      "name": "Kettlebell Turkish Get Up",
-      "manifestSourcePage": 15,
-      "ocrPage": 15,
-      "ocrText": "Kettlebell Turkish Get Up",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/kettlebell-turkish-get-up.jpg",
-      "box": {
-        "left": 36,
-        "top": 1068,
-        "size": 96
-      }
-    },
-    {
-      "slug": "kipping-pull-up",
-      "name": "Kipping Pull Up",
-      "manifestSourcePage": 15,
-      "ocrPage": 15,
-      "ocrText": "Kipping Pull Up",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/kipping-pull-up.jpg",
-      "box": {
-        "left": 36,
-        "top": 1198,
-        "size": 96
-      }
-    },
-    {
-      "slug": "knee-raise-captain-s-chair",
-      "name": "Knee Raise (Captain's Chair)",
-      "manifestSourcePage": 15,
-      "ocrPage": 15,
-      "ocrText": "Knee Raise (Captain's Chair)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/knee-raise-captain-s-chair.jpg",
-      "box": {
-        "left": 36,
-        "top": 1327,
-        "size": 96
-      }
-    },
-    {
-      "slug": "kneeling-pulldown-band",
-      "name": "Kneeling Pulldown (Band)",
-      "manifestSourcePage": 15,
-      "ocrPage": 15,
-      "ocrText": "Kneeling Pulldown (Band)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/kneeling-pulldown-band.jpg",
-      "box": {
-        "left": 36,
-        "top": 1454,
         "size": 96
       }
     },
@@ -1764,7 +1414,7 @@
       "manifestSourcePage": 16,
       "ocrPage": 16,
       "ocrText": "Lateral Raise (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lateral-raise-cable.jpg",
       "box": {
         "left": 26,
@@ -1778,7 +1428,7 @@
       "manifestSourcePage": 16,
       "ocrPage": 16,
       "ocrText": "Lateral Raise (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lateral-raise-dumbbell.jpg",
       "box": {
         "left": 22,
@@ -1792,7 +1442,7 @@
       "manifestSourcePage": 16,
       "ocrPage": 16,
       "ocrText": "Leg Extension (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/leg-extension-machine.jpg",
       "box": {
         "left": 24,
@@ -1806,7 +1456,7 @@
       "manifestSourcePage": 16,
       "ocrPage": 16,
       "ocrText": "Leg Press",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/leg-press.jpg",
       "box": {
         "left": 26,
@@ -1820,7 +1470,7 @@
       "manifestSourcePage": 16,
       "ocrPage": 16,
       "ocrText": "Lunge (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lunge-barbell.jpg",
       "box": {
         "left": 26,
@@ -1834,7 +1484,7 @@
       "manifestSourcePage": 16,
       "ocrPage": 16,
       "ocrText": "Lunge (Bodyweight)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lunge-bodyweight.jpg",
       "box": {
         "left": 24,
@@ -1848,7 +1498,7 @@
       "manifestSourcePage": 16,
       "ocrPage": 16,
       "ocrText": "Lunge (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lunge-dumbbell.jpg",
       "box": {
         "left": 24,
@@ -1862,7 +1512,7 @@
       "manifestSourcePage": 16,
       "ocrPage": 16,
       "ocrText": "Lying Leg Curl (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/lying-leg-curl-machine.jpg",
       "box": {
         "left": 24,
@@ -1876,7 +1526,7 @@
       "manifestSourcePage": 17,
       "ocrPage": 18,
       "ocrText": "Mountain Climber",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/mountain-climber.jpg",
       "box": {
         "left": 36,
@@ -1890,7 +1540,7 @@
       "manifestSourcePage": 17,
       "ocrPage": 18,
       "ocrText": "Muscle Up",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/muscle-up.jpg",
       "box": {
         "left": 36,
@@ -1904,7 +1554,7 @@
       "manifestSourcePage": 17,
       "ocrPage": 18,
       "ocrText": "Oblique Crunch",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/oblique-crunch.jpg",
       "box": {
         "left": 36,
@@ -1918,7 +1568,7 @@
       "manifestSourcePage": 17,
       "ocrPage": 18,
       "ocrText": "Overhead Press (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/overhead-press-barbell.jpg",
       "box": {
         "left": 36,
@@ -1932,7 +1582,7 @@
       "manifestSourcePage": 17,
       "ocrPage": 18,
       "ocrText": "Overhead Press (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/overhead-press-cable.jpg",
       "box": {
         "left": 36,
@@ -1946,7 +1596,7 @@
       "manifestSourcePage": 17,
       "ocrPage": 18,
       "ocrText": "Overhead Press (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/overhead-press-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -1960,7 +1610,7 @@
       "manifestSourcePage": 17,
       "ocrPage": 18,
       "ocrText": "Overhead Press (Smith Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/overhead-press-smith-machine.jpg",
       "box": {
         "left": 36,
@@ -1974,7 +1624,7 @@
       "manifestSourcePage": 17,
       "ocrPage": 18,
       "ocrText": "Overhead Squat (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/overhead-squat-barbell.jpg",
       "box": {
         "left": 36,
@@ -1988,7 +1638,7 @@
       "manifestSourcePage": 18,
       "ocrPage": 17,
       "ocrText": "Pec Deck (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/pec-deck-machine.jpg",
       "box": {
         "left": 36,
@@ -2002,7 +1652,7 @@
       "manifestSourcePage": 18,
       "ocrPage": 17,
       "ocrText": "Pendlay Row (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/pendlay-row-barbell.jpg",
       "box": {
         "left": 36,
@@ -2016,7 +1666,7 @@
       "manifestSourcePage": 18,
       "ocrPage": 17,
       "ocrText": "Pistol Squat",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/pistol-squat.jpg",
       "box": {
         "left": 36,
@@ -2030,7 +1680,7 @@
       "manifestSourcePage": 18,
       "ocrPage": 17,
       "ocrText": "Plank",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/plank.jpg",
       "box": {
         "left": 36,
@@ -2044,7 +1694,7 @@
       "manifestSourcePage": 18,
       "ocrPage": 17,
       "ocrText": "Power Clean",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/power-clean.jpg",
       "box": {
         "left": 36,
@@ -2058,7 +1708,7 @@
       "manifestSourcePage": 18,
       "ocrPage": 17,
       "ocrText": "Power Snatch (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/power-snatch-barbell.jpg",
       "box": {
         "left": 36,
@@ -2072,7 +1722,7 @@
       "manifestSourcePage": 18,
       "ocrPage": 17,
       "ocrText": "Preacher Curl (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/preacher-curl-barbell.jpg",
       "box": {
         "left": 36,
@@ -2086,7 +1736,7 @@
       "manifestSourcePage": 18,
       "ocrPage": 17,
       "ocrText": "Preacher Curl (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/preacher-curl-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -2100,7 +1750,7 @@
       "manifestSourcePage": 19,
       "ocrPage": 19,
       "ocrText": "Press Under (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/press-under-barbell.jpg",
       "box": {
         "left": 36,
@@ -2114,7 +1764,7 @@
       "manifestSourcePage": 19,
       "ocrPage": 19,
       "ocrText": "Pull Up",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/pull-up.jpg",
       "box": {
         "left": 36,
@@ -2128,7 +1778,7 @@
       "manifestSourcePage": 19,
       "ocrPage": 19,
       "ocrText": "Pull Up (Assisted)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/pull-up-assisted.jpg",
       "box": {
         "left": 36,
@@ -2142,7 +1792,7 @@
       "manifestSourcePage": 19,
       "ocrPage": 19,
       "ocrText": "Pull Up (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/pull-up-band.jpg",
       "box": {
         "left": 36,
@@ -2156,7 +1806,7 @@
       "manifestSourcePage": 19,
       "ocrPage": 19,
       "ocrText": "Pullover (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/pullover-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -2170,7 +1820,7 @@
       "manifestSourcePage": 19,
       "ocrPage": 19,
       "ocrText": "Pullover (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/pullover-machine.jpg",
       "box": {
         "left": 36,
@@ -2184,7 +1834,7 @@
       "manifestSourcePage": 19,
       "ocrPage": 19,
       "ocrText": "Push Press",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/push-press.jpg",
       "box": {
         "left": 36,
@@ -2198,7 +1848,7 @@
       "manifestSourcePage": 19,
       "ocrPage": 19,
       "ocrText": "Push Up",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/push-up.jpg",
       "box": {
         "left": 36,
@@ -2212,7 +1862,7 @@
       "manifestSourcePage": 20,
       "ocrPage": 20,
       "ocrText": "Push Up (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/push-up-band.jpg",
       "box": {
         "left": 36,
@@ -2226,7 +1876,7 @@
       "manifestSourcePage": 20,
       "ocrPage": 20,
       "ocrText": "Push Up (Knees)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/push-up-knees.jpg",
       "box": {
         "left": 36,
@@ -2240,7 +1890,7 @@
       "manifestSourcePage": 20,
       "ocrPage": 20,
       "ocrText": "Rack Pull (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/rack-pull-barbell.jpg",
       "box": {
         "left": 36,
@@ -2254,7 +1904,7 @@
       "manifestSourcePage": 20,
       "ocrPage": 20,
       "ocrText": "Reverse Crunch",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/reverse-crunch.jpg",
       "box": {
         "left": 36,
@@ -2268,7 +1918,7 @@
       "manifestSourcePage": 20,
       "ocrPage": 20,
       "ocrText": "Reverse Curl (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/reverse-curl-band.jpg",
       "box": {
         "left": 36,
@@ -2282,7 +1932,7 @@
       "manifestSourcePage": 20,
       "ocrPage": 20,
       "ocrText": "Reverse Curl (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/reverse-curl-barbell.jpg",
       "box": {
         "left": 36,
@@ -2296,7 +1946,7 @@
       "manifestSourcePage": 20,
       "ocrPage": 20,
       "ocrText": "Reverse Curl (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/reverse-curl-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -2310,7 +1960,7 @@
       "manifestSourcePage": 20,
       "ocrPage": 20,
       "ocrText": "Reverse Fly (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/reverse-fly-cable.jpg",
       "box": {
         "left": 36,
@@ -2324,7 +1974,7 @@
       "manifestSourcePage": 21,
       "ocrPage": 21,
       "ocrText": "Reverse Fly (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/reverse-fly-dumbbell.jpg",
       "box": {
         "left": 26,
@@ -2338,7 +1988,7 @@
       "manifestSourcePage": 21,
       "ocrPage": 21,
       "ocrText": "Reverse Fly (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/reverse-fly-machine.jpg",
       "box": {
         "left": 26,
@@ -2366,7 +2016,7 @@
       "manifestSourcePage": 21,
       "ocrPage": 21,
       "ocrText": "Reverse Plank",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/reverse-plank.jpg",
       "box": {
         "left": 26,
@@ -2380,7 +2030,7 @@
       "manifestSourcePage": 21,
       "ocrPage": 21,
       "ocrText": "Romanian Deadlift (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/romanian-deadlift-barbell.jpg",
       "box": {
         "left": 26,
@@ -2394,7 +2044,7 @@
       "manifestSourcePage": 21,
       "ocrPage": 21,
       "ocrText": "Romanian Deadlift (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/romanian-deadlift-dumbbell.jpg",
       "box": {
         "left": 26,
@@ -2408,7 +2058,7 @@
       "manifestSourcePage": 21,
       "ocrPage": 21,
       "ocrText": "Rowing (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/rowing-machine.jpg",
       "box": {
         "left": 26,
@@ -2422,7 +2072,7 @@
       "manifestSourcePage": 21,
       "ocrPage": 21,
       "ocrText": "Running",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/running.jpg",
       "box": {
         "left": 26,
@@ -2436,7 +2086,7 @@
       "manifestSourcePage": 21,
       "ocrPage": 21,
       "ocrText": "Running (Treadmill)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/running-treadmill.jpg",
       "box": {
         "left": 24,
@@ -2450,7 +2100,7 @@
       "manifestSourcePage": 22,
       "ocrPage": 22,
       "ocrText": "Russian Twist",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/russian-twist.jpg",
       "box": {
         "left": 26,
@@ -2464,7 +2114,7 @@
       "manifestSourcePage": 22,
       "ocrPage": 22,
       "ocrText": "Seated Calf Raise (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/seated-calf-raise-machine.jpg",
       "box": {
         "left": 24,
@@ -2478,7 +2128,7 @@
       "manifestSourcePage": 22,
       "ocrPage": 22,
       "ocrText": "Seated Calf Raise (Plate Loaded)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/seated-calf-raise-plate-loaded.jpg",
       "box": {
         "left": 26,
@@ -2492,7 +2142,7 @@
       "manifestSourcePage": 22,
       "ocrPage": 22,
       "ocrText": "Seated Leg Curl (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/seated-leg-curl-machine.jpg",
       "box": {
         "left": 24,
@@ -2506,7 +2156,7 @@
       "manifestSourcePage": 22,
       "ocrPage": 22,
       "ocrText": "Seated Leg Press (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/seated-leg-press-machine.jpg",
       "box": {
         "left": 26,
@@ -2520,7 +2170,7 @@
       "manifestSourcePage": 22,
       "ocrPage": 22,
       "ocrText": "Seated Overhead Press (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/seated-overhead-press-barbell.jpg",
       "box": {
         "left": 24,
@@ -2534,7 +2184,7 @@
       "manifestSourcePage": 22,
       "ocrPage": 22,
       "ocrText": "Seated Overhead Press (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/seated-overhead-press-dumbbell.jpg",
       "box": {
         "left": 26,
@@ -2548,7 +2198,7 @@
       "manifestSourcePage": 22,
       "ocrPage": 22,
       "ocrText": "Seated Palms Up Wrist Curl (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/seated-palms-up-wrist-curl-dumbbell.jpg",
       "box": {
         "left": 24,
@@ -2562,7 +2212,7 @@
       "manifestSourcePage": 23,
       "ocrPage": 23,
       "ocrText": "Side Bend (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/side-bend-band.jpg",
       "box": {
         "left": 36,
@@ -2576,7 +2226,7 @@
       "manifestSourcePage": 23,
       "ocrPage": 23,
       "ocrText": "Side Bend (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/side-bend-cable.jpg",
       "box": {
         "left": 36,
@@ -2590,7 +2240,7 @@
       "manifestSourcePage": 23,
       "ocrPage": 23,
       "ocrText": "Side Bend (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/side-bend-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -2604,7 +2254,7 @@
       "manifestSourcePage": 23,
       "ocrPage": 23,
       "ocrText": "Side Plank",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/side-plank.jpg",
       "box": {
         "left": 36,
@@ -2618,7 +2268,7 @@
       "manifestSourcePage": 23,
       "ocrPage": 23,
       "ocrText": "Single Leg Bridge",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/single-leg-bridge.jpg",
       "box": {
         "left": 36,
@@ -2632,7 +2282,7 @@
       "manifestSourcePage": 23,
       "ocrPage": 23,
       "ocrText": "Sit Up",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/sit-up.jpg",
       "box": {
         "left": 36,
@@ -2646,7 +2296,7 @@
       "manifestSourcePage": 23,
       "ocrPage": 23,
       "ocrText": "Skating",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/skating.jpg",
       "box": {
         "left": 36,
@@ -2660,7 +2310,7 @@
       "manifestSourcePage": 23,
       "ocrPage": 23,
       "ocrText": "Skiing",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/skiing.jpg",
       "box": {
         "left": 33,
@@ -2674,7 +2324,7 @@
       "manifestSourcePage": 23,
       "ocrPage": 23,
       "ocrText": "Skullcrusher (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/skullcrusher-barbell.jpg",
       "box": {
         "left": 33,
@@ -2688,7 +2338,7 @@
       "manifestSourcePage": 24,
       "ocrPage": 24,
       "ocrText": "Seated Row (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/seated-row-cable.jpg",
       "box": {
         "left": 24,
@@ -2702,7 +2352,7 @@
       "manifestSourcePage": 24,
       "ocrPage": 24,
       "ocrText": "Seated Wide-Grip Row (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/seated-wide-grip-row-cable.jpg",
       "box": {
         "left": 26,
@@ -2716,7 +2366,7 @@
       "manifestSourcePage": 24,
       "ocrPage": 24,
       "ocrText": "Shoulder Press (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/shoulder-press-machine.jpg",
       "box": {
         "left": 24,
@@ -2730,7 +2380,7 @@
       "manifestSourcePage": 24,
       "ocrPage": 24,
       "ocrText": "Shoulder Press (Plate Loaded)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/shoulder-press-plate-loaded.jpg",
       "box": {
         "left": 24,
@@ -2744,7 +2394,7 @@
       "manifestSourcePage": 24,
       "ocrPage": 24,
       "ocrText": "Shrug (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/shrug-barbell.jpg",
       "box": {
         "left": 24,
@@ -2758,7 +2408,7 @@
       "manifestSourcePage": 24,
       "ocrPage": 24,
       "ocrText": "Shrug (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/shrug-dumbbell.jpg",
       "box": {
         "left": 24,
@@ -2772,7 +2422,7 @@
       "manifestSourcePage": 24,
       "ocrPage": 24,
       "ocrText": "Shrug (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/shrug-machine.jpg",
       "box": {
         "left": 24,
@@ -2786,7 +2436,7 @@
       "manifestSourcePage": 24,
       "ocrPage": 24,
       "ocrText": "Shrug (Smith Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/shrug-smith-machine.jpg",
       "box": {
         "left": 24,
@@ -2800,7 +2450,7 @@
       "manifestSourcePage": 25,
       "ocrPage": 25,
       "ocrText": "Skullcrusher (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/skullcrusher-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -2814,7 +2464,7 @@
       "manifestSourcePage": 25,
       "ocrPage": 25,
       "ocrText": "Snatch (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/snatch-barbell.jpg",
       "box": {
         "left": 36,
@@ -2828,7 +2478,7 @@
       "manifestSourcePage": 25,
       "ocrPage": 25,
       "ocrText": "Snatch Pull (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/snatch-pull-barbell.jpg",
       "box": {
         "left": 36,
@@ -2842,7 +2492,7 @@
       "manifestSourcePage": 25,
       "ocrPage": 25,
       "ocrText": "Snowboarding",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/snowboarding.jpg",
       "box": {
         "left": 36,
@@ -2856,7 +2506,7 @@
       "manifestSourcePage": 25,
       "ocrPage": 25,
       "ocrText": "Split Jerk (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/split-jerk-barbell.jpg",
       "box": {
         "left": 36,
@@ -2870,7 +2520,7 @@
       "manifestSourcePage": 25,
       "ocrPage": 25,
       "ocrText": "Squat (Band)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/squat-band.jpg",
       "box": {
         "left": 36,
@@ -2884,7 +2534,7 @@
       "manifestSourcePage": 25,
       "ocrPage": 25,
       "ocrText": "Squat (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/squat-barbell.jpg",
       "box": {
         "left": 36,
@@ -2898,7 +2548,7 @@
       "manifestSourcePage": 25,
       "ocrPage": 25,
       "ocrText": "Squat (Bodyweight)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/squat-bodyweight.jpg",
       "box": {
         "left": 36,
@@ -2912,7 +2562,7 @@
       "manifestSourcePage": 25,
       "ocrPage": 25,
       "ocrText": "Squat (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/squat-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -2926,7 +2576,7 @@
       "manifestSourcePage": 26,
       "ocrPage": 26,
       "ocrText": "Stiff Leg Deadlift (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/stiff-leg-deadlift-barbell.jpg",
       "box": {
         "left": 36,
@@ -2940,25 +2590,11 @@
       "manifestSourcePage": 26,
       "ocrPage": 26,
       "ocrText": "Stiff Leg Deadlift (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/stiff-leg-deadlift-dumbbell.jpg",
       "box": {
         "left": 36,
         "top": 583,
-        "size": 96
-      }
-    },
-    {
-      "slug": "straight-leg-deadlift-band",
-      "name": "Straight Leg Deadlift (Band)",
-      "manifestSourcePage": 26,
-      "ocrPage": 26,
-      "ocrText": "Straight Leg Deadlift (Band)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/straight-leg-deadlift-band.jpg",
-      "box": {
-        "left": 36,
-        "top": 713,
         "size": 96
       }
     },
@@ -2968,7 +2604,7 @@
       "manifestSourcePage": 26,
       "ocrPage": 26,
       "ocrText": "Stretching",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/stretching.jpg",
       "box": {
         "left": 36,
@@ -2982,7 +2618,7 @@
       "manifestSourcePage": 26,
       "ocrPage": 26,
       "ocrText": "Strict Military Press (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/strict-military-press-barbell.jpg",
       "box": {
         "left": 33,
@@ -2996,7 +2632,7 @@
       "manifestSourcePage": 26,
       "ocrPage": 26,
       "ocrText": "Sumo Deadlift (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/sumo-deadlift-barbell.jpg",
       "box": {
         "left": 36,
@@ -3010,25 +2646,11 @@
       "manifestSourcePage": 26,
       "ocrPage": 26,
       "ocrText": "Sumo Deadlift High Pull (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/sumo-deadlift-high-pull-barbell.jpg",
       "box": {
         "left": 36,
         "top": 1228,
-        "size": 96
-      }
-    },
-    {
-      "slug": "superman",
-      "name": "Superman",
-      "manifestSourcePage": 26,
-      "ocrPage": 26,
-      "ocrText": "Superman",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/superman.jpg",
-      "box": {
-        "left": 35,
-        "top": 1359,
         "size": 96
       }
     },
@@ -3038,7 +2660,7 @@
       "manifestSourcePage": 26,
       "ocrPage": 26,
       "ocrText": "Swimming",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/swimming.jpg",
       "box": {
         "left": 36,
@@ -3052,7 +2674,7 @@
       "manifestSourcePage": 27,
       "ocrPage": 27,
       "ocrText": "Squat (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/squat-machine.jpg",
       "box": {
         "left": 24,
@@ -3066,25 +2688,11 @@
       "manifestSourcePage": 27,
       "ocrPage": 27,
       "ocrText": "Squat (Smith Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/squat-smith-machine.jpg",
       "box": {
         "left": 26,
         "top": 454,
-        "size": 77
-      }
-    },
-    {
-      "slug": "squat-row-band",
-      "name": "Squat Row (Band)",
-      "manifestSourcePage": 27,
-      "ocrPage": 27,
-      "ocrText": "Squat Row (Band)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/squat-row-band.jpg",
-      "box": {
-        "left": 24,
-        "top": 559,
         "size": 77
       }
     },
@@ -3094,25 +2702,11 @@
       "manifestSourcePage": 27,
       "ocrPage": 27,
       "ocrText": "Standing Calf Raise (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/standing-calf-raise-barbell.jpg",
       "box": {
         "left": 24,
         "top": 661,
-        "size": 77
-      }
-    },
-    {
-      "slug": "standing-calf-raise-bodyweight",
-      "name": "Standing Calf Raise (Bodyweight)",
-      "manifestSourcePage": 27,
-      "ocrPage": 27,
-      "ocrText": "Standing Calf Raise (Bodyweight)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/standing-calf-raise-bodyweight.jpg",
-      "box": {
-        "left": 26,
-        "top": 762,
         "size": 77
       }
     },
@@ -3122,7 +2716,7 @@
       "manifestSourcePage": 27,
       "ocrPage": 27,
       "ocrText": "Standing Calf Raise (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/standing-calf-raise-dumbbell.jpg",
       "box": {
         "left": 26,
@@ -3136,7 +2730,7 @@
       "manifestSourcePage": 27,
       "ocrPage": 27,
       "ocrText": "Standing Calf Raise (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/standing-calf-raise-machine.jpg",
       "box": {
         "left": 24,
@@ -3150,25 +2744,11 @@
       "manifestSourcePage": 27,
       "ocrPage": 27,
       "ocrText": "Standing Calf Raise (Smith Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/standing-calf-raise-smith-machine.jpg",
       "box": {
         "left": 24,
         "top": 1070,
-        "size": 77
-      }
-    },
-    {
-      "slug": "step-up",
-      "name": "Step-up",
-      "manifestSourcePage": 27,
-      "ocrPage": 27,
-      "ocrText": "Step-up",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/step-up.jpg",
-      "box": {
-        "left": 23,
-        "top": 1174,
         "size": 77
       }
     },
@@ -3178,53 +2758,11 @@
       "manifestSourcePage": 28,
       "ocrPage": 28,
       "ocrText": "T Bar Row",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/t-bar-row.jpg",
       "box": {
         "left": 36,
         "top": 444,
-        "size": 96
-      }
-    },
-    {
-      "slug": "thruster-barbell",
-      "name": "Thruster (Barbell)",
-      "manifestSourcePage": 28,
-      "ocrPage": 28,
-      "ocrText": "Thruster (Barbell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/thruster-barbell.jpg",
-      "box": {
-        "left": 36,
-        "top": 574,
-        "size": 96
-      }
-    },
-    {
-      "slug": "thruster-kettlebell",
-      "name": "Thruster (Kettlebell)",
-      "manifestSourcePage": 28,
-      "ocrPage": 28,
-      "ocrText": "Thruster (Kettlebell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/thruster-kettlebell.jpg",
-      "box": {
-        "left": 36,
-        "top": 702,
-        "size": 96
-      }
-    },
-    {
-      "slug": "toes-to-bar",
-      "name": "Toes To Bar",
-      "manifestSourcePage": 28,
-      "ocrPage": 28,
-      "ocrText": "Toes To Bar",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/toes-to-bar.jpg",
-      "box": {
-        "left": 36,
-        "top": 831,
         "size": 96
       }
     },
@@ -3234,7 +2772,7 @@
       "manifestSourcePage": 28,
       "ocrPage": 28,
       "ocrText": "Torso Rotation (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/torso-rotation-machine.jpg",
       "box": {
         "left": 36,
@@ -3248,7 +2786,7 @@
       "manifestSourcePage": 28,
       "ocrPage": 28,
       "ocrText": "Trap Bar Deadlift",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/trap-bar-deadlift.jpg",
       "box": {
         "left": 36,
@@ -3262,7 +2800,7 @@
       "manifestSourcePage": 28,
       "ocrPage": 28,
       "ocrText": "Triceps Dip",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/triceps-dip.jpg",
       "box": {
         "left": 36,
@@ -3276,7 +2814,7 @@
       "manifestSourcePage": 28,
       "ocrPage": 28,
       "ocrText": "Triceps Dip (Assisted)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/triceps-dip-assisted.jpg",
       "box": {
         "left": 36,
@@ -3290,25 +2828,11 @@
       "manifestSourcePage": 28,
       "ocrPage": 28,
       "ocrText": "Triceps Extension",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/triceps-extension.jpg",
       "box": {
         "left": 36,
         "top": 1476,
-        "size": 96
-      }
-    },
-    {
-      "slug": "v-up",
-      "name": "V Up",
-      "manifestSourcePage": 29,
-      "ocrPage": 29,
-      "ocrText": "V Up",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/v-up.jpg",
-      "box": {
-        "left": 33,
-        "top": 440,
         "size": 96
       }
     },
@@ -3318,7 +2842,7 @@
       "manifestSourcePage": 29,
       "ocrPage": 29,
       "ocrText": "Walking",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/walking.jpg",
       "box": {
         "left": 36,
@@ -3332,7 +2856,7 @@
       "manifestSourcePage": 29,
       "ocrPage": 29,
       "ocrText": "Wide Pull Up",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/wide-pull-up.jpg",
       "box": {
         "left": 36,
@@ -3346,7 +2870,7 @@
       "manifestSourcePage": 29,
       "ocrPage": 29,
       "ocrText": "Wrist Roller",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/wrist-roller.jpg",
       "box": {
         "left": 33,
@@ -3360,25 +2884,11 @@
       "manifestSourcePage": 29,
       "ocrPage": 29,
       "ocrText": "Yoga",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/yoga.jpg",
       "box": {
         "left": 36,
         "top": 1090,
-        "size": 96
-      }
-    },
-    {
-      "slug": "zercher-squat-barbell",
-      "name": "Zercher Squat (Barbell)",
-      "manifestSourcePage": 29,
-      "ocrPage": 29,
-      "ocrText": "Zercher Squat (Barbell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/zercher-squat-barbell.jpg",
-      "box": {
-        "left": 36,
-        "top": 1288,
         "size": 96
       }
     },
@@ -3388,7 +2898,7 @@
       "manifestSourcePage": 29,
       "ocrPage": 29,
       "ocrText": "tricep extension (machine w/ pad)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/tricep-extension-machine-w-pad.jpg",
       "box": {
         "left": 33,
@@ -3402,7 +2912,7 @@
       "manifestSourcePage": 30,
       "ocrPage": 30,
       "ocrText": "Triceps Extension (Barbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/triceps-extension-barbell.jpg",
       "box": {
         "left": 36,
@@ -3416,7 +2926,7 @@
       "manifestSourcePage": 30,
       "ocrPage": 30,
       "ocrText": "Triceps Extension (Cable)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/triceps-extension-cable.jpg",
       "box": {
         "left": 36,
@@ -3430,7 +2940,7 @@
       "manifestSourcePage": 30,
       "ocrPage": 30,
       "ocrText": "Triceps Extension (Dumbbell)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/triceps-extension-dumbbell.jpg",
       "box": {
         "left": 36,
@@ -3444,7 +2954,7 @@
       "manifestSourcePage": 30,
       "ocrPage": 30,
       "ocrText": "Triceps Extension (Machine)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/triceps-extension-machine.jpg",
       "box": {
         "left": 36,
@@ -3458,53 +2968,11 @@
       "manifestSourcePage": 30,
       "ocrPage": 30,
       "ocrText": "Triceps Pushdown (Cable - Straight Bar)",
-      "matchRatio": 1.0,
+      "matchRatio": 1,
       "crop": "tmp/pdfs/aloo-exercises/cropped-icons/triceps-pushdown-cable-straight-bar.jpg",
       "box": {
         "left": 36,
         "top": 959,
-        "size": 96
-      }
-    },
-    {
-      "slug": "upright-row-barbell",
-      "name": "Upright Row (Barbell)",
-      "manifestSourcePage": 30,
-      "ocrPage": 30,
-      "ocrText": "Upright Row (Barbell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/upright-row-barbell.jpg",
-      "box": {
-        "left": 36,
-        "top": 1157,
-        "size": 96
-      }
-    },
-    {
-      "slug": "upright-row-cable",
-      "name": "Upright Row (Cable)",
-      "manifestSourcePage": 30,
-      "ocrPage": 30,
-      "ocrText": "Upright Row (Cable)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/upright-row-cable.jpg",
-      "box": {
-        "left": 36,
-        "top": 1285,
-        "size": 96
-      }
-    },
-    {
-      "slug": "upright-row-dumbbell",
-      "name": "Upright Row (Dumbbell)",
-      "manifestSourcePage": 30,
-      "ocrPage": 30,
-      "ocrText": "Upright Row (Dumbbell)",
-      "matchRatio": 1.0,
-      "crop": "tmp/pdfs/aloo-exercises/cropped-icons/upright-row-dumbbell.jpg",
-      "box": {
-        "left": 36,
-        "top": 1413,
         "size": 96
       }
     }

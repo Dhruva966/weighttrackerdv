@@ -113,7 +113,6 @@ export const starterExercises: Exercise[] = [
   exercise('low-row-machine', 'Low Row Machine', 'back', 'machine'),
   exercise('bench-press-smith-machine', 'Bench Press (Smith Machine)', 'chest', 'machine', ['triceps']),
   exercise('back-extension', 'Back Extension', 'back', 'bodyweight'),
-  exercise('abs-home', 'Abs Home', 'core', 'other'),
   exercise('tricep-extension-home', 'Tricep Extension Home', 'triceps', 'other'),
 ];
 
@@ -190,7 +189,6 @@ const baselineRows: Array<{ slug: string; weightLb: number; reps?: number; progr
   { slug: 'low-row-machine', weightLb: 75 },
   { slug: 'bench-press-smith-machine', weightLb: 175 },
   { slug: 'back-extension', weightLb: 100 },
-  { slug: 'abs-home', weightLb: 48 },
   { slug: 'tricep-extension-home', weightLb: 70 },
 ];
 

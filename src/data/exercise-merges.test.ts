@@ -122,7 +122,13 @@ describe('exercise-merges', () => {
       { id: 'z1', slug: 'zorp-mis-tagged-lift' },
       { id: 'z2', slug: 'zorp-cable-kickback-deluxe' },
       { id: 'd1', slug: 'triceps-extension-cable' },
+      { id: 'd2', slug: 'upright-row-barbell' },
+      { id: 'd3', slug: 'abs-home' },
+      { id: 'keep-row', slug: 'bent-over-row-dumbbell' },
     ]);
-    expect(merged.map((row) => row.slug)).toEqual(['pull-up']);
+    expect(merged.map((row) => row.slug).sort()).toEqual([
+      'bent-over-row-dumbbell',
+      'pull-up',
+    ]);
   });
 });

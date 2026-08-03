@@ -1,7 +1,7 @@
-# Aloo (Weight Tracker PWA)
+# Lift (Weight Tracker PWA)
 
 ## What This Is
-**Aloo** is a single-user, mobile-first PWA for owner Dhruva: body weight, walks/cardio, and gym logging. Soft gold + white chrome; a pot of gold grows with consistency (`goldDays`). Food, meal, macro, and calorie UI is archived under `archive/food/` for a later pass. Supabase backs gym data; weight/walks are local-first Zustand until synced. Works from iPhone Safari / PWA; Capacitor later.
+**Lift** is a single-user, mobile-first PWA for owner Dhruva: body weight, walks/cardio, and gym logging. Soft gold + white chrome; a pot of gold grows with consistency (`goldDays`). Food, meal, macro, and calorie UI is archived under `archive/food/` for a later pass. Supabase backs gym data; weight/walks are local-first Zustand until synced. Works from iPhone Safari / PWA; Capacitor later.
 
 ## Tech Stack
 | Layer | Technology |

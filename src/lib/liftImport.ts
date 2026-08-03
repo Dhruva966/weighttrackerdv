@@ -569,8 +569,18 @@ function exerciseNamesMatch(left: string, right: string): boolean {
   return leftSlug === rightSlug || leftSlug.includes(rightSlug) || rightSlug.includes(leftSlug);
 }
 
+/** One parsed set — lift (weight+reps) and/or cardio/duration fields. */
+export type ParsedExerciseSet = {
+  weightLb: number;
+  reps: number;
+  level?: number;
+  speed?: number;
+  durationSec?: number;
+  calories?: number;
+};
+
 export type ParsedExerciseLog = {
-  sets: Array<{ weightLb: number; reps: number }>;
+  sets: ParsedExerciseSet[];
   notes: string[];
 };
 
