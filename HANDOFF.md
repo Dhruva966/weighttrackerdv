@@ -32,7 +32,7 @@ Canonical board→PDF slug collapses (`EXERCISE_MERGES` / `canonicalExerciseSlug
 
 **Round 7 (2026-08-02):** gap-filled 15 canonical survivors whose crop lived under a merged-from / sibling slug (e.g. `close-grip-pulldown`←`lat-pulldown-underhand-cable`, `squat-curved-stand`←`squat-machine`, `seated-calf-raise-machine`←`seated-calf-raise-plate-loaded`, shoulder/lateral aliases, letter-tile→nearest real crop for walking/hiking/yoga/GHR/etc.). Hard-deleted leftover junk (`mis-tagged-row`, `photo-keep`, `zorp-*`). Board-only starter aliases (Forearm Curl, rope triceps, trap/low rows, etc.) map to nearest Strong crops in `pdfIconSlugs` so Library UI is not name-only. Unavoidable No-photo leftover historically: Swimming. Skating + Skiing hard-deleted in round 8 (0 sets/templates) and added to EXERCISE_HARD_DELETES.
 
-**Round 8 (2026-08-03):** hard-deleted `skating` and `skiing` from live `exercises` (cardio/other, 0 sets / 0 template links). Added both to `EXERCISE_HARD_DELETES` and stripped from `pdf-exercise-manifest.json` / `pdf-icon-pairs.json` so letter-tile seeds cannot resurrect them.
+**Round 8 (2026-08-03):** hard-deleted `skating` and `skiing` from live `exercises` (cardio/other, 0 sets / 0 template links). Added both to `EXERCISE_HARD_DELETES` and stripped from `pdf-exercise-manifest.json` / `pdf-icon-pairs.json` so letter-tile seeds cannot resurrect them. Also gap-filled live `cable-curl` ← `bicep-curl-cable` so Library has an image_url; Swimming remains the only intentional name-only active row (letter tile, no hollow crop).
 
 ### Gym (Supabase / workoutStore)
 | Contract | Notes |
