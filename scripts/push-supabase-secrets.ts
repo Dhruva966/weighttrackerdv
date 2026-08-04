@@ -34,6 +34,7 @@ async function main() {
   const groqKey = process.env.GROQ_API_KEY ?? process.env.VITE_GROQ_API_KEY;
   const liftMcpToken = process.env.LIFT_MCP_TOKEN;
   const liftMcpWrites = process.env.LIFT_MCP_WRITES_ENABLED;
+  const liftMcpPublicUrl = process.env.LIFT_MCP_PUBLIC_URL;
 
   if (!anthropicKey && !groqKey && !liftMcpToken) {
     throw new Error(
@@ -54,6 +55,9 @@ async function main() {
   if (liftMcpWrites === 'true' || liftMcpWrites === 'false') {
     pairs.push(`LIFT_MCP_WRITES_ENABLED="${quote(liftMcpWrites)}"`);
   }
+  if (liftMcpPublicUrl) {
+    pairs.push(`LIFT_MCP_PUBLIC_URL="${quote(liftMcpPublicUrl)}"`);
+  }
 
   const command = `npx --yes supabase@latest secrets set ${pairs.join(' ')} --project-ref "${projectRef}"`;
   execSync(command, { stdio: 'inherit' });
@@ -69,6 +73,9 @@ async function main() {
   }
   if (liftMcpWrites === 'true' || liftMcpWrites === 'false') {
     console.log(`ok pushed LIFT_MCP_WRITES_ENABLED=${liftMcpWrites}`);
+  }
+  if (liftMcpPublicUrl) {
+    console.log('ok pushed LIFT_MCP_PUBLIC_URL');
   }
   console.log('next: deploy the function with `pnpm supabase:deploy-functions`');
 }

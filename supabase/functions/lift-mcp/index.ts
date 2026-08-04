@@ -3,6 +3,12 @@ import { McpServer } from 'npm:@modelcontextprotocol/sdk@1.25.3/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from 'npm:@modelcontextprotocol/sdk@1.25.3/server/webStandardStreamableHttp.js';
 import { Hono } from 'npm:hono@4.9.7';
 import { z } from 'npm:zod@4.1.13';
+import {
+  corsHeaders as oauthCorsHeaders,
+  isAuthorized,
+  mountOauthRoutes,
+  unauthorizedMcp,
+} from './oauth.ts';
 
 /** Keep in sync with src/lib/user.ts */
 const USER_ID = 'de3c1f99-a64b-46c4-9f46-6afcc6d17f70';
@@ -70,13 +76,7 @@ function rankExerciseMatches(query: string, exercises: RankedExercise[]): Ranked
     .map((s) => s.ex);
 }
 
-const corsHeaders: Record<string, string> = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'authorization, x-api-key, x-auth-token, content-type, accept, mcp-protocol-version, mcp-session-id, last-event-id',
-  'Access-Control-Expose-Headers': 'mcp-session-id',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, DELETE',
-};
+const corsHeaders: Record<string, string> = oauthCorsHeaders();
 
 function jsonText(data: unknown): { content: Array<{ type: 'text'; text: string }> } {
   return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
@@ -88,37 +88,6 @@ function errorText(message: string): { content: Array<{ type: 'text'; text: stri
 
 function writesEnabled(): boolean {
   return Deno.env.get('LIFT_MCP_WRITES_ENABLED') === 'true';
-}
-
-function assertBearer(req: Request): Response | null {
-  const expected = Deno.env.get('LIFT_MCP_TOKEN');
-  if (!expected) {
-    return new Response(JSON.stringify({ error: 'LIFT_MCP_TOKEN is not configured' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
-  const header = req.headers.get('authorization') ?? req.headers.get('Authorization') ?? '';
-  const alt =
-    req.headers.get('x-api-key') ??
-    req.headers.get('x-auth-token') ??
-    '';
-
-  const ok =
-    header === `Bearer ${expected}` ||
-    header === expected ||
-    alt === expected ||
-    alt === `Bearer ${expected}`;
-
-  if (!ok) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json', 'WWW-Authenticate': 'Bearer' },
-    });
-  }
-
-  return null;
 }
 
 function supabaseAdmin(): SupabaseClient {
@@ -579,15 +548,19 @@ mcpApp.get('/health', (c) =>
       ok: true,
       name: 'lift-mcp',
       writesEnabled: writesEnabled(),
+      auth: 'oauth+bearer',
     },
     200,
     corsHeaders,
   ),
 );
 
+mountOauthRoutes(mcpApp);
+
 mcpApp.all('/*', async (c) => {
-  const unauthorized = assertBearer(c.req.raw);
-  if (unauthorized) return unauthorized;
+  if (!(await isAuthorized(c.req.raw))) {
+    return unauthorizedMcp(c.req.raw);
+  }
 
   try {
     const db = supabaseAdmin();
@@ -597,7 +570,6 @@ mcpApp.all('/*', async (c) => {
     });
     await server.connect(transport);
     const response = await transport.handleRequest(c.req.raw);
-    // Ensure CORS on MCP responses for Inspector
     const headers = new Headers(response.headers);
     for (const [k, v] of Object.entries(corsHeaders)) headers.set(k, v);
     return new Response(response.body, { status: response.status, headers });

@@ -86,25 +86,32 @@ Or manually in the Supabase dashboard: **Project Settings → Edge Functions →
 ### Lift remote MCP (`lift-mcp`)
 Claude custom connector for coach-style Q&A over gym data (sessions/sets/PRs). Not an in-app chatbot.
 
+**Claude connector URL (use this):** `https://weighttrackerdv.vercel.app/api/lift-mcp`
+
+Do **not** point Claude at the raw Supabase function URL. Supabase’s gateway returns `401` on Claude’s `/.well-known/.../functions/v1/lift-mcp` discovery probe, which breaks Connect with “Couldn't register with Lift's sign-in service.” The Vercel route proxies MCP and injects `LIFT_MCP_TOKEN`; `vercel.json` 404s well-known discovery so Claude treats the connector as public.
+
 1. Add to `.env.local`: `LIFT_MCP_TOKEN` (e.g. `openssl rand -hex 32`) and `LIFT_MCP_WRITES_ENABLED=false`.
 2. Log in to Supabase CLI once: `npx supabase login` (or set `SUPABASE_ACCESS_TOKEN`).
 3. Push secrets: `pnpm supabase:secrets` (pushes `LIFT_MCP_TOKEN` when set).
-4. Deploy: `pnpm supabase:deploy-functions` (deploys `parse-exercise-log` + `lift-mcp` with JWT verify off).
-5. Production URL: `https://<ref>.supabase.co/functions/v1/lift-mcp`
-6. Health: `curl -s https://<ref>.supabase.co/functions/v1/lift-mcp/health`
-7. E2E: `pnpm test:lift-mcp` (set `LIFT_MCP_URL` to override).
-8. In Claude: **Settings → Connectors → Add custom connector** → that URL → Request headers → `authorization` = `Bearer <LIFT_MCP_TOKEN>` (type the word `Bearer`, a space, then the token). Enable the connector per chat via **+ → Connectors**.
+4. Deploy Edge Function: `pnpm supabase:deploy-functions`.
+5. In **Vercel → Project → Settings → Environment Variables**, set:
+   - `LIFT_MCP_TOKEN` = same value as `.env.local`
+   - `LIFT_MCP_UPSTREAM` = `https://svcjdtlmmrisrkjqdsjt.supabase.co/functions/v1/lift-mcp` (optional; this is the default)
+6. Deploy/redeploy the Vercel app so `/api/lift-mcp` is live.
+7. Sanity: `curl -s https://weighttrackerdv.vercel.app/api/lift-mcp/health` → `{"ok":true,...}`
+8. In Claude: remove any old Lift connector → **Add custom connector** → URL `https://weighttrackerdv.vercel.app/api/lift-mcp` → leave OAuth Client ID empty → **Connect** (no authorize popup; should just connect) → enable in chat via **+ → Connectors**.
+
+Edge function direct URL (scripts/E2E only): `https://svcjdtlmmrisrkjqdsjt.supabase.co/functions/v1/lift-mcp`  
+E2E: `LIFT_MCP_URL=https://weighttrackerdv.vercel.app/api/lift-mcp pnpm test:lift-mcp`
 
 **Local verify without deploy** (Deno talks to live Postgres via service role):
 
 ```bash
 pnpm serve:lift-mcp   # http://127.0.0.1:8787
 LIFT_MCP_URL=http://127.0.0.1:8787 pnpm test:lift-mcp
-# optional public tunnel for Claude while iterating:
-# ngrok http 8787
 ```
 
-If Request headers are missing in your Claude UI (beta rollout), use Claude Desktop with a local `mcp-remote` bridge or wait for OAuth — do not put the token in the URL query string.
+Do not put the token in the URL query string.
 
 `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are copied **from** Supabase API settings into Vercel/`.env.local`. They are not stored back into Supabase.
 
@@ -113,9 +120,10 @@ If Request headers are missing in your Claude UI (beta rollout), use Claude Desk
 2. Set framework preset to Vite.
 3. Set build command to `pnpm build`.
 4. Set output directory to `dist`.
-5. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+5. Add `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and for Claude MCP: `LIFT_MCP_TOKEN` (same as Supabase secret). Optional: `LIFT_MCP_UPSTREAM`.
 6. Enable auto-deploy from `main`.
 7. Production URL: **https://weighttrackerdv.vercel.app** (confirm in Vercel project domains if renamed).
+8. Claude connector path: **https://weighttrackerdv.vercel.app/api/lift-mcp**
 
 ## Runbook
 | Symptom | Check | Fix |
