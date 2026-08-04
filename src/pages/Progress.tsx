@@ -79,17 +79,20 @@ export function Progress() {
           <div>
             <h2 className="text-xl font-medium text-fg">Lift progress</h2>
           </div>
-          <select
-            className="field sm:max-w-xs"
-            value={selectedExercise?.id ?? ''}
-            onChange={(event) => setSelectedExerciseId(event.target.value)}
-          >
-            {exercisesWithSets.map((exercise) => (
-              <option key={exercise.id} value={exercise.id}>
-                {exercise.name}
-              </option>
-            ))}
-          </select>
+          {exercisesWithSets.length > 0 ? (
+            <select
+              className="field sm:max-w-xs"
+              value={selectedExercise?.id ?? ''}
+              onChange={(event) => setSelectedExerciseId(event.target.value)}
+              aria-label="Exercise for progress chart"
+            >
+              {exercisesWithSets.map((exercise) => (
+                <option key={exercise.id} value={exercise.id}>
+                  {exercise.name}
+                </option>
+              ))}
+            </select>
+          ) : null}
         </div>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -156,6 +159,7 @@ export function Progress() {
         <button
           className="button-primary"
           type="button"
+          disabled={!dumpText.trim()}
           onClick={() => {
             const result = importLiftDump(dumpText);
             if (result.imported > 0 && result.notes > 0) {

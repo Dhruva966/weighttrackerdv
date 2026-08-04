@@ -88,4 +88,27 @@ describe('DayWorkoutPanel', () => {
     expect(links).toHaveLength(1);
     expect(links[0]).toHaveAttribute('href', '/session/s1');
   });
+
+  it('shows the selected calendar day label without timezone shift', () => {
+    renderPanel('2026-08-03', null);
+
+    expect(screen.getByRole('heading', { name: 'Monday, August 3' })).toBeInTheDocument();
+  });
+
+  it('shows empty pick-a-day state when nothing is selected', () => {
+    renderPanel(null, null);
+
+    expect(screen.getByRole('heading', { name: /pick a day/i })).toBeInTheDocument();
+    expect(screen.getByText(/select a day on the calendar/i)).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /log workout/i })).not.toBeInTheDocument();
+  });
+
+  it('passes the selected day key through Log workout unchanged', () => {
+    renderPanel('2026-08-03', null);
+
+    expect(screen.getByRole('link', { name: /log workout/i })).toHaveAttribute(
+      'href',
+      '/session/new?date=2026-08-03',
+    );
+  });
 });

@@ -23,7 +23,7 @@ export function TodayWorkoutBanner({ openSession }: TodayWorkoutBannerProps) {
       <Link
         className="grid min-h-9 gap-1.5 rounded-lg border border-accent/30 bg-accentSoft/40 p-4 transition hover:border-accent/50"
         to={`/session/${openSession.id}`}
-        state={{ from: '/today' }}
+        state={{ from: '/move' }}
       >
         <div className="flex items-center justify-between gap-3">
           <p className="font-bold text-fg">Continue today’s workout</p>
@@ -46,7 +46,7 @@ export function TodayWorkoutBanner({ openSession }: TodayWorkoutBannerProps) {
       <Link
         className="button-primary mx-auto inline-flex min-h-9 items-center gap-2"
         to="/session/new"
-        state={{ from: '/today' }}
+        state={{ from: '/move' }}
       >
         <Dumbbell size={16} strokeWidth={1.75} />
         Start empty workout

@@ -309,6 +309,21 @@ describe('calendarDayToStartedAt', () => {
     );
     expect(toDayKey(startedAt, 'America/Los_Angeles')).toBe('2026-11-01');
   });
+
+  it('round-trips east-of-UTC zones (Grow Log workout path — was off-by-one on fixed UTC hours)', () => {
+    const now = new Date('2026-08-04T10:00:00.000Z');
+    for (const timeZone of [
+      'Asia/Hong_Kong',
+      'Asia/Shanghai',
+      'Asia/Tokyo',
+      'Asia/Singapore',
+      'Australia/Sydney',
+      'Pacific/Kiritimati',
+    ]) {
+      const startedAt = calendarDayToStartedAt('2026-08-03', timeZone, now);
+      expect(toDayKey(startedAt, timeZone)).toBe('2026-08-03');
+    }
+  });
 });
 
 describe('toDayKey with a non-LA device timezone', () => {
@@ -458,5 +473,51 @@ describe('findDaySession', () => {
       { timeZone: 'America/Los_Angeles' },
     );
     expect(found?.id).toBe('earlier');
+  });
+
+  it('keeps a localDate-stamped Aug 3 workout on Aug 3 even when startedAt is UTC midnight (LA viewer)', () => {
+    const sessions = [
+      {
+        id: 'arms',
+        startedAt: '2026-08-03T00:00:00.000Z',
+        localDate: '2026-08-03',
+        timezone: 'Asia/Kolkata',
+        notes: 'Arms, Biceps, Core',
+      },
+    ];
+    const sets = [
+      {
+        id: 'set-1',
+        sessionId: 'arms',
+        exerciseId: 'ex-arms',
+        setNumber: 1,
+        weightLb: 40,
+        reps: 12,
+        isPr: false,
+        createdAt: '2026-08-03T01:00:00.000Z',
+      },
+    ];
+    const exercises = [{ id: 'ex-arms', muscleGroup: 'arms' }];
+
+    // Without localDate preference, toDayKey(startedAt) in LA would be Aug 2.
+    expect(toDayKey(sessions[0]!.startedAt, 'America/Los_Angeles')).toBe('2026-08-02');
+
+    expect(
+      summarizeDayWorkout('2026-08-03', sessions, sets, exercises, {
+        timeZone: 'America/Los_Angeles',
+      }),
+    ).toMatchObject({
+      date: '2026-08-03',
+      primarySessionId: 'arms',
+      muscleGroups: ['arms'],
+    });
+    expect(
+      summarizeDayWorkout('2026-08-02', sessions, sets, exercises, {
+        timeZone: 'America/Los_Angeles',
+      }),
+    ).toBeNull();
+    expect(
+      findDaySession('2026-08-03', sessions, { timeZone: 'America/Los_Angeles' })?.id,
+    ).toBe('arms');
   });
 });

@@ -1,14 +1,14 @@
 import { toDayKey } from './calendar';
-import { getDeviceTimeZone } from './local-day';
+import { getDeviceTimeZone, sessionDayKey } from './local-day';
 import type { MovementKind } from './movement-from-text';
-
-export const DAY_WORKOUT_TIMEZONE = getDeviceTimeZone();
 
 export type DayWorkoutSessionInput = {
   id: string;
   startedAt: string;
   endedAt?: string;
   notes?: string;
+  localDate?: string;
+  timezone?: string;
 };
 
 export type DayWorkoutSetInput = {
@@ -157,20 +157,20 @@ function buildSessionBundle(
  * Returns `null` when the day has no gym sessions and no movements
  * (empty calendar cells stay blank — no day spine rows).
  *
- * Day keys use the device's local timezone by default. Any session that started that
- * day counts as gym (open or soft-ended). Session notes come from
- * `sessions.notes` (no day_notes table).
+ * Day keys use getDeviceTimeZone() by default (resolved at call time, not module load).
+ * Any session that started that day counts as gym (open or soft-ended). Session notes
+ * come from `sessions.notes` (no day_notes table).
  */
 export function getDayWorkoutBundle(
   date: string,
   input: GetDayWorkoutBundleInput,
   options: GetDayWorkoutBundleOptions = {},
 ): DayWorkoutBundle | null {
-  const timeZone = options.timeZone ?? DAY_WORKOUT_TIMEZONE;
+  const timeZone = options.timeZone ?? getDeviceTimeZone();
   const exerciseNameById = new Map(input.exercises.map((exercise) => [exercise.id, exercise.name]));
 
   const sessions = input.sessions
-    .filter((session) => toDayKey(session.startedAt, timeZone) === date)
+    .filter((session) => sessionDayKey(session, timeZone) === date)
     .slice()
     .sort((a, b) => a.startedAt.localeCompare(b.startedAt))
     .map((session) => buildSessionBundle(session, input.sets, exerciseNameById));

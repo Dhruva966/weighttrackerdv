@@ -11,6 +11,7 @@ export function ExerciseCreate() {
       title="New Exercise"
       description="Add name, target muscle, equipment, and optional camera photo."
       submitLabel="Save Exercise"
+      onCancel={() => navigate('/exercises')}
       onSubmit={(values) => {
         const exercise = addExercise(values);
         navigate(`/exercises/${exercise.slug}`);

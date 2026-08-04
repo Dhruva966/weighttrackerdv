@@ -61,12 +61,15 @@ export function Goals() {
               <button
                 className="flex min-w-0 flex-1 items-center gap-3 py-2 text-left"
                 type="button"
+                aria-pressed={goal.done}
+                aria-label={goal.name}
                 onClick={() => toggleIntention(goal.id)}
               >
                 <span
                   className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border text-[10px] ${
                     goal.done ? 'border-accent bg-accent text-bg' : 'border-border text-transparent'
                   }`}
+                  aria-hidden
                 >
                   <Check size={12} strokeWidth={2} />
                 </span>

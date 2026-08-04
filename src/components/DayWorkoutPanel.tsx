@@ -1,15 +1,7 @@
 import { Dumbbell } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { DayWorkoutSummary } from '../lib/calendar';
-
-function formatSelectedDayLabel(date: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(`${date}T12:00:00Z`));
-}
+import { formatDayKeyLabel } from '../lib/local-day';
 
 function formatMuscleGroupLabel(muscleGroup: string): string {
   if (muscleGroup === 'full-body') {
@@ -38,7 +30,7 @@ export function DayWorkoutPanel({ selectedDate, summary }: DayWorkoutPanelProps)
   return (
     <section className="grid gap-3" aria-label="Selected day workouts">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-medium text-fg">{formatSelectedDayLabel(selectedDate)}</h2>
+        <h2 className="text-xl font-medium text-fg">{formatDayKeyLabel(selectedDate)}</h2>
       </div>
 
       {summary ? (

@@ -4,10 +4,21 @@ import { z } from 'zod';
 import { coerceFormMuscleGroup, FORM_MUSCLE_GROUPS } from '../lib/formMuscleGroups';
 import type { EquipmentKind, MuscleGroup } from '../types';
 
+export const FORM_EQUIPMENT_KINDS = [
+  'barbell',
+  'dumbbell',
+  'machine',
+  'cable',
+  'bodyweight',
+  'kettlebell',
+  'band',
+  'other',
+] as const satisfies readonly EquipmentKind[];
+
 export const exerciseFormSchema = z.object({
   name: z.string().min(2),
   muscleGroup: z.enum(FORM_MUSCLE_GROUPS),
-  equipment: z.enum(['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'kettlebell', 'other']),
+  equipment: z.enum(FORM_EQUIPMENT_KINDS),
 });
 
 export type ExerciseFormValues = {
@@ -24,9 +35,10 @@ type ExerciseFormProps = {
   submitLabel: string;
   initial?: Partial<ExerciseFormValues> & { imageUrl?: string };
   onSubmit: (values: ExerciseFormValues) => void;
+  onCancel?: () => void;
 };
 
-export function ExerciseForm({ title, description, submitLabel, initial, onSubmit }: ExerciseFormProps) {
+export function ExerciseForm({ title, description, submitLabel, initial, onSubmit, onCancel }: ExerciseFormProps) {
   const [name, setName] = useState(initial?.name ?? '');
   const [muscleGroup, setMuscleGroup] = useState<MuscleGroup>(coerceFormMuscleGroup(initial?.muscleGroup));
   const [equipment, setEquipment] = useState<EquipmentKind>(initial?.equipment ?? 'machine');
@@ -91,7 +103,7 @@ export function ExerciseForm({ title, description, submitLabel, initial, onSubmi
           value={equipment}
           onChange={(event) => setEquipment(event.target.value as EquipmentKind)}
         >
-          {exerciseFormSchema.shape.equipment.options.map((option) => (
+          {FORM_EQUIPMENT_KINDS.map((option) => (
             <option key={option} value={option}>
               {option}
             </option>
@@ -120,7 +132,12 @@ export function ExerciseForm({ title, description, submitLabel, initial, onSubmi
           onChange={(event) => {
             const file = event.target.files?.[0];
             if (file) {
-              setImageUrl(URL.createObjectURL(file));
+              setImageUrl((previous) => {
+                if (previous?.startsWith('blob:')) {
+                  URL.revokeObjectURL(previous);
+                }
+                return URL.createObjectURL(file);
+              });
             }
           }}
         />
@@ -128,10 +145,17 @@ export function ExerciseForm({ title, description, submitLabel, initial, onSubmi
       {error ? (
         <p className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-sm font-semibold text-danger">{error}</p>
       ) : null}
-      <button className="button-primary" type="submit">
-        <Save size={20} />
-        {submitLabel}
-      </button>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <button className="button-primary flex-1" type="submit">
+          <Save size={20} />
+          {submitLabel}
+        </button>
+        {onCancel ? (
+          <button className="button-secondary flex-1 justify-center" type="button" onClick={onCancel}>
+            Cancel
+          </button>
+        ) : null}
+      </div>
     </form>
   );
 }

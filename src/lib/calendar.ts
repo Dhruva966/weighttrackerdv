@@ -1,9 +1,19 @@
-import { getDeviceTimeZone } from './local-day';
+import {
+  dayKeyToUtcNoon,
+  getDeviceTimeZone,
+  isDayKey,
+  sessionDayKey,
+  toDayKey,
+} from './local-day';
+
+export { toDayKey } from './local-day';
 
 export type CalendarSessionInput = {
   id: string;
   startedAt: string;
   endedAt?: string;
+  localDate?: string;
+  timezone?: string;
 };
 
 export type CalendarSetInput = {
@@ -113,29 +123,18 @@ export type CalendarOptions = {
   today?: string;
 };
 
-const isoDateFormatter = (timeZone: string) =>
-  new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-
-export function toDayKey(value: string | Date, timeZone: string): string {
-  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return value;
-  }
-
-  return isoDateFormatter(timeZone).format(value instanceof Date ? value : new Date(value));
-}
-
-/** ISO instant for a calendar day in `timeZone` (today → now; otherwise ~local noon). */
+/**
+ * ISO instant for a calendar day in `timeZone` (today → now; otherwise ~local midday).
+ *
+ * Must cover UTC-12 through UTC+14. A fixed list of UTC hours on `dayKey` alone fails
+ * east of ~UTC+6 (e.g. Hong Kong / Tokyo): local midday falls on the previous UTC date.
+ */
 export function calendarDayToStartedAt(
   dayKey: string,
   timeZone = getDeviceTimeZone(),
   now = new Date(),
 ): string {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dayKey)) {
+  if (!isDayKey(dayKey)) {
     return now.toISOString();
   }
 
@@ -143,18 +142,26 @@ export function calendarDayToStartedAt(
     return now.toISOString();
   }
 
-  for (const hourUtc of [20, 19, 18, 17, 21, 16]) {
-    const candidate = new Date(`${dayKey}T${String(hourUtc).padStart(2, '0')}:00:00.000Z`);
-    if (toDayKey(candidate, timeZone) === dayKey) {
-      return candidate.toISOString();
+  const anchor = dayKeyToUtcNoon(dayKey).getTime();
+  const matching: number[] = [];
+  // ±36h from UTC noon covers every civil timezone for that local calendar day.
+  for (let hourOffset = -36; hourOffset <= 36; hourOffset += 1) {
+    const candidateMs = anchor + hourOffset * 3_600_000;
+    if (toDayKey(new Date(candidateMs), timeZone) === dayKey) {
+      matching.push(candidateMs);
     }
   }
 
-  return new Date(`${dayKey}T19:00:00.000Z`).toISOString();
+  if (matching.length === 0) {
+    return dayKeyToUtcNoon(dayKey).toISOString();
+  }
+
+  // Median matching hour ≈ local midday.
+  return new Date(matching[Math.floor(matching.length / 2)]!).toISOString();
 }
 
 function addDays(day: string, amount: number): string {
-  const date = new Date(`${day}T12:00:00Z`);
+  const date = dayKeyToUtcNoon(day);
   date.setUTCDate(date.getUTCDate() + amount);
   return date.toISOString().slice(0, 10);
 }
@@ -164,7 +171,15 @@ function daysInMonth(year: number, month: number): number {
 }
 
 function weekdayForDate(date: string): number {
-  return new Date(`${date}T12:00:00Z`).getUTCDay();
+  return dayKeyToUtcNoon(date).getUTCDay();
+}
+
+function sessionBelongsToDay(
+  session: CalendarSessionInput | DayWorkoutSessionInput,
+  date: string,
+  timeZone: string,
+): boolean {
+  return sessionDayKey(session, timeZone) === date;
 }
 
 export function buildSessionDayMap(
@@ -176,7 +191,7 @@ export function buildSessionDayMap(
   const activityByDay = new Map<string, DayActivity>();
 
   for (const session of sessions) {
-    const date = toDayKey(session.startedAt, timeZone);
+    const date = sessionDayKey(session, timeZone);
     const existing =
       activityByDay.get(date) ??
       ({
@@ -201,7 +216,7 @@ export function buildSessionDayMap(
       continue;
     }
 
-    const date = toDayKey(session.startedAt, timeZone);
+    const date = sessionDayKey(session, timeZone);
     const existing = activityByDay.get(date);
     if (!existing) {
       continue;
@@ -308,7 +323,7 @@ export function getDayWorkoutBundle(
   const activityByDay = buildSessionDayMap(sessions, sets, options);
 
   const daySessions = sessions
-    .filter((session) => toDayKey(session.startedAt, timeZone) === date)
+    .filter((session) => sessionBelongsToDay(session, date, timeZone))
     .slice()
     .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
 
@@ -368,7 +383,7 @@ export function summarizeDayWorkout(
 ): DayWorkoutSummary | null {
   const timeZone = options.timeZone ?? getDeviceTimeZone();
   const daySessions = sessions
-    .filter((session) => toDayKey(session.startedAt, timeZone) === date)
+    .filter((session) => sessionBelongsToDay(session, date, timeZone))
     .slice()
     .sort((a, b) => a.startedAt.localeCompare(b.startedAt));
 
@@ -417,7 +432,7 @@ export function findDaySession(
 ): DayWorkoutSessionInput | undefined {
   const timeZone = options.timeZone ?? getDeviceTimeZone();
   const daySessions = sessions
-    .filter((session) => toDayKey(session.startedAt, timeZone) === date)
+    .filter((session) => sessionBelongsToDay(session, date, timeZone))
     .slice()
     .sort((a, b) => a.startedAt.localeCompare(b.startedAt));
   return daySessions.find((session) => !session.endedAt) ?? daySessions[0];

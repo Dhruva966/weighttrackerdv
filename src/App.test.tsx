@@ -46,4 +46,21 @@ describe('workout navigation surfaces', () => {
     expect(libraryTab).toHaveTextContent(/library/i);
     expect(screen.getByRole('heading', { name: /exercise library/i })).toBeInTheDocument();
   });
+
+  it('routes logo home and You header into shell destinations', () => {
+    renderApp('/today');
+    expect(screen.getByRole('link', { name: /lift home/i })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: /you and settings/i })).toHaveAttribute('href', '/you');
+  });
+
+  it('keeps five bottom-nav destinations including Today and You', () => {
+    renderApp('/you');
+    const nav = screen.getByRole('navigation');
+    expect(nav.querySelector('a[href="/move"]')).toBeTruthy();
+    expect(nav.querySelector('a[href="/today"]')).toBeTruthy();
+    expect(nav.querySelector('a[href="/grow"]')).toBeTruthy();
+    expect(nav.querySelector('a[href="/exercises"]')).toBeTruthy();
+    expect(nav.querySelector('a[href="/you"]')).toBeTruthy();
+    expect(screen.getByRole('link', { name: /open intentions/i })).toHaveAttribute('href', '/goals');
+  });
 });

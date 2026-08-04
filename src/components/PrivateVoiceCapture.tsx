@@ -45,6 +45,7 @@ export function PrivateVoiceCapture({ sampleTranscript, onConfirm }: Props) {
             setListening(true);
           }}
           disabled={listening}
+          aria-label={listening ? 'Listening' : 'Tap to speak (demo)'}
         >
           {listening ? 'Listening…' : 'Tap to speak (demo)'}
         </button>
@@ -57,7 +58,12 @@ export function PrivateVoiceCapture({ sampleTranscript, onConfirm }: Props) {
           <button className="button-primary" type="button" onClick={() => onConfirm(transcript)}>
             Look it over with me
           </button>
-          <button className="button-secondary" type="button" onClick={() => setTranscript('')}>
+          <button
+            className="button-secondary"
+            type="button"
+            onClick={() => setTranscript('')}
+            aria-label="Try voice capture again"
+          >
             Try again
           </button>
         </div>
