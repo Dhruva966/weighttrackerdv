@@ -1,17 +1,9 @@
 /**
  * Public Claude connector front-door for Lift MCP.
  *
- * Why this exists: Supabase's API gateway returns 401 (missing apikey) for
- * `/.well-known/oauth-protected-resource/functions/v1/lift-mcp`, which makes
- * Claude attempt OAuth discovery that never reaches our Edge Function.
- *
- * This Vercel proxy:
- * 1. Accepts Claude's unauthenticated MCP requests
- * 2. Injects Authorization: Bearer <LIFT_MCP_TOKEN>
- * 3. Forwards to the Supabase Edge Function
- *
- * Pair with vercel.json rewrites that 404 well-known discovery paths so Claude
- * treats this URL as a public (no-OAuth) connector.
+ * Supabase gateway 401s Claude's path-inserted OAuth discovery, so Connect fails
+ * against the raw Edge URL. This proxy accepts unauthenticated MCP calls, injects
+ * LIFT_MCP_TOKEN, and forwards to Supabase. vercel.json 404s /.well-known probes.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
@@ -51,13 +43,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  // Optional path segments: /api/lift-mcp/health → upstream /health
+  // /api/lift-mcp/health → ?path=health via vercel rewrite
   const pathParam = req.query.path;
   const extra =
     typeof pathParam === 'string'
       ? pathParam
       : Array.isArray(pathParam)
-        ? pathParam.join('/')
+        ? pathParam.filter(Boolean).join('/')
         : '';
   const upstreamUrl = extra ? `${UPSTREAM.replace(/\/$/, '')}/${extra}` : UPSTREAM;
 
@@ -89,16 +81,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   res.status(upstream.status);
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const passHeaders = [
-    'content-type',
-    'mcp-session-id',
-    'cache-control',
-  ] as const;
-  for (const name of passHeaders) {
+  for (const name of ['content-type', 'mcp-session-id', 'cache-control'] as const) {
     const value = upstream.headers.get(name);
     if (value) res.setHeader(name, value);
   }
 
-  const buf = Buffer.from(await upstream.arrayBuffer());
-  res.send(buf);
+  res.send(Buffer.from(await upstream.arrayBuffer()));
 }

@@ -29,7 +29,11 @@
       "destination": "/api/mcp-discovery-404"
     },
     {
-      "source": "/(.*)",
+      "source": "/api/lift-mcp/:path*",
+      "destination": "/api/lift-mcp?path=:path*"
+    },
+    {
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]
