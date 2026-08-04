@@ -1,4 +1,5 @@
-import { Download, Database, RefreshCw, Smartphone, Sparkles } from 'lucide-react';
+import { Download, Database, ListChecks, RefreshCw, Smartphone, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { downloadWorkoutExport } from '../lib/export';
 import { isExerciseLogLlmConfigured, isSupabaseLlmConfigured } from '../lib/exercise-log-parse';
 import { useOnline } from '../hooks/useOnline';
@@ -21,6 +22,18 @@ export function SettingsPage() {
         <p className="mt-1 text-sm text-fgMuted">Settings, units, export — built for {preferredName || 'Dhruva'}.</p>
       </div>
       <section className="app-card grid gap-3">
+        <p className="flex items-center gap-2 font-medium text-fg">
+          <ListChecks size={18} aria-hidden />
+          Intentions
+        </p>
+        <p className="text-sm leading-relaxed text-fgMuted">
+          Add, check off, or reshape the daily intentions that keep you compounding.
+        </p>
+        <Link className="button-secondary w-fit" to="/goals">
+          Open intentions
+        </Link>
+      </section>
+      <section className="app-card grid gap-3">
         <p className="font-medium text-fg">Onboarding (stashed)</p>
         <p className="text-sm leading-relaxed text-fgMuted">
           Welcome tour is paused. Lift stays gold-and-white with a pot that fills as you log.
@@ -30,6 +43,7 @@ export function SettingsPage() {
           type="button"
           disabled
           title="Onboarding is stashed"
+          aria-label="Replay onboarding (paused)"
         >
           Replay onboarding (paused)
         </button>
@@ -72,10 +86,18 @@ export function SettingsPage() {
         </p>
       </section>
       <section className="app-card grid gap-3">
-        <p className="font-bold text-fg">Units</p>
-        <div className="grid grid-cols-2 gap-2">
+        <p className="font-bold text-fg" id="units-label">
+          Units
+        </p>
+        <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="units-label">
           {(['lb', 'kg'] as const).map((option) => (
-            <button key={option} className={unit === option ? 'button-primary' : 'button-secondary'} type="button" onClick={() => setUnit(option)}>
+            <button
+              key={option}
+              className={unit === option ? 'button-primary' : 'button-secondary'}
+              type="button"
+              aria-pressed={unit === option}
+              onClick={() => setUnit(option)}
+            >
               {option}
             </button>
           ))}
@@ -85,8 +107,19 @@ export function SettingsPage() {
         </p>
       </section>
       <section className="app-card grid gap-3">
-        <p className="font-bold text-fg">Rest timer</p>
-        <input min="30" max="240" step="15" type="range" value={restSeconds} onChange={(event) => setRestSeconds(Number(event.target.value))} />
+        <label className="font-bold text-fg" htmlFor="rest-timer-default">
+          Rest timer
+        </label>
+        <input
+          id="rest-timer-default"
+          min="30"
+          max="240"
+          step="15"
+          type="range"
+          value={restSeconds}
+          onChange={(event) => setRestSeconds(Number(event.target.value))}
+          aria-valuetext={`${restSeconds} seconds`}
+        />
         <p className="tabular text-sm text-fgMuted">{restSeconds}s default</p>
       </section>
       <section className="app-card grid gap-3">
@@ -98,7 +131,7 @@ export function SettingsPage() {
         <p className={online ? 'text-sm font-bold text-accent' : 'text-sm font-bold text-danger'}>{online ? 'Online' : 'Offline'}</p>
       </section>
       <button className="button-secondary" type="button" onClick={downloadWorkoutExport}>
-        <Download size={18} />
+        <Download size={18} aria-hidden />
         Export data
       </button>
       <p className="text-xs text-fgMuted">Body map attribution: Wikimedia Commons muscle SVG, CC-BY-SA, when the full SVG asset is installed.</p>

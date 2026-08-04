@@ -9,7 +9,7 @@ import { RestTimer } from '../components/RestTimer';
 import { TemplateCard } from '../components/TemplateCard';
 import { exampleTemplates, resolveExampleTemplateExerciseIds } from '../data/example-templates';
 import { toDayKey } from '../lib/calendar';
-import { getDeviceTimeZone } from '../lib/local-day';
+import { formatDayKeyLabel, getDeviceTimeZone, sessionDayKey } from '../lib/local-day';
 import { useSessionHistoryStore } from '../stores/sessionHistoryStore';
 import { startWorkoutWithExercises, useTemplateStore } from '../stores/templateStore';
 import { useUiStore } from '../stores/uiStore';
@@ -36,28 +36,25 @@ const muscleGroupLabels: Record<MuscleGroup, string> = {
 
 const EMPTY_PLAN: string[] = [];
 
-function sessionDayKey(session: Pick<WorkoutSession, 'startedAt' | 'localDate'>): string {
-  return session.localDate ?? toDayKey(session.startedAt, getDeviceTimeZone());
+function sessionCalendarDay(session: Pick<WorkoutSession, 'startedAt' | 'localDate' | 'timezone'>): string {
+  return sessionDayKey(session, getDeviceTimeZone());
 }
 
-function sessionDayLabel(startedAt: string, localDate?: string): string {
-  const dayKey = localDate ?? toDayKey(startedAt, getDeviceTimeZone());
+function sessionDayLabel(startedAt: string, localDate?: string, timezone?: string): string {
+  const dayKey = sessionDayKey({ startedAt, localDate, timezone }, getDeviceTimeZone());
   const todayKey = toDayKey(new Date(), getDeviceTimeZone());
   if (dayKey === todayKey) {
     return "Today's workout";
   }
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(`${dayKey}T12:00:00Z`));
+  return formatDayKeyLabel(dayKey, { weekday: 'short', month: 'short' });
 }
 
 /** Fallback when there is no in-app history (deep link / refresh). Past days → Grow; today → Move. */
-export function sessionBackFallbackPath(session: Pick<WorkoutSession, 'startedAt' | 'localDate'>): string {
+export function sessionBackFallbackPath(
+  session: Pick<WorkoutSession, 'startedAt' | 'localDate' | 'timezone'>,
+): string {
   const todayKey = toDayKey(new Date(), getDeviceTimeZone());
-  return sessionDayKey(session) === todayKey ? '/move' : '/grow';
+  return sessionCalendarDay(session) === todayKey ? '/move' : '/grow';
 }
 
 /**
@@ -179,10 +176,56 @@ export function Session() {
 
   function removeExercise(exerciseId: string) {
     const name = exerciseName(exerciseId);
-    updatePlan(
-      plannedExercises.filter((exercise) => exercise.id !== exerciseId),
-      `Removed ${name}`,
-    );
+    const inPlan = plannedIds.includes(exerciseId);
+    const loggedForExercise = sessionSets.filter((setItem) => setItem.exerciseId === exerciseId);
+
+    // Logged-only extras are not on the plan — filtering plannedExercises would be a no-op
+    // (or worse, promote other extras into the plan). Delete sets to hide them.
+    if (!inPlan) {
+      if (loggedForExercise.length === 0) {
+        return;
+      }
+      if (
+        !window.confirm(
+          `Remove ${name} and delete its ${loggedForExercise.length} logged set${
+            loggedForExercise.length === 1 ? '' : 's'
+          } from this workout?`,
+        )
+      ) {
+        return;
+      }
+      const changed = commitEdit(session.id, `Removed ${name}`, () => {
+        for (const setItem of loggedForExercise) {
+          useWorkoutStore.getState().removeSet(setItem.id);
+        }
+      });
+      if (!changed) {
+        return;
+      }
+      if (expandedExerciseId === exerciseId) {
+        setExpandedExerciseId(null);
+      }
+      showPreviewNotice(`Removed ${name}`);
+      return;
+    }
+
+    if (loggedForExercise.length > 0) {
+      if (
+        !window.confirm(
+          `Remove ${name} from the plan? Logged sets will stay and this exercise will still appear.`,
+        )
+      ) {
+        return;
+      }
+    }
+
+    // Only touch plannedExerciseIds — never rebuild from plannedExercises (includes extras).
+    commitEdit(session.id, `Removed ${name}`, () => {
+      setSessionPlan(
+        session.id,
+        plannedIds.filter((id) => id !== exerciseId),
+      );
+    });
     if (expandedExerciseId === exerciseId) {
       setExpandedExerciseId(null);
     }
@@ -285,7 +328,7 @@ export function Session() {
     }
   }
 
-  const title = sessionDayLabel(session.startedAt, session.localDate);
+  const title = sessionDayLabel(session.startedAt, session.localDate, session.timezone);
 
   return (
     <div className="grid gap-4">

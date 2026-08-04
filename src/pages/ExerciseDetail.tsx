@@ -54,7 +54,11 @@ export function ExerciseDetail() {
             {exercise.muscleGroup} / {exercise.equipment}
           </p>
         </div>
-        <Link className="button-secondary inline-flex shrink-0" to={`/exercises/${exercise.slug}/edit`}>
+        <Link
+          className="button-secondary inline-flex shrink-0"
+          to={`/exercises/${exercise.slug}/edit`}
+          state={{ from: `/exercises/${exercise.slug}` }}
+        >
           <Pencil size={16} />
           Edit
         </Link>

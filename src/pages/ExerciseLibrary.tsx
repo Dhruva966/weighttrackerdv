@@ -1,15 +1,13 @@
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ExerciseCard } from '../components/ExerciseCard';
 import { useExercises } from '../hooks/useExercises';
-import type { MuscleGroup } from '../types';
-
-const filters: Array<MuscleGroup | 'all'> = ['all', 'chest', 'back', 'arms', 'legs', 'core', 'shoulders'];
+import { LIBRARY_MUSCLE_FILTERS, type LibraryMuscleFilter } from '../lib/formMuscleGroups';
 
 export function ExerciseLibrary() {
   const [query, setQuery] = useState('');
-  const [muscleGroup, setMuscleGroup] = useState<MuscleGroup | 'all'>('all');
+  const [muscleGroup, setMuscleGroup] = useState<LibraryMuscleFilter>('all');
   const exercises = useExercises(query, muscleGroup);
 
   return (
@@ -34,10 +32,20 @@ export function ExerciseLibrary() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
+        {query ? (
+          <button
+            type="button"
+            className="shrink-0 rounded-lg p-1 text-fgMuted hover:bg-surfaceAlt hover:text-fg"
+            aria-label="Clear search"
+            onClick={() => setQuery('')}
+          >
+            <X size={16} strokeWidth={1.75} aria-hidden />
+          </button>
+        ) : null}
       </label>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {filters.map((filter) => (
+        {LIBRARY_MUSCLE_FILTERS.map((filter) => (
           <button
             key={filter}
             className={`min-h-10 whitespace-nowrap rounded-full border px-4 text-sm font-bold capitalize ${

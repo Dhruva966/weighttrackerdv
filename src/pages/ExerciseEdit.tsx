@@ -19,6 +19,8 @@ export function ExerciseEdit() {
     return <p className="text-fgMuted">Exercise not found.</p>;
   }
 
+  const afterSavePath = returnTo ?? `/exercises/${exercise.slug}`;
+
   return (
     <ExerciseForm
       key={exercise.id}
@@ -32,6 +34,7 @@ export function ExerciseEdit() {
         setupNotes: exercise.setupNotes ?? [],
         imageUrl: exercise.imageUrl,
       }}
+      onCancel={() => navigate(afterSavePath)}
       onSubmit={(values) => {
         const updated = updateExercise(exercise.id, values);
         if (updated) {

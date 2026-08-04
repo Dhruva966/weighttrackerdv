@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { searchExercises } from './useExercises';
+import { matchesLibraryMuscleFilter } from '../lib/formMuscleGroups';
 import type { Exercise } from '../types';
 
 function exercise(partial: Partial<Exercise> & Pick<Exercise, 'id' | 'slug' | 'name'>): Exercise {
@@ -49,5 +50,26 @@ describe('searchExercises', () => {
     const results = searchExercises(catalog, '');
     expect(results.every((item) => !item.archived)).toBe(true);
     expect(results.map((item) => item.id)).not.toContain('4');
+  });
+});
+
+describe('Library muscle filter + search', () => {
+  const catalog = [
+    exercise({ id: 'b1', slug: 'bicep-curl', name: 'Bicep Curl', muscleGroup: 'biceps' }),
+    exercise({ id: 't1', slug: 'tricep-pushdown', name: 'Tricep Pushdown', muscleGroup: 'triceps' }),
+    exercise({ id: 'q1', slug: 'leg-extension', name: 'Leg Extension', muscleGroup: 'quads' }),
+    exercise({ id: 'c1', slug: 'bench-press', name: 'Bench Press', muscleGroup: 'chest' }),
+  ];
+
+  it('keeps form-created biceps/triceps visible under the arms chip', () => {
+    const arms = catalog.filter((item) => matchesLibraryMuscleFilter(item.muscleGroup, 'arms'));
+    const results = searchExercises(arms, '');
+    expect(results.map((item) => item.id).sort()).toEqual(['b1', 't1']);
+  });
+
+  it('keeps form-created quads visible under the legs chip', () => {
+    const legs = catalog.filter((item) => matchesLibraryMuscleFilter(item.muscleGroup, 'legs'));
+    const results = searchExercises(legs, 'Leg Extension');
+    expect(results[0]?.id).toBe('q1');
   });
 });

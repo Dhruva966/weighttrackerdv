@@ -83,7 +83,7 @@ export function UniversalCommandBar() {
       upsertBodyWeight(weightLb);
       syncPotOfGold();
       showPreviewNotice(`Logged ${weightLb} lb.`);
-      navigate('/');
+      navigate('/today');
       setQuery('');
       return;
     }

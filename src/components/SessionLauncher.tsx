@@ -4,8 +4,6 @@ import { calendarDayToStartedAt, findDaySession, toDayKey } from '../lib/calenda
 import { getDeviceTimeZone } from '../lib/local-day';
 import { useWorkoutStore } from '../stores/workoutStore';
 
-const MOVE_TIMEZONE = getDeviceTimeZone();
-
 export function SessionLauncher() {
   const createSession = useWorkoutStore((state) => state.createSession);
   const reopenSession = useWorkoutStore((state) => state.reopenSession);
@@ -14,11 +12,12 @@ export function SessionLauncher() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    const timeZone = getDeviceTimeZone();
     const dateParam = searchParams.get('date');
     const dayKey =
       dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)
         ? dateParam
-        : toDayKey(new Date(), MOVE_TIMEZONE);
+        : toDayKey(new Date(), timeZone);
 
     const incomingFrom = (location.state as { from?: unknown } | null)?.from;
     const from =
@@ -35,8 +34,10 @@ export function SessionLauncher() {
         startedAt: session.startedAt,
         endedAt: session.endedAt,
         notes: session.notes,
+        localDate: session.localDate,
+        timezone: session.timezone,
       })),
-      { timeZone: MOVE_TIMEZONE },
+      { timeZone },
     );
     if (existing) {
       if (existing.endedAt) {
@@ -46,7 +47,7 @@ export function SessionLauncher() {
       return;
     }
 
-    const startedAt = calendarDayToStartedAt(dayKey, MOVE_TIMEZONE);
+    const startedAt = calendarDayToStartedAt(dayKey, timeZone);
     const session = createSession({ startedAt });
     navigate(`/session/${session.id}`, { replace: true, state: { from } });
   }, [createSession, location.state, navigate, reopenSession, searchParams]);

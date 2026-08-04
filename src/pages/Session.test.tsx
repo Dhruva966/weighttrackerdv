@@ -286,6 +286,91 @@ describe('Session undo/redo and edit', () => {
     });
   });
 
+  it('does not promote logged extras into the plan when removing a planned exercise', async () => {
+    const session = useWorkoutStore.getState().createSession();
+    const planned = starterExercises[0]!;
+    const extra = starterExercises[1]!;
+    useWorkoutStore.getState().setSessionPlan(session.id, [planned.id]);
+    useWorkoutStore.getState().addSet({
+      sessionId: session.id,
+      exerciseId: extra.id,
+      weightLb: 40,
+      reps: 10,
+      isWarmup: false,
+    });
+
+    renderSession(session.id);
+    fireEvent.click(screen.getByRole('button', { name: `Remove ${planned.name}` }));
+
+    await waitFor(() => {
+      expect(
+        useWorkoutStore.getState().sessions.find((item) => item.id === session.id)?.plannedExerciseIds,
+      ).toEqual([]);
+    });
+    // Extra stays visible via logged sets, but must not be written onto the plan.
+    expect(screen.getByText(extra.name)).toBeInTheDocument();
+    expect(
+      useWorkoutStore.getState().sets.filter((setItem) => setItem.sessionId === session.id),
+    ).toHaveLength(1);
+  });
+
+  it('asks before removing a planned exercise that has sets, and never deletes those sets', async () => {
+    const session = useWorkoutStore.getState().createSession();
+    const exercise = starterExercises[0]!;
+    useWorkoutStore.getState().setSessionPlan(session.id, [exercise.id]);
+    useWorkoutStore.getState().addSet({
+      sessionId: session.id,
+      exerciseId: exercise.id,
+      weightLb: 100,
+      reps: 5,
+      isWarmup: false,
+    });
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    renderSession(session.id);
+    fireEvent.click(screen.getByRole('button', { name: `Remove ${exercise.name}` }));
+
+    await waitFor(() => {
+      expect(confirmSpy).toHaveBeenCalled();
+      expect(
+        useWorkoutStore.getState().sessions.find((item) => item.id === session.id)?.plannedExerciseIds,
+      ).toEqual([]);
+      expect(
+        useWorkoutStore.getState().sets.filter((setItem) => setItem.sessionId === session.id),
+      ).toHaveLength(1);
+      expect(screen.getByText(exercise.name)).toBeInTheDocument();
+    });
+  });
+
+  it('deletes logged sets when removing an unplanned extra after confirm', async () => {
+    const session = useWorkoutStore.getState().createSession();
+    const planned = starterExercises[0]!;
+    const extra = starterExercises[1]!;
+    useWorkoutStore.getState().setSessionPlan(session.id, [planned.id]);
+    useWorkoutStore.getState().addSet({
+      sessionId: session.id,
+      exerciseId: extra.id,
+      weightLb: 55,
+      reps: 8,
+      isWarmup: false,
+    });
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    renderSession(session.id);
+    fireEvent.click(screen.getByRole('button', { name: `Remove ${extra.name}` }));
+
+    await waitFor(() => {
+      expect(confirmSpy).toHaveBeenCalled();
+      expect(
+        useWorkoutStore.getState().sessions.find((item) => item.id === session.id)?.plannedExerciseIds,
+      ).toEqual([planned.id]);
+      expect(
+        useWorkoutStore.getState().sets.filter((setItem) => setItem.sessionId === session.id),
+      ).toHaveLength(0);
+      expect(screen.queryByText(extra.name)).not.toBeInTheDocument();
+    });
+  });
+
   it('undoes applying a template to the session', async () => {
     const session = useWorkoutStore.getState().createSession();
     const a = starterExercises[0]!;

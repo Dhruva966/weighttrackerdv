@@ -69,6 +69,8 @@ export function startWorkoutWithExercises(
         startedAt: session.startedAt,
         endedAt: session.endedAt,
         notes: session.notes,
+        localDate: session.localDate,
+        timezone: session.timezone,
       })),
       { timeZone: MOVE_TIMEZONE },
     );

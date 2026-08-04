@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { isBoardBaselineSession } from '../data/catalog';
 import { toDayKey } from '../lib/calendar';
+import { formatDayKeyLabel, getDeviceTimeZone, sessionDayKey } from '../lib/local-day';
 import { movementsForDay, useDiaryStore } from '../stores/diaryStore';
 import { useWorkoutStore } from '../stores/workoutStore';
-import { InteractiveGymCalendar, MOVE_TIMEZONE } from '../components/InteractiveGymCalendar';
+import { InteractiveGymCalendar } from '../components/InteractiveGymCalendar';
 import type { MuscleGroup } from '../types';
 
 const kindStyles = {
@@ -41,17 +42,12 @@ function groupLabel(dayKey: string, todayKey: string): string {
   if (dayKey === todayKey) {
     return 'Today';
   }
-  const yesterday = new Date(`${todayKey}T12:00:00Z`);
+  const yesterday = new Date(`${todayKey}T12:00:00.000Z`);
   yesterday.setUTCDate(yesterday.getUTCDate() - 1);
   if (dayKey === yesterday.toISOString().slice(0, 10)) {
     return 'Yesterday';
   }
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(`${dayKey}T12:00:00Z`));
+  return formatDayKeyLabel(dayKey, { weekday: 'short', month: 'short' });
 }
 
 export function History({
@@ -72,7 +68,7 @@ export function History({
   const bodyWeightLogs = useDiaryStore((state) => state.bodyWeightLogs);
   const movements = useDiaryStore((state) => state.movements);
 
-  const timeZone = MOVE_TIMEZONE;
+  const timeZone = getDeviceTimeZone();
   const todayKey = toDayKey(new Date(), timeZone);
 
   const dayKeys = new Set<string>();
@@ -85,7 +81,7 @@ export function History({
     }
   }
   for (const session of sessions) {
-    dayKeys.add(toDayKey(session.startedAt, timeZone));
+    dayKeys.add(sessionDayKey(session, timeZone));
   }
 
   const recentDays = [...dayKeys].sort((a, b) => b.localeCompare(a)).slice(0, 8);
@@ -114,7 +110,7 @@ export function History({
       }
       const daySessionIds = new Set(
         sessions
-          .filter((session) => toDayKey(session.startedAt, timeZone) === day)
+          .filter((session) => sessionDayKey(session, timeZone) === day)
           .map((session) => session.id),
       );
       if (daySessionIds.size > 0) {

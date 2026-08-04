@@ -1,16 +1,8 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { CalendarCell } from '../lib/calendar';
+import { formatDayKeyLabel } from '../lib/local-day';
 
 const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-function formatSelectedDateAnnouncement(date: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(`${date}T12:00:00Z`));
-}
 
 type WorkoutCalendarProps = {
   monthLabel: string;
@@ -46,7 +38,7 @@ export function WorkoutCalendar({
         aria-atomic="true"
         className="sr-only"
       >
-        {selectedDate ? `Selected ${formatSelectedDateAnnouncement(selectedDate)}` : 'No day selected'}
+        {selectedDate ? `Selected ${formatDayKeyLabel(selectedDate)}` : 'No day selected'}
       </div>
 
       <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium uppercase tracking-wide text-fgMuted">
@@ -64,6 +56,7 @@ export function WorkoutCalendar({
           const isSelected = selectedDate === cell.date;
           const hadGym = cell.activity?.hadGymVisit;
           const hadOverload = cell.activity?.hadProgressiveOverload;
+          const dayLabel = formatDayKeyLabel(cell.date);
 
           return (
             <button
@@ -80,7 +73,7 @@ export function WorkoutCalendar({
                     ? 'border-accent/30 bg-accentSoft text-fg hover:border-accent/50'
                     : 'border-border bg-bg text-fgMuted hover:border-fg/20 hover:bg-surface'
               } ${cell.isToday && !isSelected ? 'ring-1 ring-accent/40' : ''}`}
-              aria-label={`${cell.day}${hadGym ? ', gym day' : ''}${hadOverload ? ', progressive overload' : ''}${isSelected ? ', selected' : ''}`}
+              aria-label={`${dayLabel}${hadGym ? ', gym day' : ''}${hadOverload ? ', progressive overload' : ''}${isSelected ? ', selected' : ''}`}
             >
               <span className="tabular font-medium">{cell.day}</span>
               {hadGym ? (

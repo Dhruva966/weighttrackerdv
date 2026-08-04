@@ -1,7 +1,11 @@
 import { useMemo } from 'react';
 import Fuse from 'fuse.js';
+import {
+  matchesLibraryMuscleFilter,
+  type LibraryMuscleFilter,
+} from '../lib/formMuscleGroups';
 import { useWorkoutStore } from '../stores/workoutStore';
-import type { Exercise, MuscleGroup } from '../types';
+import type { Exercise } from '../types';
 
 /** Alphabetical — do not boost photo rows (FEDB stock was surfacing over board/PDF exercises). */
 function byName(a: Exercise, b: Exercise): number {
@@ -51,11 +55,12 @@ export function searchExercises(exercises: Exercise[], query: string): Exercise[
   return ranked;
 }
 
-export function useExercises(query = '', muscleGroup: MuscleGroup | 'all' = 'all') {
+export function useExercises(query = '', muscleGroup: LibraryMuscleFilter = 'all') {
   const exercises = useWorkoutStore((state) => state.exercises);
   return useMemo(() => {
-    const byGroup =
-      muscleGroup === 'all' ? exercises : exercises.filter((exercise) => exercise.muscleGroup === muscleGroup);
+    const byGroup = exercises.filter((exercise) =>
+      matchesLibraryMuscleFilter(exercise.muscleGroup, muscleGroup),
+    );
     return searchExercises(byGroup, query);
   }, [exercises, muscleGroup, query]);
 }

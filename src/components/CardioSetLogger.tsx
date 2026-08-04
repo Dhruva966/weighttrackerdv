@@ -42,6 +42,7 @@ export function CardioSetLogger({
     previous?.calories != null ? String(previous.calories) : '',
   );
   const [message, setMessage] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   async function runEdit(label: string, run: () => void | Promise<void>) {
     if (onEdit) {
@@ -53,7 +54,7 @@ export function CardioSetLogger({
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (disabled) {
+    if (disabled || isSaving) {
       return;
     }
 
@@ -75,19 +76,24 @@ export function CardioSetLogger({
     }
 
     setMessage('');
-    await runEdit('Logged cardio', () => {
-      addSet({
-        sessionId,
-        exerciseId: exercise.id,
-        weightLb: 0,
-        reps: 0,
-        isWarmup: false,
-        level: nextLevel,
-        speed: nextSpeed,
-        durationSec,
-        calories: nextCalories,
+    setIsSaving(true);
+    try {
+      await runEdit('Logged cardio', () => {
+        addSet({
+          sessionId,
+          exerciseId: exercise.id,
+          weightLb: 0,
+          reps: 0,
+          isWarmup: false,
+          level: nextLevel,
+          speed: nextSpeed,
+          durationSec,
+          calories: nextCalories,
+        });
       });
-    });
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -146,9 +152,13 @@ export function CardioSetLogger({
         </label>
       </div>
       {message ? <p className="text-xs text-fgMuted">{message}</p> : null}
-      <button className="button-primary min-h-10 justify-center text-sm" type="submit" disabled={disabled}>
+      <button
+        className="button-primary min-h-10 justify-center text-sm"
+        type="submit"
+        disabled={disabled || isSaving}
+      >
         <Save size={16} />
-        Log cardio
+        {isSaving ? 'Logging…' : 'Log cardio'}
       </button>
     </form>
   );

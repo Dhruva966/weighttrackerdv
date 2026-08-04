@@ -25,7 +25,7 @@ export function Nav({ items }: { items: NavItem[] }) {
               }`
             }
           >
-            <item.icon size={20} strokeWidth={1.5} />
+            <item.icon size={20} strokeWidth={1.5} aria-hidden />
             <span>{item.label}</span>
           </NavLink>
         ))}

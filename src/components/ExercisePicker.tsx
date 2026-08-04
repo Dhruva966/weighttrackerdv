@@ -6,11 +6,12 @@ import { FORM_MUSCLE_GROUPS } from '../lib/formMuscleGroups';
 import { useWorkoutStore } from '../stores/workoutStore';
 import type { EquipmentKind, Exercise, MuscleGroup } from '../types';
 import { ExerciseImage } from './ExerciseImage';
+import { FORM_EQUIPMENT_KINDS } from './ExerciseForm';
 
 const createSchema = z.object({
   name: z.string().min(2),
   muscleGroup: z.enum(FORM_MUSCLE_GROUPS),
-  equipment: z.enum(['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'kettlebell', 'other']),
+  equipment: z.enum(FORM_EQUIPMENT_KINDS),
 });
 
 export function ExercisePicker({
@@ -141,7 +142,7 @@ export function ExercisePicker({
                 value={equipment}
                 onChange={(event) => setEquipment(event.target.value as EquipmentKind)}
               >
-                {createSchema.shape.equipment.options.map((option) => (
+                {FORM_EQUIPMENT_KINDS.map((option) => (
                   <option key={option} value={option}>
                     {option}
                   </option>

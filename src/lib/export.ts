@@ -1,14 +1,23 @@
+import { useDiaryStore } from '../stores/diaryStore';
+import { useUiStore } from '../stores/uiStore';
 import { useWorkoutStore } from '../stores/workoutStore';
 
 export function exportWorkoutData(): string {
-  const state = useWorkoutStore.getState();
+  const workout = useWorkoutStore.getState();
+  const diary = useDiaryStore.getState();
+  const ui = useUiStore.getState();
   return JSON.stringify(
     {
       exportedAt: new Date().toISOString(),
-      exercises: state.exercises,
-      goals: state.goals,
-      sessions: state.sessions,
-      sets: state.sets,
+      exercises: workout.exercises,
+      goals: workout.goals,
+      sessions: workout.sessions,
+      sets: workout.sets,
+      bodyWeightLogs: diary.bodyWeightLogs,
+      movements: diary.movements,
+      intentions: ui.intentions,
+      unit: ui.unit,
+      restSeconds: ui.restSeconds,
     },
     null,
     2,

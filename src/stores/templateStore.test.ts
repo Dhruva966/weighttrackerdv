@@ -182,6 +182,31 @@ describe('templateStore', () => {
         useWorkoutStore.getState().sessions.find((item) => item.id === sessionId)?.plannedExerciseIds,
       ).toEqual([a.id, b.id]);
     });
+
+    it('reuses a localDate-stamped day session even when startedAt maps to a different day in device TZ', () => {
+      const [a, b] = starterExercises;
+      // UTC midnight Aug 3 → Aug 2 in America/Los_Angeles without localDate preference.
+      const stamped = useWorkoutStore.getState().createSession({
+        startedAt: '2026-08-03T00:00:00.000Z',
+      });
+      useWorkoutStore.setState((state) => ({
+        sessions: state.sessions.map((session) =>
+          session.id === stamped.id
+            ? { ...session, localDate: '2026-08-03', timezone: 'Asia/Kolkata' }
+            : session,
+        ),
+      }));
+      useWorkoutStore.getState().setSessionPlan(stamped.id, [a.id]);
+      const sessionCountBefore = useWorkoutStore.getState().sessions.length;
+
+      const sessionId = startWorkoutWithExercises([b.id], { dayKey: '2026-08-03' });
+
+      expect(sessionId).toBe(stamped.id);
+      expect(useWorkoutStore.getState().sessions).toHaveLength(sessionCountBefore);
+      expect(
+        useWorkoutStore.getState().sessions.find((item) => item.id === stamped.id)?.plannedExerciseIds,
+      ).toEqual([a.id, b.id]);
+    });
   });
 
   describe('saveSessionAsTemplate', () => {

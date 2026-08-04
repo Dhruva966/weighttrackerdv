@@ -16,8 +16,6 @@ import { DayWorkoutPanel } from './DayWorkoutPanel';
 import { StatCard } from './StatCard';
 import { WorkoutCalendar } from './WorkoutCalendar';
 
-export const MOVE_TIMEZONE = getDeviceTimeZone();
-
 function currentMonthParts(timeZone: string): { year: number; month: number } {
   const now = new Date();
   return {
@@ -34,9 +32,13 @@ export function InteractiveGymCalendar({ showMonthStats = false }: { showMonthSt
     state.sets.filter((setItem) => !isBoardBaselineSession(setItem.sessionId)),
   );
   const exercises = useWorkoutStore((state) => state.exercises);
-  const todayKey = toDayKey(new Date(), MOVE_TIMEZONE);
-  const [{ year, month }, setMonthParts] = useState(() => currentMonthParts(MOVE_TIMEZONE));
-  const [selectedDate, setSelectedDate] = useState<string | null>(todayKey);
+  // Resolve TZ on each render so travel / DST policy changes without a full reload stay correct.
+  const timeZone = getDeviceTimeZone();
+  const todayKey = toDayKey(new Date(), timeZone);
+  const [{ year, month }, setMonthParts] = useState(() => currentMonthParts(getDeviceTimeZone()));
+  const [selectedDate, setSelectedDate] = useState<string | null>(() =>
+    toDayKey(new Date(), getDeviceTimeZone()),
+  );
 
   const sessionInputs = useMemo(
     () =>
@@ -45,6 +47,8 @@ export function InteractiveGymCalendar({ showMonthStats = false }: { showMonthSt
         startedAt: session.startedAt,
         endedAt: session.endedAt,
         notes: session.notes,
+        localDate: session.localDate,
+        timezone: session.timezone,
       })),
     [sessions],
   );
@@ -76,8 +80,8 @@ export function InteractiveGymCalendar({ showMonthStats = false }: { showMonthSt
   );
 
   const calendarOptions = useMemo(
-    () => ({ timeZone: MOVE_TIMEZONE, today: todayKey }),
-    [todayKey],
+    () => ({ timeZone, today: todayKey }),
+    [timeZone, todayKey],
   );
 
   const activityByDay = useMemo(
