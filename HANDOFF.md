@@ -90,6 +90,7 @@ Removed: blind `tendGold()` +1.
 | NL parsers | `src/lib/weight-from-text.ts`, `src/lib/movement-from-text.ts`, `src/lib/universal-command.ts` |
 | Archived food UI | `archive/food/` |
 | Exercise NL sets | Two-stage LLM-to-UI pattern: Supabase `parse-exercise-log` (Anthropic `claude-haiku-4-5` first, Groq fallback) → constrained draft JSON → deterministic `commitExerciseLogDraft` in `src/lib/exercise-log-parse.ts` → UI-ready sets/notes. Key: `ANTHROPIC_API_KEY` in Supabase secrets only (not `VITE_*`). Clean shorthand stays on-device. |
+| Lift remote MCP | Supabase Edge Function `lift-mcp` (Streamable HTTP) for Claude **custom connectors**. Read tools: `list_recent_sessions`, `get_session_detail`, `get_exercise_history`, `list_recent_prs`. Write stub `log_set_draft` gated by `LIFT_MCP_WRITES_ENABLED` (default false). Auth: Bearer `LIFT_MCP_TOKEN` (deploy with `verify_jwt=false`). URL: `https://<ref>.supabase.co/functions/v1/lift-mcp`. Connect in Claude: Settings → Connectors → Add custom connector → that URL → Request header `authorization` = `Bearer <token>` (include `Bearer `). Diary not exposed. Spec: `docs/superpowers/specs/2026-08-04-lift-mcp-connector-design.md`. E2E: `pnpm test:lift-mcp`. |
 | Session + search | `src/pages/Session.tsx`, `ExercisePicker.tsx`, `MovementLogger.tsx`, `CardioSetLogger.tsx` |
 | Exercise merges | `src/data/exercise-merges.ts` (+ tests) |
 | Theme | `tailwind.config.js`, `src/index.css` |
@@ -106,6 +107,7 @@ Removed: blind `tendGold()` +1.
 ## Open follow-ups
 - Catalog exercise ids (`ex-${slug}`) never sync to Supabase — sets stay local until UUID migration
 - Sync diary weight/movements to Supabase when tables/policies ready
+- Deploy `lift-mcp` Edge Function to production once CLI is logged in (`npx supabase login` / `SUPABASE_ACCESS_TOKEN`) — local Deno + E2E already verified against live DB
 - Optional freeform custom movement categories beyond the fixed kind list
 - Groq Whisper edge for iPhone installed-PWA STT
 - Rebuild food/meal logging from `archive/food/` when ready

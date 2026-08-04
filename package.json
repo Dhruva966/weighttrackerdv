@@ -17,7 +17,9 @@
     "check:supabase": "tsx scripts/check-supabase.ts",
     "check:groq": "tsx scripts/check-groq.ts",
     "supabase:secrets": "tsx scripts/push-supabase-secrets.ts",
-    "supabase:deploy-functions": "tsx scripts/deploy-supabase-functions.ts"
+    "supabase:deploy-functions": "tsx scripts/deploy-supabase-functions.ts",
+    "test:lift-mcp": "tsx scripts/test-lift-mcp-e2e.ts",
+    "serve:lift-mcp": "bash scripts/serve-lift-mcp-local.sh"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

@@ -18,11 +18,13 @@ async function main() {
     throw new Error('Missing SUPABASE_PROJECT_REF or VITE_SUPABASE_URL in .env.local');
   }
 
-  execSync(`npx --yes supabase@latest functions deploy parse-exercise-log --project-ref "${projectRef}"`, {
-    stdio: 'inherit',
-  });
-
-  console.log('ok deployed parse-exercise-log');
+  const functions = ['parse-exercise-log', 'lift-mcp'] as const;
+  for (const name of functions) {
+    execSync(`npx --yes supabase@latest functions deploy ${name} --project-ref "${projectRef}"`, {
+      stdio: 'inherit',
+    });
+    console.log(`ok deployed ${name}`);
+  }
 }
 
 main().catch((error) => {
