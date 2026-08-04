@@ -2,3 +2,6 @@ project_id = "weight-tracker"
 
 [functions.parse-exercise-log]
 verify_jwt = false
+
+[functions.lift-mcp]
+verify_jwt = false

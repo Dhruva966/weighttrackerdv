@@ -32,9 +32,13 @@ async function main() {
   const projectRef = requireValue('SUPABASE_PROJECT_REF or VITE_SUPABASE_URL', projectRefFromEnv());
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const groqKey = process.env.GROQ_API_KEY ?? process.env.VITE_GROQ_API_KEY;
+  const liftMcpToken = process.env.LIFT_MCP_TOKEN;
+  const liftMcpWrites = process.env.LIFT_MCP_WRITES_ENABLED;
 
-  if (!anthropicKey && !groqKey) {
-    throw new Error('Set ANTHROPIC_API_KEY (preferred) and/or GROQ_API_KEY in .env.local');
+  if (!anthropicKey && !groqKey && !liftMcpToken) {
+    throw new Error(
+      'Set ANTHROPIC_API_KEY and/or GROQ_API_KEY and/or LIFT_MCP_TOKEN in .env.local',
+    );
   }
 
   const pairs: string[] = [];
@@ -43,6 +47,12 @@ async function main() {
   }
   if (groqKey) {
     pairs.push(`GROQ_API_KEY="${quote(groqKey)}"`);
+  }
+  if (liftMcpToken) {
+    pairs.push(`LIFT_MCP_TOKEN="${quote(liftMcpToken)}"`);
+  }
+  if (liftMcpWrites === 'true' || liftMcpWrites === 'false') {
+    pairs.push(`LIFT_MCP_WRITES_ENABLED="${quote(liftMcpWrites)}"`);
   }
 
   const command = `npx --yes supabase@latest secrets set ${pairs.join(' ')} --project-ref "${projectRef}"`;
@@ -53,6 +63,12 @@ async function main() {
   }
   if (groqKey) {
     console.log('ok pushed GROQ_API_KEY to Supabase Edge Function secrets (fallback)');
+  }
+  if (liftMcpToken) {
+    console.log('ok pushed LIFT_MCP_TOKEN to Supabase Edge Function secrets');
+  }
+  if (liftMcpWrites === 'true' || liftMcpWrites === 'false') {
+    console.log(`ok pushed LIFT_MCP_WRITES_ENABLED=${liftMcpWrites}`);
   }
   console.log('next: deploy the function with `pnpm supabase:deploy-functions`');
 }

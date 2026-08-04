@@ -83,6 +83,29 @@ Or manually in the Supabase dashboard: **Project Settings → Edge Functions →
 
 `parse-exercise-log` uses **Claude Haiku (`claude-haiku-4-5`)** first for messy set logs (number words, broken English), then Groq if Anthropic is unset/fails. The client commits the draft with Zod — no Anthropic key in the browser.
 
+### Lift remote MCP (`lift-mcp`)
+Claude custom connector for coach-style Q&A over gym data (sessions/sets/PRs). Not an in-app chatbot.
+
+1. Add to `.env.local`: `LIFT_MCP_TOKEN` (e.g. `openssl rand -hex 32`) and `LIFT_MCP_WRITES_ENABLED=false`.
+2. Log in to Supabase CLI once: `npx supabase login` (or set `SUPABASE_ACCESS_TOKEN`).
+3. Push secrets: `pnpm supabase:secrets` (pushes `LIFT_MCP_TOKEN` when set).
+4. Deploy: `pnpm supabase:deploy-functions` (deploys `parse-exercise-log` + `lift-mcp` with JWT verify off).
+5. Production URL: `https://<ref>.supabase.co/functions/v1/lift-mcp`
+6. Health: `curl -s https://<ref>.supabase.co/functions/v1/lift-mcp/health`
+7. E2E: `pnpm test:lift-mcp` (set `LIFT_MCP_URL` to override).
+8. In Claude: **Settings → Connectors → Add custom connector** → that URL → Request headers → `authorization` = `Bearer <LIFT_MCP_TOKEN>` (type the word `Bearer`, a space, then the token). Enable the connector per chat via **+ → Connectors**.
+
+**Local verify without deploy** (Deno talks to live Postgres via service role):
+
+```bash
+pnpm serve:lift-mcp   # http://127.0.0.1:8787
+LIFT_MCP_URL=http://127.0.0.1:8787 pnpm test:lift-mcp
+# optional public tunnel for Claude while iterating:
+# ngrok http 8787
+```
+
+If Request headers are missing in your Claude UI (beta rollout), use Claude Desktop with a local `mcp-remote` bridge or wait for OAuth — do not put the token in the URL query string.
+
 `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are copied **from** Supabase API settings into Vercel/`.env.local`. They are not stored back into Supabase.
 
 ## Vercel Setup
