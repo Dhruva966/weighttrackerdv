@@ -90,16 +90,18 @@ Claude custom connector for coach-style Q&A over gym data (sessions/sets/PRs). N
 
 Do **not** point Claude at the raw Supabase function URL. Supabase’s gateway returns `401` on Claude’s `/.well-known/.../functions/v1/lift-mcp` discovery probe, which breaks Connect with “Couldn't register with Lift's sign-in service.” The Vercel route proxies MCP and injects `LIFT_MCP_TOKEN`; `vercel.json` 404s well-known discovery so Claude treats the connector as public.
 
-1. Add to `.env.local`: `LIFT_MCP_TOKEN` (e.g. `openssl rand -hex 32`) and `LIFT_MCP_WRITES_ENABLED=false`.
+1. Add to `.env.local`: `LIFT_MCP_TOKEN` (e.g. `openssl rand -hex 32`) and `LIFT_MCP_WRITES_ENABLED=true` when ready to log from Claude (otherwise `false`).
 2. Log in to Supabase CLI once: `npx supabase login` (or set `SUPABASE_ACCESS_TOKEN`).
-3. Push secrets: `pnpm supabase:secrets` (pushes `LIFT_MCP_TOKEN` when set).
+3. Push secrets: `pnpm supabase:secrets` (pushes `LIFT_MCP_TOKEN` and `LIFT_MCP_WRITES_ENABLED` when set).
 4. Deploy Edge Function: `pnpm supabase:deploy-functions`.
 5. In **Vercel → Project → Settings → Environment Variables**, set:
    - `LIFT_MCP_TOKEN` = same value as `.env.local`
    - `LIFT_MCP_UPSTREAM` = `https://svcjdtlmmrisrkjqdsjt.supabase.co/functions/v1/lift-mcp` (optional; this is the default)
 6. Deploy/redeploy the Vercel app so `/api/lift-mcp` is live.
 7. Sanity: `curl -s https://weighttrackerdv.vercel.app/api/lift-mcp/health` → `{"ok":true,...}`
-8. In Claude: remove any old Lift connector → **Add custom connector** → URL `https://weighttrackerdv.vercel.app/api/lift-mcp` → leave OAuth Client ID empty → **Connect** (no authorize popup; should just connect) → enable in chat via **+ → Connectors**.
+8. In Claude: remove any old Lift connector → **Add custom connector** → URL `https://weighttrackerdv.vercel.app/api/lift-mcp` → leave OAuth Client ID empty → **Connect** → enable in chat via **+ → Connectors**.
+9. Chat routine: dump workout → Claude calls `resolve_exercise` (pick numbered candidates) → `log_sets` → optional `get_exercise_history` for last-time / overload. Weigh-in: `log_weight` (50–500 lb, upsert that calendar day) then `list_recent_weigh_ins`. Refresh the PWA (Session **Refresh**, or leave/reopen) so Today/Grow pick up the cloud row.
+10. Empty junk sessions: `pnpm cleanup:empty-sessions` then `--apply` if the dry-run looks right.
 
 Edge function direct URL (scripts/E2E only): `https://svcjdtlmmrisrkjqdsjt.supabase.co/functions/v1/lift-mcp`  
 E2E: `LIFT_MCP_URL=https://weighttrackerdv.vercel.app/api/lift-mcp pnpm test:lift-mcp`

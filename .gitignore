@@ -36,3 +36,6 @@ public/mockups/*.png
 # Extracted / cropped IMG_3417.pdf assets (regenerate locally; pairs JSON is committed)
 tmp/pdfs/
 public/exercise-icons/
+
+# Brainstorm visual companion sessions
+.superpowers/

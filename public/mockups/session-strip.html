@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Lift · session strip</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #fffefb;
+        --bg-wash: #fbf7f0;
+        --fg: #2b261c;
+        --muted: #7a7164;
+        --card: #ffffff;
+        --line: #e6ddce;
+        --gold: #c4a35a;
+        --gold-deep: #b08d3a;
+        --field: #f3ebda;
+        --field-2: #efe6d4;
+        --shadow: 0 18px 50px rgba(43, 38, 28, 0.12);
+        --phone-w: 390px;
+        --safe: 16px;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        color: var(--fg);
+        font-family: Inter, system-ui, sans-serif;
+        background:
+          radial-gradient(ellipse 95% 65% at 0% 0%, rgba(196, 163, 90, 0.16), transparent 52%),
+          radial-gradient(ellipse 70% 45% at 100% 8%, rgba(243, 235, 218, 0.9), transparent 48%),
+          linear-gradient(180deg, #fffefb 0%, #fbf7f0 42%, #f5efe4 100%);
+      }
+
+      .stage {
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 28px 16px;
+      }
+
+      .phone {
+        width: min(100%, var(--phone-w));
+        height: 844px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 36px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      .phone::before {
+        content: "";
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        width: 108px;
+        height: 28px;
+        transform: translateX(-50%);
+        background: #1c1914;
+        border-radius: 18px;
+        z-index: 4;
+      }
+
+      .app {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding-top: 44px;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: 44px 1fr auto;
+        align-items: center;
+        padding: 4px var(--safe) 6px;
+        gap: 8px;
+      }
+
+      .icon-btn {
+        width: 36px;
+        height: 36px;
+        border: 0;
+        background: transparent;
+        color: var(--fg);
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border-radius: 10px;
+      }
+
+      .elapsed {
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        font-size: 17px;
+        letter-spacing: -0.02em;
+        text-align: left;
+      }
+
+      .rest {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--muted);
+      }
+
+      .rest svg { color: var(--gold-deep); }
+
+      .strip-wrap {
+        padding: 4px 0 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .strip {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 6px var(--safe) 10px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      .strip::-webkit-scrollbar { display: none; }
+
+      .ex {
+        flex: 0 0 58px;
+        width: 58px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .ex img {
+        display: block;
+        width: 58px;
+        height: 58px;
+        object-fit: cover;
+        border-radius: 4px;
+        background: #2a2620;
+      }
+
+      .ex .mark {
+        display: block;
+        height: 4px;
+        margin: 7px 1px 0;
+        border-radius: 0;
+        background: transparent;
+      }
+
+      .ex.is-on .mark { background: var(--fg); }
+
+      .add-ex {
+        flex: 0 0 58px;
+        width: 58px;
+        height: 58px;
+        border-radius: 4px;
+        border: 1.5px solid #d8d0c2;
+        background: var(--card);
+        color: var(--muted);
+        display: grid;
+        place-items: center;
+        text-decoration: none;
+        margin-top: 0;
+      }
+
+      .body {
+        padding: 14px var(--safe) 8px;
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+      }
+
+      .title {
+        margin: 0;
+        font-family: "EB Garamond", Georgia, serif;
+        font-size: 34px;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+      }
+
+      .sub {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .pills {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        margin: 14px 0 18px;
+        scrollbar-width: none;
+      }
+      .pills::-webkit-scrollbar { display: none; }
+
+      .pill {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 32px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--field);
+        color: var(--fg);
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .pill svg { width: 14px; height: 14px; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      th {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+        text-align: center;
+        padding: 0 4px 10px;
+      }
+      th:first-child, td:first-child { text-align: left; width: 42px; }
+      th:last-child, td:last-child { width: 36px; }
+
+      td {
+        padding: 6px 4px;
+        vertical-align: middle;
+        text-align: center;
+      }
+
+      .set-n {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: var(--field);
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .prev {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .cell {
+        width: 100%;
+        height: 36px;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        background: var(--field);
+        font: 600 15px/1 Inter, system-ui, sans-serif;
+        font-variant-numeric: tabular-nums;
+        color: var(--fg);
+        text-align: center;
+        padding: 0 4px;
+      }
+
+      .cell.is-on {
+        border-color: var(--fg);
+        background: var(--card);
+      }
+
+      .box {
+        width: 22px;
+        height: 22px;
+        margin: 0 auto;
+        border: 1.5px solid #c9bfae;
+        border-radius: 5px;
+        background: var(--card);
+        display: grid;
+        place-items: center;
+        padding: 0;
+      }
+
+      .box.is-done {
+        background: var(--gold);
+        border-color: var(--gold);
+        color: #fffefb;
+      }
+
+      .add-set {
+        width: 36px;
+        height: 28px;
+        margin: 10px 0 0 4px;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        display: grid;
+        place-items: center;
+        padding: 0;
+      }
+
+      .pad {
+        border-top: 1px solid var(--line);
+        background: linear-gradient(180deg, #fffefb 0%, #f7f1e6 100%);
+        padding: 8px 10px 18px;
+      }
+
+      .keys {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr) 72px;
+        grid-template-rows: repeat(4, 52px);
+        gap: 6px;
+      }
+
+      .key, .side {
+        border: 0;
+        border-radius: 10px;
+        background: var(--card);
+        color: var(--fg);
+        font: 600 22px/1 Inter, system-ui, sans-serif;
+        box-shadow: 0 1px 0 rgba(43, 38, 28, 0.06);
+        display: grid;
+        place-items: center;
+      }
+
+      .side {
+        font-size: 13px;
+        color: var(--muted);
+        background: var(--field);
+      }
+
+      .done {
+        grid-row: 3 / 5;
+        grid-column: 4;
+        background: var(--gold);
+        color: #fffefb;
+        font-size: 0;
+        box-shadow: none;
+      }
+
+      .caption {
+        display: none;
+      }
+
+      @media (min-width: 720px) {
+        .caption {
+          display: block;
+          position: absolute;
+          left: calc(100% + 22px);
+          top: 72px;
+          width: 220px;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.5;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="phone" aria-label="Lift session mockup">
+        <p class="caption">Static mock · photos from /exercise-icons · gold underline = selected</p>
+        <div class="app">
+          <header class="topbar">
+            <button class="icon-btn" type="button" aria-label="Menu">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </button>
+            <div class="elapsed">0:20:14</div>
+            <div class="rest">
+              <span>0:00</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.8" />
+                <path d="M12 13V9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                <path d="M9 4h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </div>
+          </header>
+
+          <div class="strip-wrap">
+            <div class="strip" aria-label="Exercises in this session">
+              <button class="ex" type="button" data-name="Incline Bench">
+                <img src="/exercise-icons/incline-bench-press-barbell.jpg" alt="" />
+                <span class="mark"></span>
+              </button>
+              <button class="ex" type="button" data-name="Lat Pulldown">
+                <img src="/exercise-icons/lat-pulldown-cable.jpg" alt="" />
+                <span class="mark"></span>
+              </button>
+              <button class="ex" type="button" data-name="Seated Row">
+                <img src="/exercise-icons/seated-row-cable.jpg" alt="" />
+                <span class="mark"></span>
+              </button>
+              <button class="ex" type="button" data-name="Leg Press">
+                <img src="/exercise-icons/leg-press.jpg" alt="" />
+                <span class="mark"></span>
+              </button>
+              <button class="ex is-on" type="button" data-name="Bench Press">
+                <img src="/exercise-icons/bench-press-barbell.jpg" alt="Bench Press" />
+                <span class="mark"></span>
+              </button>
+              <a class="add-ex" href="#add" aria-label="Add exercise">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <div class="body">
+            <h1 class="title" id="ex-title">Bench Press</h1>
+            <p class="sub">Set 1 of 3</p>
+
+            <div class="pills" aria-label="Exercise actions">
+              <button class="pill" type="button">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+                Info
+              </button>
+              <button class="pill" type="button">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" /><path d="M12 8v4l2.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+                Warm Up
+              </button>
+              <button class="pill" type="button">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M7 7h11l-3-3M17 17H6l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                Swap
+              </button>
+              <button class="pill" type="button">+ Note</button>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Set</th>
+                  <th>Previous</th>
+                  <th>Lb</th>
+                  <th>Reps</th>
+                  <th>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="2" />
+                    </svg>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="set-n">1</span></td>
+                  <td><span class="prev">185 × 5</span></td>
+                  <td><button class="cell" type="button" data-field="lb-1">185</button></td>
+                  <td><button class="cell is-on" type="button" data-field="reps-1">5</button></td>
+                  <td><button class="box" type="button" aria-label="Complete set 1"></button></td>
+                </tr>
+                <tr>
+                  <td><span class="set-n">2</span></td>
+                  <td><span class="prev">185 × 5</span></td>
+                  <td><button class="cell" type="button" data-field="lb-2"></button></td>
+                  <td><button class="cell" type="button" data-field="reps-2"></button></td>
+                  <td><button class="box" type="button" aria-label="Complete set 2"></button></td>
+                </tr>
+                <tr>
+                  <td><span class="set-n">3</span></td>
+                  <td><span class="prev">185 × 5</span></td>
+                  <td><button class="cell" type="button" data-field="lb-3"></button></td>
+                  <td><button class="cell" type="button" data-field="reps-3"></button></td>
+                  <td><button class="box" type="button" aria-label="Complete set 3"></button></td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="add-set" type="button" aria-label="Add set">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="pad" aria-label="Number pad">
+            <div class="keys">
+              <button class="key" type="button">1</button>
+              <button class="key" type="button">2</button>
+              <button class="key" type="button">3</button>
+              <button class="side" type="button" aria-label="Hide keyboard">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 8h16M8 16l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </button>
+              <button class="key" type="button">4</button>
+              <button class="key" type="button">5</button>
+              <button class="key" type="button">6</button>
+              <button class="side" type="button" aria-label="Note">Note</button>
+              <button class="key" type="button">7</button>
+              <button class="key" type="button">8</button>
+              <button class="key" type="button">9</button>
+              <button class="key done" type="button" aria-label="Done">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </button>
+              <button class="key" type="button">.</button>
+              <button class="key" type="button">0</button>
+              <button class="key" type="button" aria-label="Backspace">⌫</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const title = document.getElementById("ex-title");
+      document.querySelectorAll(".ex").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".ex").forEach((el) => el.classList.remove("is-on"));
+          btn.classList.add("is-on");
+          title.textContent = btn.dataset.name || "Exercise";
+        });
+      });
+      document.querySelectorAll(".cell").forEach((cell) => {
+        cell.addEventListener("click", () => {
+          document.querySelectorAll(".cell").forEach((el) => el.classList.remove("is-on"));
+          cell.classList.add("is-on");
+        });
+      });
+      document.querySelectorAll(".box").forEach((box) => {
+        box.addEventListener("click", () => {
+          box.classList.toggle("is-done");
+          box.innerHTML = box.classList.contains("is-done")
+            ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>'
+            : "";
+        });
+      });
+      let active = document.querySelector(".cell.is-on");
+      document.querySelectorAll(".cell").forEach((cell) => {
+        cell.addEventListener("click", () => { active = cell; });
+      });
+      document.querySelectorAll(".key").forEach((key) => {
+        key.addEventListener("click", () => {
+          if (!active || key.classList.contains("done")) return;
+          const label = key.getAttribute("aria-label");
+          const t = key.textContent.trim();
+          if (label === "Backspace" || t === "⌫") {
+            active.textContent = (active.textContent || "").slice(0, -1);
+            return;
+          }
+          if (t === "." || /^\d$/.test(t)) {
+            active.textContent = `${active.textContent || ""}${t}`;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

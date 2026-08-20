@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getDeviceTimeZone } from '../lib/local-day';
 import type { MovementKind } from '../lib/movement-from-text';
+import { isUuid, syncBodyWeight } from '../lib/supabase-sync';
 
 export type BodyWeightLog = {
   id: string;
@@ -23,10 +24,25 @@ type DiaryState = {
   bodyWeightLogs: BodyWeightLog[];
   movements: MovementLog[];
   upsertBodyWeight: (weightLb: number, loggedAt?: string, timeZone?: string) => BodyWeightLog;
+  hydrateBodyWeightFromRemote: (remote: BodyWeightLog[]) => void;
   addMovement: (
     movement: Omit<MovementLog, 'id' | 'loggedAt'> & { loggedAt?: string },
   ) => MovementLog;
 };
+
+export function mergeBodyWeightLogs(
+  local: BodyWeightLog[],
+  remote: BodyWeightLog[],
+): BodyWeightLog[] {
+  const byDay = new Map<string, BodyWeightLog>();
+  for (const log of local) {
+    byDay.set(log.loggedAt, log);
+  }
+  for (const log of remote) {
+    byDay.set(log.loggedAt, log);
+  }
+  return [...byDay.values()].sort((a, b) => b.loggedAt.localeCompare(a.loggedAt));
+}
 
 function todayKey(timeZone: string = getDeviceTimeZone()): string {
   return dayKeyForTimestamp(new Date().toISOString(), timeZone);
@@ -66,16 +82,26 @@ export const useDiaryStore = create<DiaryState>()(
       upsertBodyWeight: (weightLb, loggedAt, timeZone) => {
         const day = loggedAt ? dayKeyForTimestamp(loggedAt, timeZone) : todayKey(timeZone);
         const existing = get().bodyWeightLogs.find((log) => log.loggedAt === day);
-        const next: BodyWeightLog = existing
-          ? { ...existing, weightLb }
-          : { id: newId('bw'), loggedAt: day, weightLb };
+        const next: BodyWeightLog =
+          existing && isUuid(existing.id)
+            ? { ...existing, weightLb }
+            : { id: crypto.randomUUID(), loggedAt: day, weightLb };
         set((state) => ({
           bodyWeightLogs: [
             next,
             ...state.bodyWeightLogs.filter((log) => log.loggedAt !== day),
           ].sort((a, b) => b.loggedAt.localeCompare(a.loggedAt)),
         }));
+        void syncBodyWeight(next);
         return next;
+      },
+      hydrateBodyWeightFromRemote: (remote) => {
+        if (remote.length === 0) {
+          return;
+        }
+        set((state) => ({
+          bodyWeightLogs: mergeBodyWeightLogs(state.bodyWeightLogs, remote),
+        }));
       },
       addMovement: (movement) => {
         const entry: MovementLog = {

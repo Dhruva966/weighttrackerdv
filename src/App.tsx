@@ -8,7 +8,6 @@ import { Nav } from './components/Nav';
 import { PotOfGold } from './components/PotOfGold';
 import { SessionLauncher } from './components/SessionLauncher';
 import { Toaster } from './components/Toaster';
-import { UniversalCommandBar } from './components/UniversalCommandBar';
 import { useSupabaseBootstrap } from './hooks/useSupabaseBootstrap';
 import { dailyQuoteForToday } from './lib/daily-quote';
 import { syncPotOfGold } from './lib/sync-gold';
@@ -119,7 +118,6 @@ export function App() {
   return (
     <div className="min-h-screen font-serif text-fg antialiased">
       <Header />
-      <UniversalCommandBar />
       <main className="mx-auto min-h-[calc(100vh-180px)] max-w-xl overflow-x-hidden px-5 pb-32 pt-7">
         <AppRoutes />
       </main>

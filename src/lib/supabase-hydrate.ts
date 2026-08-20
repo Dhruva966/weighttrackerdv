@@ -1,5 +1,6 @@
 import { getSupabase } from './supabase';
 import {
+  rowToBodyWeight,
   rowToExercise,
   rowToGoal,
   rowToSession,
@@ -8,6 +9,7 @@ import {
   rowToTemplateExercise,
 } from './supabase-mappers';
 import type { Exercise, Goal, LoggedSet, Template, TemplateExercise, WorkoutSession } from '../types';
+import { USER_ID } from './user';
 
 export type RemoteSnapshot = {
   exercises: Exercise[];
@@ -70,4 +72,28 @@ export async function fetchTemplateSnapshot(): Promise<RemoteTemplateSnapshot | 
       (templateExercisesRes.data ?? []) as Parameters<typeof rowToTemplateExercise>[0][]
     ).map(rowToTemplateExercise),
   };
+}
+
+/** Pulls owner body-weight rows. Independent of gym snapshot so a diary miss does not block sessions. */
+export async function fetchBodyWeightLogs(): Promise<Array<{
+  id: string;
+  loggedAt: string;
+  weightLb: number;
+}> | null> {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('body_weight_logs')
+    .select('id,user_id,logged_at,weight_lb')
+    .eq('user_id', USER_ID)
+    .order('logged_at', { ascending: false });
+
+  if (error) {
+    return null;
+  }
+
+  return ((data ?? []) as Parameters<typeof rowToBodyWeight>[0][]).map(rowToBodyWeight);
 }

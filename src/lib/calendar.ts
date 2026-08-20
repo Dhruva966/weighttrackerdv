@@ -424,16 +424,29 @@ export function summarizeDayWorkout(
   };
 }
 
-/** Existing session for a calendar day, preferring in-progress then earliest. */
+export type FindDaySessionOptions = CalendarOptions & {
+  /** Prefer an in-progress session that already has sets (avoids empty duplicate day rows). */
+  sessionIdsWithSets?: ReadonlySet<string>;
+};
+
+/** Existing session for a calendar day, preferring in-progress-with-sets, then in-progress, then earliest. */
 export function findDaySession(
   date: string,
   sessions: DayWorkoutSessionInput[],
-  options: CalendarOptions = {},
+  options: FindDaySessionOptions = {},
 ): DayWorkoutSessionInput | undefined {
   const timeZone = options.timeZone ?? getDeviceTimeZone();
   const daySessions = sessions
     .filter((session) => sessionBelongsToDay(session, date, timeZone))
     .slice()
     .sort((a, b) => a.startedAt.localeCompare(b.startedAt));
-  return daySessions.find((session) => !session.endedAt) ?? daySessions[0];
+  const openSessions = daySessions.filter((session) => !session.endedAt);
+  const withSets = options.sessionIdsWithSets;
+  if (withSets && withSets.size > 0) {
+    const openWithSets = openSessions.find((session) => withSets.has(session.id));
+    if (openWithSets) return openWithSets;
+    const anyWithSets = daySessions.find((session) => withSets.has(session.id));
+    if (anyWithSets) return anyWithSets;
+  }
+  return openSessions[0] ?? daySessions[0];
 }
