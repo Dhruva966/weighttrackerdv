@@ -26,7 +26,8 @@ export function Move() {
   const showPreviewNotice = useUiStore((state) => state.showPreviewNotice);
 
   const todayKey = toDayKey(new Date(), getDeviceTimeZone());
-  const todaySession = findDaySession(todayKey, sessions);
+  const sessionIdsWithSets = new Set(sets.map((setItem) => setItem.sessionId));
+  const todaySession = findDaySession(todayKey, sessions, { sessionIdsWithSets });
   const openSession =
     todaySession && !todaySession.endedAt
       ? {

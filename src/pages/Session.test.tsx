@@ -212,6 +212,16 @@ describe('Session undo/redo and edit', () => {
     vi.restoreAllMocks();
   });
 
+  it('shows Refresh next to Undo/Redo/Done', () => {
+    const session = useWorkoutStore.getState().createSession();
+    renderSession(session.id);
+
+    expect(screen.getByRole('button', { name: /refresh from cloud/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^undo$/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /^redo$/i })).toBeDisabled();
+    expect(screen.getByRole('link', { name: /^done$/i })).toBeInTheDocument();
+  });
+
   it('shows Undo/Redo next to Done, disabled until there is history', () => {
     const session = useWorkoutStore.getState().createSession();
     renderSession(session.id);
@@ -357,6 +367,10 @@ describe('Session undo/redo and edit', () => {
     const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
 
     renderSession(session.id);
+    const extraStrip = screen
+      .getAllByRole('button', { name: extra.name })
+      .find((el) => el.getAttribute('aria-pressed') != null);
+    fireEvent.click(extraStrip!);
     fireEvent.click(screen.getByRole('button', { name: `Remove ${extra.name}` }));
 
     await waitFor(() => {
@@ -407,6 +421,27 @@ describe('Session undo/redo and edit', () => {
 
     fireEvent.click(editLink);
     await waitFor(() => expect(screen.getByText(/exercise edit page/i)).toBeInTheDocument());
+  });
+
+  it('shows a horizontal exercise strip with an add control', () => {
+    const session = useWorkoutStore.getState().createSession();
+    const a = starterExercises[0]!;
+    const b = starterExercises[1]!;
+    useWorkoutStore.getState().setSessionPlan(session.id, [a.id, b.id]);
+
+    renderSession(session.id);
+
+    const stripA = screen
+      .getAllByRole('button', { name: a.name })
+      .find((el) => el.getAttribute('aria-pressed') != null);
+    const stripB = screen
+      .getAllByRole('button', { name: b.name })
+      .find((el) => el.getAttribute('aria-pressed') != null);
+    expect(stripA).toHaveAttribute('aria-pressed', 'true');
+    expect(stripB).toBeTruthy();
+    expect(screen.getByRole('button', { name: /add exercise/i })).toBeInTheDocument();
+    fireEvent.click(stripB!);
+    expect(stripB).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('saves the current planned exercises as a template from the header', async () => {

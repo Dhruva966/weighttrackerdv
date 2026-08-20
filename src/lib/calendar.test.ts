@@ -475,6 +475,29 @@ describe('findDaySession', () => {
     expect(found?.id).toBe('earlier');
   });
 
+  it('prefers an open session that already has sets over an empty duplicate', () => {
+    const found = findDaySession(
+      '2026-08-08',
+      [
+        {
+          id: 'with-sets',
+          startedAt: '2026-08-08T09:00:00-07:00',
+          localDate: '2026-08-08',
+        },
+        {
+          id: 'empty-later',
+          startedAt: '2026-08-08T09:05:00-07:00',
+          localDate: '2026-08-08',
+        },
+      ],
+      {
+        timeZone: 'America/Los_Angeles',
+        sessionIdsWithSets: new Set(['with-sets']),
+      },
+    );
+    expect(found?.id).toBe('with-sets');
+  });
+
   it('keeps a localDate-stamped Aug 3 workout on Aug 3 even when startedAt is UTC midnight (LA viewer)', () => {
     const sessions = [
       {

@@ -1,5 +1,6 @@
 import { drainQueue, enqueueWrite } from './offline-queue';
 import {
+  bodyWeightToRow,
   exerciseToRow,
   goalToRow,
   sessionToRow,
@@ -8,6 +9,7 @@ import {
   templateToRow,
 } from './supabase-mappers';
 import { getSupabase } from './supabase';
+import { USER_ID } from './user';
 import type { Exercise, Goal, LoggedSet, Template, TemplateExercise, WorkoutSession } from '../types';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -140,6 +142,24 @@ export async function deleteSyncedTemplateExercise(templateExerciseId: string): 
   }
 
   await persistDelete('template_exercises', templateExerciseId);
+}
+
+export async function syncBodyWeight(log: { id: string; loggedAt: string; weightLb: number }): Promise<void> {
+  if (!isUuid(log.id) || !isSupabaseConfigured()) {
+    return;
+  }
+
+  const row = bodyWeightToRow(log, USER_ID);
+  const supabase = getSupabase();
+  if (!supabase || !navigator.onLine) {
+    await enqueueWrite({ table: 'body_weight_logs', op: 'upsert', payload: row });
+    return;
+  }
+
+  const { error } = await supabase.from('body_weight_logs').upsert(row, { onConflict: 'user_id,logged_at' });
+  if (error) {
+    await enqueueWrite({ table: 'body_weight_logs', op: 'upsert', payload: row });
+  }
 }
 
 export async function pingSupabase(): Promise<boolean> {

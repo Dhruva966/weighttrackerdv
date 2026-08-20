@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { LoggedSet } from '../types';
-import { exerciseToRow, goalToRow, sessionToRow, setToRow } from './supabase-mappers';
+import { exerciseToRow, goalToRow, sessionToRow, setToRow, bodyWeightToRow } from './supabase-mappers';
 import { deleteSyncedSet, isUuid, syncSet } from './supabase-sync';
 
 describe('isUuid', () => {
@@ -67,6 +67,20 @@ describe('supabase mappers', () => {
         createdAt: '2026-07-13T00:00:00.000Z',
       }),
     ).toMatchObject({ target_value: 225, target_unit: 'lb' });
+  });
+
+  it('maps body weight logs', () => {
+    expect(
+      bodyWeightToRow(
+        { id: 'de3c1f99-a64b-46c4-9f46-6afcc6d17f75', loggedAt: '2026-08-13', weightLb: 169.25 },
+        'de3c1f99-a64b-46c4-9f46-6afcc6d17f70',
+      ),
+    ).toEqual({
+      id: 'de3c1f99-a64b-46c4-9f46-6afcc6d17f75',
+      user_id: 'de3c1f99-a64b-46c4-9f46-6afcc6d17f70',
+      logged_at: '2026-08-13',
+      weight_lb: 169.25,
+    });
   });
 });
 

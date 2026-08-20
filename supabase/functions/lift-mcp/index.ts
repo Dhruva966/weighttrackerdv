@@ -52,8 +52,9 @@ function clampLimit(value: number | undefined, fallback: number, max: number): n
 }
 
 type RankedExercise = { id: string; slug: string; name: string; archived: boolean };
+type ScoredExercise = RankedExercise & { score: number };
 
-function rankExerciseMatches(query: string, exercises: RankedExercise[]): RankedExercise[] {
+function scoreExerciseMatches(query: string, exercises: RankedExercise[]): ScoredExercise[] {
   const q = query.trim().toLowerCase();
   const slugQ = slugifyExerciseQuery(query);
   if (!q) return [];
@@ -67,14 +68,50 @@ function rankExerciseMatches(query: string, exercises: RankedExercise[]): Ranked
     else if (slug.startsWith(slugQ) || name.startsWith(q)) score = 70;
     else if (slug.includes(slugQ) || name.includes(q)) score = 50;
     if (ex.archived) score -= 5;
-    return { ex, score };
+    return { ...ex, score };
   });
 
   return scored
     .filter((s) => s.score > 0)
-    .sort((a, b) => b.score - a.score || a.ex.name.localeCompare(b.ex.name))
-    .map((s) => s.ex);
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 }
+
+function rankExerciseMatches(query: string, exercises: RankedExercise[]): RankedExercise[] {
+  return scoreExerciseMatches(query, exercises).map(({ score: _s, ...ex }) => ex);
+}
+
+type ResolveStatus = 'exact' | 'ambiguous' | 'none';
+
+function resolveExerciseStatus(
+  scored: ScoredExercise[],
+): { status: ResolveStatus; take: ScoredExercise[] } {
+  if (scored.length === 0) return { status: 'none', take: [] };
+  if (scored.length === 1) return { status: 'exact', take: scored };
+  const top = scored[0]!;
+  const second = scored[1]!;
+  if (top.score >= 90 && top.score - second.score >= 20) {
+    return { status: 'exact', take: [top] };
+  }
+  return { status: 'ambiguous', take: scored };
+}
+
+function todayKeyInTimeZone(timeZone: string, now = new Date()): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+}
+
+function normalizeBodyWeightLb(value: number): number | null {
+  if (!Number.isFinite(value) || value < 50 || value > 500) return null;
+  return Math.round(value * 100) / 100;
+}
+
+const DEFAULT_OWNER_TIMEZONE = 'America/Los_Angeles';
+const DAY_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 
 const corsHeaders: Record<string, string> = oauthCorsHeaders();
 
@@ -168,20 +205,25 @@ function createMcpServer(db: SupabaseClient): McpServer {
     {
       title: 'List recent gym sessions',
       description:
-        'List recent Lift gym sessions for the owner (most recent first), with set count, PR count, volume, and muscle groups. Diary weight/walks are not included.',
+        'List recent Lift gym sessions for the owner (most recent first), with set count, PR count, volume, and muscle groups. Empty 0-set sessions are hidden unless includeEmpty=true. Diary weight/walks are not included.',
       inputSchema: {
         limit: z.number().int().min(1).max(100).optional().describe('Max sessions (default 20)'),
         days: z.number().int().min(1).max(365).optional().describe('Only sessions in the last N days'),
+        includeEmpty: z
+          .boolean()
+          .optional()
+          .describe('Include 0-set sessions (default false — rest days have no session row)'),
       },
     },
-    async ({ limit, days }) => {
+    async ({ limit, days, includeEmpty }) => {
       const lim = clampLimit(limit, 20, 100);
+      const fetchLim = includeEmpty === true ? lim : Math.min(100, lim * 5);
       let query = db
         .from('sessions')
         .select('id,user_id,started_at,ended_at,notes,local_date,timezone')
         .eq('user_id', USER_ID)
         .order('started_at', { ascending: false })
-        .limit(lim);
+        .limit(fetchLim);
 
       if (days != null) {
         const since = new Date(Date.now() - days * 86400000).toISOString();
@@ -223,19 +265,22 @@ function createMcpServer(db: SupabaseClient): McpServer {
       }
 
       return jsonText({
-        sessions: sessionRows.map((session) => {
-          const summary = summarizeSets(setsBySession.get(session.id) ?? [], exercisesById);
-          return {
-            id: session.id,
-            userId: session.user_id,
-            startedAt: session.started_at,
-            endedAt: session.ended_at,
-            localDate: session.local_date,
-            timezone: session.timezone,
-            notes: session.notes,
-            ...summary,
-          };
-        }),
+        sessions: sessionRows
+          .map((session) => {
+            const summary = summarizeSets(setsBySession.get(session.id) ?? [], exercisesById);
+            return {
+              id: session.id,
+              userId: session.user_id,
+              startedAt: session.started_at,
+              endedAt: session.ended_at,
+              localDate: session.local_date,
+              timezone: session.timezone,
+              notes: session.notes,
+              ...summary,
+            };
+          })
+          .filter((s) => includeEmpty === true || s.setCount > 0)
+          .slice(0, lim),
       });
     },
   );
@@ -428,6 +473,25 @@ function createMcpServer(db: SupabaseClient): McpServer {
           equipment: full.equipment,
           archived: Boolean(full.archived),
         },
+        matchNote:
+          ranked.length > 1
+            ? `Auto-picked best match; ${ranked.length} catalog hits for "${exerciseNameOrSlug}". Prefer resolve_exercise when unsure.`
+            : undefined,
+        lastWorkingSet: mapped[0]
+          ? {
+              date: mapped[0].sessionLocalDate,
+              weightLb: mapped[0].weightLb,
+              reps: mapped[0].reps,
+              isPr: mapped[0].isPr,
+              estimatedOneRmLb: mapped[0].estimatedOneRmLb,
+            }
+          : null,
+        previousWorkingSets: mapped.slice(1, 4).map((s) => ({
+          date: s.sessionLocalDate,
+          weightLb: s.weightLb,
+          reps: s.reps,
+          estimatedOneRmLb: s.estimatedOneRmLb,
+        })),
         stats: {
           loggedSetCount: working.length,
           bestEstimatedOneRmLb,
@@ -514,24 +578,352 @@ function createMcpServer(db: SupabaseClient): McpServer {
     },
   );
 
-  // Placeholder write surface — disabled unless LIFT_MCP_WRITES_ENABLED=true
   server.registerTool(
-    'log_set_draft',
+    'resolve_exercise',
     {
-      title: 'Log set draft (disabled in v1)',
+      title: 'Resolve exercise name',
       description:
-        'Reserved for future write support. Returns an error unless LIFT_MCP_WRITES_ENABLED=true. Prefer logging in the Lift app for now.',
+        'Search the Lift exercise catalog for a messy spoken/typed name. Returns status exact|ambiguous|none and a numbered candidates list (n=1..). When ambiguous, ask the user to pick a number before logging. Do not auto-pick when status is ambiguous.',
       inputSchema: {
-        note: z.string().optional().describe('Ignored in v1'),
+        query: z.string().min(1).describe('Messy exercise name from the user'),
+        limit: z.number().int().min(1).max(25).optional().describe('Max candidates (default 8)'),
       },
     },
-    async () => {
+    async ({ query, limit }) => {
+      const lim = clampLimit(limit, 8, 25);
+      const { data: exercises, error } = await db
+        .from('exercises')
+        .select('id,slug,name,muscle_group,equipment,archived');
+      if (error) return errorText(`resolve_exercise failed: ${error.message}`);
+
+      const rows = (exercises ?? []) as ExerciseRow[];
+      const scored = scoreExerciseMatches(
+        query,
+        rows.map((e) => ({
+          id: e.id,
+          slug: e.slug,
+          name: e.name,
+          archived: Boolean(e.archived),
+        })),
+      );
+      const { status, take } = resolveExerciseStatus(scored);
+      const byId = new Map(rows.map((e) => [e.id, e]));
+      const candidates = take.slice(0, lim).map((ex, i) => {
+        const full = byId.get(ex.id);
+        return {
+          n: i + 1,
+          id: ex.id,
+          slug: ex.slug,
+          name: ex.name,
+          muscleGroup: full?.muscle_group ?? null,
+          equipment: full?.equipment ?? null,
+          archived: ex.archived,
+          score: ex.score,
+        };
+      });
+
+      return jsonText({
+        query,
+        status,
+        candidates,
+        hint:
+          status === 'ambiguous'
+            ? 'Present the numbered list to the user and wait for a pick (e.g. "1") before calling log_sets.'
+            : status === 'none'
+              ? 'No catalog match. Ask the user to rephrase or use a different name.'
+              : 'Single clear match — confirm briefly if the dump had multiple similar names.',
+      });
+    },
+  );
+
+  server.registerTool(
+    'list_recent_weigh_ins',
+    {
+      title: 'List recent body-weight logs',
+      description: 'Owner body_weight_logs newest first (calendar days).',
+      inputSchema: {
+        limit: z.number().int().min(1).max(90).optional().describe('Max rows (default 14)'),
+      },
+    },
+    async ({ limit }) => {
+      const lim = clampLimit(limit, 14, 90);
+      const { data, error } = await db
+        .from('body_weight_logs')
+        .select('id,logged_at,weight_lb')
+        .eq('user_id', USER_ID)
+        .order('logged_at', { ascending: false })
+        .limit(lim);
+      if (error) return errorText(`list_recent_weigh_ins failed: ${error.message}`);
+      const logs = ((data ?? []) as Array<{ id: string; logged_at: string; weight_lb: number | string }>).map(
+        (row) => ({
+          id: row.id,
+          loggedAt: String(row.logged_at).slice(0, 10),
+          weightLb: Number(row.weight_lb),
+        }),
+      );
+      return jsonText({
+        count: logs.length,
+        latest: logs[0] ?? null,
+        logs,
+      });
+    },
+  );
+
+  server.registerTool(
+    'log_sets',
+    {
+      title: 'Log lift sets for a calendar day',
+      description:
+        'Append lift sets to the owner session for a local calendar day. Creates that day\'s session only if missing (no daily empty sessions). Requires confirmed exerciseId values from resolve_exercise. Gated by LIFT_MCP_WRITES_ENABLED.',
+      inputSchema: {
+        localDate: z
+          .string()
+          .regex(DAY_KEY_RE)
+          .optional()
+          .describe('YYYY-MM-DD (default: today in timezone)'),
+        timezone: z
+          .string()
+          .min(1)
+          .optional()
+          .describe(`IANA timezone (default ${DEFAULT_OWNER_TIMEZONE})`),
+        sets: z
+          .array(
+            z.object({
+              exerciseId: z.string().uuid().describe('Confirmed exercise UUID'),
+              weightLb: z.number().positive().describe('Weight in pounds'),
+              reps: z.number().int().positive().describe('Reps'),
+              isWarmup: z.boolean().optional().describe('Warmup set (default false)'),
+            }),
+          )
+          .min(1)
+          .max(40)
+          .describe('Sets to append (max 40 per call)'),
+      },
+    },
+    async ({ localDate, timezone, sets }) => {
       if (!writesEnabled()) {
         return errorText(
-          'Write tools are disabled (LIFT_MCP_WRITES_ENABLED!=true). Log sets in the Lift app. Ask about history with the read tools.',
+          'Write tools are disabled (LIFT_MCP_WRITES_ENABLED!=true). Resolve names with resolve_exercise; log in the Lift app until writes are enabled.',
         );
       }
-      return errorText('Write tools are enabled but not implemented yet.');
+
+      const tz = timezone?.trim() || DEFAULT_OWNER_TIMEZONE;
+      const day = localDate && DAY_KEY_RE.test(localDate) ? localDate : todayKeyInTimeZone(tz);
+
+      const exerciseIds = [...new Set(sets.map((s) => s.exerciseId))];
+      const { data: exercises, error: exError } = await db
+        .from('exercises')
+        .select('id,slug,name,muscle_group,equipment,archived')
+        .in('id', exerciseIds);
+      if (exError) return errorText(`log_sets exercises failed: ${exError.message}`);
+      const found = new Map(((exercises ?? []) as ExerciseRow[]).map((e) => [e.id, e]));
+      const missing = exerciseIds.filter((id) => !found.has(id));
+      if (missing.length > 0) {
+        return errorText(`Unknown exerciseId(s): ${missing.join(', ')}. Call resolve_exercise first.`);
+      }
+
+      const { data: daySessions, error: sessError } = await db
+        .from('sessions')
+        .select('id,user_id,started_at,ended_at,notes,local_date,timezone')
+        .eq('user_id', USER_ID)
+        .eq('local_date', day)
+        .order('started_at', { ascending: true });
+      if (sessError) return errorText(`log_sets sessions failed: ${sessError.message}`);
+
+      const dayRows = (daySessions ?? []) as SessionRow[];
+      let session: SessionRow | undefined;
+      let createdSession = false;
+
+      if (dayRows.length > 0) {
+        const dayIds = dayRows.map((s) => s.id);
+        const { data: daySetRows, error: daySetsError } = await db
+          .from('sets')
+          .select('session_id')
+          .in('session_id', dayIds);
+        if (daySetsError) return errorText(`log_sets day sets failed: ${daySetsError.message}`);
+        const withSets = new Set(
+          ((daySetRows ?? []) as { session_id: string }[]).map((r) => r.session_id),
+        );
+        session =
+          dayRows.find((s) => !s.ended_at && withSets.has(s.id)) ??
+          dayRows.find((s) => withSets.has(s.id)) ??
+          dayRows.find((s) => !s.ended_at) ??
+          dayRows[0];
+      }
+
+      if (!session) {
+        const id = crypto.randomUUID();
+        const startedAt = new Date().toISOString();
+        const { data: inserted, error: insertSessError } = await db
+          .from('sessions')
+          .insert({
+            id,
+            user_id: USER_ID,
+            started_at: startedAt,
+            ended_at: null,
+            notes: null,
+            local_date: day,
+            timezone: tz,
+          })
+          .select('id,user_id,started_at,ended_at,notes,local_date,timezone')
+          .single();
+        if (insertSessError) return errorText(`log_sets create session failed: ${insertSessError.message}`);
+        session = inserted as SessionRow;
+        createdSession = true;
+      } else if (session.ended_at) {
+        const { data: reopened, error: reopenError } = await db
+          .from('sessions')
+          .update({ ended_at: null })
+          .eq('id', session.id)
+          .eq('user_id', USER_ID)
+          .select('id,user_id,started_at,ended_at,notes,local_date,timezone')
+          .single();
+        if (reopenError) return errorText(`log_sets reopen session failed: ${reopenError.message}`);
+        session = reopened as SessionRow;
+      }
+
+      const { data: existingSets, error: existingError } = await db
+        .from('sets')
+        .select('id,exercise_id,set_number')
+        .eq('session_id', session.id);
+      if (existingError) return errorText(`log_sets existing sets failed: ${existingError.message}`);
+
+      const nextNumber = new Map<string, number>();
+      for (const row of existingSets ?? []) {
+        const exId = (row as { exercise_id: string; set_number: number }).exercise_id;
+        const n = (row as { set_number: number }).set_number;
+        nextNumber.set(exId, Math.max(nextNumber.get(exId) ?? 0, n));
+      }
+
+      const rowsToInsert = sets.map((s) => {
+        const setNumber = (nextNumber.get(s.exerciseId) ?? 0) + 1;
+        nextNumber.set(s.exerciseId, setNumber);
+        return {
+          id: crypto.randomUUID(),
+          session_id: session!.id,
+          exercise_id: s.exerciseId,
+          set_number: setNumber,
+          weight_lb: s.weightLb,
+          reps: s.reps,
+          rpe: null,
+          is_warmup: Boolean(s.isWarmup),
+          is_pr: false,
+          level: null,
+          speed: null,
+          duration_sec: null,
+          calories: null,
+        };
+      });
+
+      const { data: insertedSets, error: insertSetsError } = await db
+        .from('sets')
+        .insert(rowsToInsert)
+        .select(
+          'id,session_id,exercise_id,set_number,weight_lb,reps,rpe,is_warmup,is_pr,created_at,level,speed,duration_sec,calories',
+        );
+      if (insertSetsError) return errorText(`log_sets insert failed: ${insertSetsError.message}`);
+
+      const logged = ((insertedSets ?? []) as SetRow[]).map((s) => {
+        const ex = found.get(s.exercise_id);
+        return {
+          id: s.id,
+          exerciseId: s.exercise_id,
+          exerciseName: ex?.name ?? null,
+          exerciseSlug: ex?.slug ?? null,
+          setNumber: s.set_number,
+          weightLb: s.weight_lb,
+          reps: s.reps,
+          isWarmup: Boolean(s.is_warmup),
+          isPr: Boolean(s.is_pr),
+          createdAt: s.created_at,
+        };
+      });
+
+      return jsonText({
+        ok: true,
+        createdSession,
+        session: {
+          id: session.id,
+          localDate: session.local_date,
+          timezone: session.timezone,
+          startedAt: session.started_at,
+          endedAt: session.ended_at,
+        },
+        loggedSetCount: logged.length,
+        sets: logged,
+      });
+    },
+  );
+
+  server.registerTool(
+    'log_weight',
+    {
+      title: 'Log body weight for a calendar day',
+      description:
+        'Upsert owner body_weight_logs for a local calendar day (one row per day). Gated by LIFT_MCP_WRITES_ENABLED. Weight in pounds.',
+      inputSchema: {
+        weightLb: z.number().describe('Body weight in pounds (50–500)'),
+        localDate: z
+          .string()
+          .regex(DAY_KEY_RE)
+          .optional()
+          .describe('YYYY-MM-DD (default: today in timezone)'),
+        timezone: z
+          .string()
+          .min(1)
+          .optional()
+          .describe(`IANA timezone (default ${DEFAULT_OWNER_TIMEZONE})`),
+      },
+    },
+    async ({ weightLb, localDate, timezone }) => {
+      if (!writesEnabled()) {
+        return errorText(
+          'Write tools are disabled (LIFT_MCP_WRITES_ENABLED!=true). Enable writes to log body weight from Claude.',
+        );
+      }
+
+      const normalized = normalizeBodyWeightLb(weightLb);
+      if (normalized == null) {
+        return errorText('weightLb must be a finite number between 50 and 500 pounds.');
+      }
+
+      const tz = timezone?.trim() || DEFAULT_OWNER_TIMEZONE;
+      const day = localDate && DAY_KEY_RE.test(localDate) ? localDate : todayKeyInTimeZone(tz);
+
+      const { data: existing, error: existingError } = await db
+        .from('body_weight_logs')
+        .select('id,logged_at,weight_lb')
+        .eq('user_id', USER_ID)
+        .eq('logged_at', day)
+        .maybeSingle();
+      if (existingError) return errorText(`log_weight lookup failed: ${existingError.message}`);
+
+      const previousLb =
+        existing?.weight_lb == null ? null : Number((existing as { weight_lb: number | string }).weight_lb);
+      const id = existing?.id ?? crypto.randomUUID();
+      const row = {
+        id,
+        user_id: USER_ID,
+        logged_at: day,
+        weight_lb: normalized,
+      };
+
+      const { data: upserted, error: upsertError } = await db
+        .from('body_weight_logs')
+        .upsert(row, { onConflict: 'user_id,logged_at' })
+        .select('id,logged_at,weight_lb')
+        .single();
+      if (upsertError) return errorText(`log_weight upsert failed: ${upsertError.message}`);
+
+      const saved = upserted as { id: string; logged_at: string; weight_lb: number | string };
+      return jsonText({
+        ok: true,
+        created: !existing,
+        id: saved.id,
+        loggedAt: String(saved.logged_at).slice(0, 10),
+        weightLb: Number(saved.weight_lb),
+        previousWeightLb: previousLb,
+      });
     },
   );
 

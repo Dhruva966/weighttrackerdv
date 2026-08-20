@@ -39,11 +39,16 @@ export function ExerciseImage({
   size = 'md',
 }: {
   exercise: Exercise;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'strip';
 }) {
   const candidates = exerciseImageCandidates(exercise);
   const [index, setIndex] = useState(0);
-  const boxClass = size === 'sm' ? 'h-12 w-12 rounded-lg text-[10px]' : 'h-16 w-16 rounded-xl text-xs';
+  const boxClass =
+    size === 'sm'
+      ? 'h-12 w-12 rounded-lg text-[10px]'
+      : size === 'strip'
+        ? 'h-16 w-16 rounded-2xl text-[10px]'
+        : 'h-16 w-16 rounded-xl text-xs';
 
   useEffect(() => {
     setIndex(0);

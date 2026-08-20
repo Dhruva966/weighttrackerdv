@@ -56,11 +56,11 @@ UI calendar uses **`getDayWorkoutBundle(date, sessions, sets, { timeZone })`** �
 ### Move day reconstruction (`src/lib/day-workout-bundle.ts`) — separate helper
 Richer Move-day shape (sessions + movements). **Not** what the calendar panel imports today. Empty days return `null`; LA day keys. Do not mix archived food code into either bundle.
 
-### Diary (local `diaryStore` — not yet synced)
+### Diary (local `diaryStore` — body weight now syncs to Supabase)
 | Contract | Shape | Notes |
 |----------|-------|-------|
-| BodyWeightLog | `{ id, loggedAt, weightLb }` | Seeded ~169; NL “weighed N” upserts day |
-| MovementLog | `{ id, loggedAt, kind, title, durationMin, summary, raw }` | Kinds: `walk \| incline_walk \| hike \| run \| stairmaster \| bike \| cardio \| other` |
+| BodyWeightLog | `{ id, loggedAt, weightLb }` | UUID ids when logged in-app; seed `bw-seed-dhruva` stays local-only. Upsert by calendar day. Claude `log_weight` writes `body_weight_logs`; bootstrap hydrates into diary (remote wins same day). |
+| MovementLog | `{ id, loggedAt, kind, title, durationMin, summary, raw }` | Kinds: `walk \| incline_walk \| hike \| run \| stairmaster \| bike \| cardio \| other` — still local-only |
 
 ### UI (`uiStore`)
 Intentions `{ id, name, done }` — add/remove/toggle. Onboarding stashed.
@@ -78,7 +78,7 @@ Removed: blind `tendGold()` +1.
 ## Key files
 | What | Where |
 |------|-------|
-| Shell / routes / bar | `src/App.tsx`, `UniversalCommandBar.tsx` |
+| Shell / routes | `src/App.tsx` (universal command bar removed — log via Claude MCP) |
 | Move home | `src/pages/Move.tsx` |
 | Lift progress (Grow) | `src/components/LiftProgress.tsx` |
 | Pot of gold | `src/components/PotOfGold.tsx` |
@@ -90,12 +90,12 @@ Removed: blind `tendGold()` +1.
 | NL parsers | `src/lib/weight-from-text.ts`, `src/lib/movement-from-text.ts`, `src/lib/universal-command.ts` |
 | Archived food UI | `archive/food/` |
 | Exercise NL sets | Two-stage LLM-to-UI pattern: Supabase `parse-exercise-log` (Anthropic `claude-haiku-4-5` first, Groq fallback) → constrained draft JSON → deterministic `commitExerciseLogDraft` in `src/lib/exercise-log-parse.ts` → UI-ready sets/notes. Key: `ANTHROPIC_API_KEY` in Supabase secrets only (not `VITE_*`). Clean shorthand stays on-device. |
-| Lift remote MCP | Supabase Edge Function `lift-mcp` (Streamable HTTP) for Claude **custom connectors**. Read tools: `list_recent_sessions`, `get_session_detail`, `get_exercise_history`, `list_recent_prs`. Write stub `log_set_draft` gated by `LIFT_MCP_WRITES_ENABLED` (default false). Auth: Bearer `LIFT_MCP_TOKEN` (deploy with `verify_jwt=false`). URL: `https://<ref>.supabase.co/functions/v1/lift-mcp`. Connect in Claude: Settings → Connectors → Add custom connector → that URL → Request header `authorization` = `Bearer <token>` (include `Bearer `). Diary not exposed. Spec: `docs/superpowers/specs/2026-08-04-lift-mcp-connector-design.md`. E2E: `pnpm test:lift-mcp`. |
+| Lift remote MCP | Supabase Edge Function `lift-mcp` (+ Vercel proxy `https://weighttrackerdv.vercel.app/api/lift-mcp` for Claude). Tools: `list_recent_sessions` (hides 0-set by default), `get_session_detail`, `get_exercise_history` (includes `lastWorkingSet`), `list_recent_prs`, `resolve_exercise` (numbered candidates), `log_sets` (day session ensure-on-first-log), `log_weight` (upsert `body_weight_logs` by day), `list_recent_weigh_ins`. Writes gated by `LIFT_MCP_WRITES_ENABLED===true`. No daily empty sessions; rest day = no row. Auth: Bearer via proxy / OAuth+bearer on Edge. Specs: `docs/superpowers/specs/2026-08-04-lift-mcp-connector-design.md`, `docs/superpowers/specs/2026-08-07-lift-mcp-writes-design.md`. E2E: `pnpm test:lift-mcp`. Empty junk cleanup: `pnpm cleanup:empty-sessions` (dry-run; `--apply` to delete). |
 | Session + search | `src/pages/Session.tsx`, `ExercisePicker.tsx`, `MovementLogger.tsx`, `CardioSetLogger.tsx` |
 | Exercise merges | `src/data/exercise-merges.ts` (+ tests) |
 | Theme | `tailwind.config.js`, `src/index.css` |
 | ADRs | `decisions/2026-07-14-aloo-gold-diary.md`, `decisions/2026-07-14-context-save.md` |
-| Supabase hydration | `src/lib/supabase-hydrate.ts` (fetch + row mappers), `src/lib/supabase-mappers.ts` (`rowToExercise/Session/Set/Goal`), wired in `src/hooks/useSupabaseBootstrap.ts` |
+| Supabase hydration | `src/lib/supabase-hydrate.ts` (gym snapshot + `fetchBodyWeightLogs`), `src/lib/supabase-mappers.ts`, `src/lib/supabase-bootstrap-refresh.ts` (also hydrates diary weigh-ins), wired in `src/hooks/useSupabaseBootstrap.ts` |
 
 ## Supabase project state (2026-07-31)
 - Live project is **`weighttracker`** (`svcjdtlmmrisrkjqdsjt`, ap-southeast-2) — matches `VITE_SUPABASE_URL`. A same-named-ish sibling **`weighttrackerdv`** (`stvyokgukswcebpyqcnb`) also exists in the same org and is unused; don't confuse the two when linking the Supabase CLI.
@@ -107,7 +107,8 @@ Removed: blind `tendGold()` +1.
 ## Open follow-ups
 - Catalog exercise ids (`ex-${slug}`) never sync to Supabase — sets stay local until UUID migration
 - Sync diary weight/movements to Supabase when tables/policies ready
-- Deploy `lift-mcp` Edge Function to production once CLI is logged in (`npx supabase login` / `SUPABASE_ACCESS_TOKEN`) — local Deno + E2E already verified against live DB
+- Deploy `lift-mcp` Edge Function after writes land (`pnpm supabase:secrets` with `LIFT_MCP_WRITES_ENABLED=true`, then `pnpm supabase:deploy-functions`). Local Deno E2E already green (`LIFT_MCP_URL=http://127.0.0.1:8787 LIFT_MCP_E2E_WRITE=1 pnpm test:lift-mcp`).
+- Empty-session spam: deleted 627 junk 0-set rows (20 on Aug 4 HK + 607 others). `SessionLauncher` now waits for persist hydration + create-once ref. Optional follow-up: defer `syncSession` until first set.
 - Optional freeform custom movement categories beyond the fixed kind list
 - Groq Whisper edge for iPhone installed-PWA STT
 - Rebuild food/meal logging from `archive/food/` when ready

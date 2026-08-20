@@ -80,15 +80,15 @@ describe('app shell', () => {
     cleanup();
   });
 
-  it('renders Lift Today with universal command bar', () => {
+  it('renders Lift Today without the legacy command bar', () => {
     renderApp('/today');
     expect(screen.getByRole('link', { name: /lift home/i })).toBeInTheDocument();
     expect(screen.getByText(/hi dhruva/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /your pot of gold is filling/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /body weight/i })).toBeInTheDocument();
     expect(screen.getByText('169')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/walk, lift, or weigh-in/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /speak to log/i })).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/walk, lift, or weigh-in/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /speak to log/i })).not.toBeInTheDocument();
   });
 
   it('does not count board baseline sets as today training', () => {
@@ -149,15 +149,10 @@ describe('app shell', () => {
     await waitFor(() => expect(screen.getByRole('heading', { name: /^you$/i })).toBeInTheDocument());
   });
 
-  it('does not route food text from the universal bar while meal logging is archived', async () => {
+  it('omits the legacy universal command bar from the shell', () => {
     renderApp('/');
-    fireEvent.change(screen.getByPlaceholderText(/walk, lift, or weigh-in/i), {
-      target: { value: 'I ate a sandwich about 600 calories' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: /submit log/i }));
-    await waitFor(() => expect(screen.getAllByText(/add a hint like/i).length).toBeGreaterThan(0));
-    expect(screen.queryByRole('heading', { name: /does this feel right/i })).not.toBeInTheDocument();
-    expect(screen.queryByText(/600 kcal/i)).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/walk, lift, or weigh-in/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /submit log/i })).not.toBeInTheDocument();
   });
 });
 
@@ -272,9 +267,8 @@ describe('active session flow', () => {
       </QueryClientProvider>,
     );
 
-    expect(screen.getByRole('img', { name: withPhoto.name })).toHaveAttribute(
-      'src',
-      withPhoto.imageUrl,
+    expect(screen.getByRole('img', { name: withPhoto.name }).getAttribute('src')).toContain(
+      'exercise-images/triceps-pushdown-cable-straight-bar.jpg',
     );
     expect(
       screen.getByRole('img', { name: `No photo available for ${withoutPhoto.name}` }),

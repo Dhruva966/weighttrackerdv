@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronLeft, ChevronUp, Pencil, Redo2, Undo2, X } from 'lucide-react';
+import { ChevronLeft, Pencil, Plus, Redo2, RefreshCw, Undo2, X } from 'lucide-react';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ExerciseImage } from '../components/ExerciseImage';
@@ -10,29 +10,12 @@ import { TemplateCard } from '../components/TemplateCard';
 import { exampleTemplates, resolveExampleTemplateExerciseIds } from '../data/example-templates';
 import { toDayKey } from '../lib/calendar';
 import { formatDayKeyLabel, getDeviceTimeZone, sessionDayKey } from '../lib/local-day';
+import { refreshSupabaseBootstrap } from '../lib/supabase-bootstrap-refresh';
 import { useSessionHistoryStore } from '../stores/sessionHistoryStore';
 import { startWorkoutWithExercises, useTemplateStore } from '../stores/templateStore';
 import { useUiStore } from '../stores/uiStore';
 import { useWorkoutStore } from '../stores/workoutStore';
-import type { Exercise, MuscleGroup, WorkoutSession } from '../types';
-
-const muscleGroupLabels: Record<MuscleGroup, string> = {
-  chest: 'Chest',
-  back: 'Back',
-  shoulders: 'Shoulders',
-  arms: 'Arms',
-  biceps: 'Biceps',
-  triceps: 'Triceps',
-  legs: 'Legs',
-  quads: 'Quads',
-  hamstrings: 'Hamstrings',
-  glutes: 'Glutes',
-  calves: 'Calves',
-  core: 'Core',
-  forearms: 'Forearms',
-  'full-body': 'Full body',
-  cardio: 'Cardio',
-};
+import type { Exercise, WorkoutSession } from '../types';
 
 const EMPTY_PLAN: string[] = [];
 
@@ -110,6 +93,7 @@ export function Session() {
   const [lastSetKey, setLastSetKey] = useState('');
   const [showSaveTemplate, setShowSaveTemplate] = useState(false);
   const [templateName, setTemplateName] = useState('');
+  const [syncingRemote, setSyncingRemote] = useState(false);
   const session = sessions.find((item) => item.id === sessionId);
   const sessionSets = sets.filter((setItem) => setItem.sessionId === sessionId);
   const plannedIds = session?.plannedExerciseIds ?? EMPTY_PLAN;
@@ -125,15 +109,8 @@ export function Session() {
     return [...fromPlan, ...extras];
   }, [exercises, plannedIds, sessionSets]);
 
-  const groupedExercises = useMemo(() => {
-    const groups = new Map<MuscleGroup, Exercise[]>();
-    for (const exercise of plannedExercises) {
-      const bucket = groups.get(exercise.muscleGroup) ?? [];
-      bucket.push(exercise);
-      groups.set(exercise.muscleGroup, bucket);
-    }
-    return [...groups.entries()];
-  }, [plannedExercises]);
+  const activeExercise =
+    plannedExercises.find((exercise) => exercise.id === expandedExerciseId) ?? plannedExercises[0] ?? null;
 
   useEffect(() => {
     if (session?.endedAt) {
@@ -266,6 +243,27 @@ export function Session() {
     }
   }
 
+  async function handleRefreshFromCloud() {
+    if (syncingRemote) return;
+    setSyncingRemote(true);
+    try {
+      const result = await refreshSupabaseBootstrap();
+      if (!result.configured) {
+        showPreviewNotice('Supabase not configured on this device.');
+      } else if (!result.reachable) {
+        showPreviewNotice('Could not reach Supabase — try again online.');
+      } else if (result.hydrated) {
+        showPreviewNotice('Pulled latest sets from cloud.');
+      } else {
+        showPreviewNotice('Cloud reachable, but no snapshot returned.');
+      }
+    } catch {
+      showPreviewNotice('Refresh failed.');
+    } finally {
+      setSyncingRemote(false);
+    }
+  }
+
   function handleBack() {
     const from = (location.state as { from?: unknown } | null)?.from;
     if (typeof from === 'string' && from.startsWith('/') && !from.startsWith('//')) {
@@ -355,6 +353,24 @@ export function Session() {
           <button
             className="button-secondary inline-flex min-h-9 items-center gap-1 px-2.5 text-sm disabled:opacity-40"
             type="button"
+            onClick={() => {
+              void handleRefreshFromCloud();
+            }}
+            disabled={syncingRemote}
+            aria-label="Refresh from cloud"
+            title="Pull latest sets from Supabase (Claude MCP writes)"
+          >
+            <RefreshCw
+              size={15}
+              strokeWidth={1.75}
+              aria-hidden
+              className={syncingRemote ? 'animate-spin' : undefined}
+            />
+            {syncingRemote ? 'Syncing' : 'Refresh'}
+          </button>
+          <button
+            className="button-secondary inline-flex min-h-9 items-center gap-1 px-2.5 text-sm disabled:opacity-40"
+            type="button"
             onClick={handleUndo}
             disabled={!canUndo}
             aria-label="Undo"
@@ -434,75 +450,88 @@ export function Session() {
             Pick a template below, or search to add everything you plan to train.
           </p>
         ) : (
-          groupedExercises.map(([muscleGroup, groupExercises]) => (
-            <div key={muscleGroup} className="grid gap-2">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-fgMuted">
-                {muscleGroupLabels[muscleGroup]}
-              </h3>
-              {groupExercises.map((exercise) => {
-                const exerciseSets = sessionSets.filter((setItem) => setItem.exerciseId === exercise.id);
-                const isExpanded = expandedExerciseId === exercise.id;
-
+          <>
+            <div className="-mx-1 flex gap-2 overflow-x-auto pb-1 pt-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {plannedExercises.map((exercise) => {
+                const isActive = activeExercise?.id === exercise.id;
                 return (
-                  <section key={exercise.id} className="app-card grid gap-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <button
-                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                        type="button"
-                        onClick={() => setExpandedExerciseId(isExpanded ? null : exercise.id)}
-                      >
-                        <ExerciseImage exercise={exercise} size="sm" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-fg">{exercise.name}</p>
-                          <p className="text-xs text-fgMuted">
-                            {exerciseSets.length
-                              ? `${exerciseSets.length} set${exerciseSets.length === 1 ? '' : 's'} logged`
-                              : 'Tap to log'}
-                          </p>
-                        </div>
-                        {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                      </button>
-                      <div className="flex shrink-0 items-center gap-0.5">
-                        <Link
-                          className="icon-button"
-                          to={`/exercises/${exercise.slug}/edit`}
-                          state={{ from: `/session/${session.id}` }}
-                          aria-label={`Edit ${exercise.name}`}
-                        >
-                          <Pencil size={15} strokeWidth={1.75} />
-                        </Link>
-                        <button
-                          className="icon-button"
-                          type="button"
-                          aria-label={`Remove ${exercise.name}`}
-                          onClick={() => removeExercise(exercise.id)}
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    </div>
-
-                    {isExpanded ? (
-                      <NaturalLanguageSetLogger
-                        exercise={exercise}
-                        sessionId={session.id}
-                        onEdit={async (label, run) => {
-                          const changed = await useSessionHistoryStore
-                            .getState()
-                            .commitEditAsync(session.id, label, async () => {
-                              await run();
-                            });
-                          if (changed) {
-                            showPreviewNotice(label);
-                          }
-                        }}
-                      />
-                    ) : null}
-                  </section>
+                  <button
+                    key={exercise.id}
+                    type="button"
+                    aria-label={exercise.name}
+                    aria-pressed={isActive}
+                    onClick={() => setExpandedExerciseId(exercise.id)}
+                    className={`shrink-0 rounded-2xl p-0.5 ${
+                      isActive ? 'ring-2 ring-fg' : 'ring-1 ring-transparent'
+                    }`}
+                  >
+                    <ExerciseImage exercise={exercise} size="strip" />
+                  </button>
                 );
               })}
+              <button
+                type="button"
+                className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl border border-dashed border-border bg-surfaceAlt text-fg"
+                aria-label="Add exercise"
+                onClick={() => {
+                  document.getElementById('session-add-exercises')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                <Plus size={22} strokeWidth={1.75} aria-hidden />
+              </button>
             </div>
-          ))
+
+            {activeExercise ? (
+              <section className="app-card grid gap-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xl font-semibold tracking-tight text-fg">{activeExercise.name}</p>
+                    <p className="mt-0.5 text-xs text-fgMuted">
+                      {(() => {
+                        const count = sessionSets.filter((setItem) => setItem.exerciseId === activeExercise.id)
+                          .length;
+                        return count
+                          ? `${count} set${count === 1 ? '' : 's'} logged`
+                          : 'Tap to log';
+                      })()}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    <Link
+                      className="icon-button"
+                      to={`/exercises/${activeExercise.slug}/edit`}
+                      state={{ from: `/session/${session.id}` }}
+                      aria-label={`Edit ${activeExercise.name}`}
+                    >
+                      <Pencil size={15} strokeWidth={1.75} />
+                    </Link>
+                    <button
+                      className="icon-button"
+                      type="button"
+                      aria-label={`Remove ${activeExercise.name}`}
+                      onClick={() => removeExercise(activeExercise.id)}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+                <NaturalLanguageSetLogger
+                  exercise={activeExercise}
+                  sessionId={session.id}
+                  onEdit={async (label, run) => {
+                    const changed = await useSessionHistoryStore
+                      .getState()
+                      .commitEditAsync(session.id, label, async () => {
+                        await run();
+                      });
+                    if (changed) {
+                      showPreviewNotice(label);
+                    }
+                  }}
+                />
+              </section>
+            ) : null}
+          </>
         )}
       </section>
 
@@ -538,7 +567,7 @@ export function Session() {
       </section>
 
       {/* 3. Add exercises */}
-      <section className="grid gap-3 border-t border-border/70 pt-5">
+      <section id="session-add-exercises" className="grid gap-3 border-t border-border/70 pt-5">
         <h2 className="text-lg font-medium text-fg">Add exercises</h2>
         <ExercisePicker
           excludeIds={plannedExercises.map((exercise) => exercise.id)}

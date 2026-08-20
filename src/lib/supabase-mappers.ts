@@ -71,6 +71,13 @@ type TemplateRow = {
   updated_at: string;
 };
 
+type BodyWeightRow = {
+  id: string;
+  user_id: string;
+  logged_at: string;
+  weight_lb: number | string;
+};
+
 type TemplateExerciseRow = {
   id: string;
   template_id: string;
@@ -166,6 +173,15 @@ export function templateExerciseToRow(templateExercise: TemplateExercise) {
   };
 }
 
+export function bodyWeightToRow(log: { id: string; loggedAt: string; weightLb: number }, userId: string) {
+  return {
+    id: log.id,
+    user_id: userId,
+    logged_at: log.loggedAt,
+    weight_lb: log.weightLb,
+  };
+}
+
 export function rowToExercise(row: ExerciseRow): Exercise {
   return {
     id: row.id,
@@ -248,5 +264,13 @@ export function rowToTemplateExercise(row: TemplateExerciseRow): TemplateExercis
     targetWeightLb:
       row.target_weight_lb === null || row.target_weight_lb === undefined ? undefined : Number(row.target_weight_lb),
     createdAt: row.created_at,
+  };
+}
+
+export function rowToBodyWeight(row: BodyWeightRow): { id: string; loggedAt: string; weightLb: number } {
+  return {
+    id: row.id,
+    loggedAt: String(row.logged_at).slice(0, 10),
+    weightLb: Number(row.weight_lb),
   };
 }
