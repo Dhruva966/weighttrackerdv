@@ -46,7 +46,7 @@ describe('useSupabaseBootstrap', () => {
     expect(refreshSupabaseBootstrap).toHaveBeenCalledTimes(3);
 
     await act(async () => {
-      resolveRefresh();
+      resolveRefresh({ configured: true, reachable: true, drained: 2, hydrated: false });
     });
 
     await waitFor(() => expect(result.current.syncing).toBe(false));

@@ -1,7 +1,8 @@
 import { BookOpen, Dumbbell, Home, Sparkles, User } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { AppLogo } from './components/AppLogo';
+import { ErrorBoundary, RouteErrorFallback } from './components/ErrorBoundary';
 import { LiftProgress } from './components/LiftProgress';
 import { InteractiveGymCalendar } from './components/InteractiveGymCalendar';
 import { Nav } from './components/Nav';
@@ -67,14 +68,30 @@ function GrowPage() {
   );
 }
 
+/**
+ * Wrapper component for route-level error boundaries with navigation.
+ */
+function RouteWithErrorBoundary({ element }: { element: React.ReactElement }) {
+  const navigate = useNavigate();
+  return (
+    <ErrorBoundary
+      fallback={(error, reset) => (
+        <RouteErrorFallback error={error} reset={reset} onNavigateHome={() => navigate('/move')} />
+      )}
+    >
+      {element}
+    </ErrorBoundary>
+  );
+}
+
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/move" replace />} />
-      <Route path="/move" element={<Move />} />
-      <Route path="/today" element={<Today />} />
-      <Route path="/grow" element={<GrowPage />} />
-      <Route path="/you" element={<SettingsPage />} />
+      <Route path="/move" element={<RouteWithErrorBoundary element={<Move />} />} />
+      <Route path="/today" element={<RouteWithErrorBoundary element={<Today />} />} />
+      <Route path="/grow" element={<RouteWithErrorBoundary element={<GrowPage />} />} />
+      <Route path="/you" element={<RouteWithErrorBoundary element={<SettingsPage />} />} />
       <Route path="/log" element={<Navigate to="/move" replace />} />
       <Route path="/history" element={<Navigate to="/grow" replace />} />
       <Route path="/history/sessions" element={<WorkoutHistory />} />
