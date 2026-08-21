@@ -708,9 +708,9 @@ describe('workoutStore', () => {
       const matches = useWorkoutStore.getState().exercises.filter((item) => item.slug === 'close-grip-pulldown');
       expect(matches).toHaveLength(1);
       expect(matches[0]?.id).toBe(local!.id);
-      // People-image block: Strong Storage URLs are stripped, not gap-filled.
-      expect(matches[0]?.imageUrl).toBeUndefined();
-      expect(matches[0]?.imageStyle).toBe('name-only');
+      // Policy v6: Strong Storage hollow-model PDF crops are allowed and gap-filled.
+      expect(matches[0]?.imageUrl).toBe(remotePdf);
+      expect(matches[0]?.imageStyle).toBe('photo');
     });
 
     it('replaces stale local stock people-photo URLs with remote PDF crops', () => {
@@ -745,9 +745,9 @@ describe('workoutStore', () => {
       });
 
       const match = useWorkoutStore.getState().exercises.find((item) => item.slug === 'close-grip-pulldown');
-      // Both local stock and remote Strong people demos are stripped.
-      expect(match?.imageUrl).toBeUndefined();
-      expect(match?.imageStyle).toBe('name-only');
+      // Policy v6: Remote PDF crop replaces stale stock URL with allowlisted Storage URL.
+      expect(match?.imageUrl).toBe(remotePdf);
+      expect(match?.imageStyle).toBe('photo');
     });
 
     it('keeps an existing allowlisted local imageUrl when remote has none', () => {

@@ -184,7 +184,6 @@ export const PDF_ICON_SLUGS = new Set<string>([
   'stiff-leg-deadlift-barbell',
   'stiff-leg-deadlift-dumbbell',
   'stretching',
-  'swimming',
   'sumo-deadlift-barbell',
   'sumo-deadlift-high-pull-barbell',
   't-bar-row',
