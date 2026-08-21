@@ -9,6 +9,23 @@ import {
   mountOauthRoutes,
   unauthorizedMcp,
 } from './oauth.ts';
+import {
+  type ListRecentSessionsResponse,
+  type GetSessionDetailResponse,
+  type GetExerciseHistoryResponse,
+  type ListRecentPrsResponse,
+  type ResolveExerciseResponse,
+  type ListRecentWeighInsResponse,
+  type LogSetsResponse,
+  type LogWeightResponse,
+} from './schemas.ts';
+import {
+  errorResponse,
+  dbError,
+  validationError,
+  notFoundError,
+  writesDisabledError,
+} from './errors.ts';
 
 /** Keep in sync with src/lib/user.ts */
 const USER_ID = 'de3c1f99-a64b-46c4-9f46-6afcc6d17f70';
@@ -115,16 +132,27 @@ const DAY_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const corsHeaders: Record<string, string> = oauthCorsHeaders();
 
-function jsonText(data: unknown): { content: Array<{ type: 'text'; text: string }> } {
+/**
+ * Format successful response with JSON data.
+ * Response data should conform to the schema for the tool.
+ */
+function jsonResponse<T>(data: T): { content: Array<{ type: 'text'; text: string }> } {
   return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
-}
-
-function errorText(message: string): { content: Array<{ type: 'text'; text: string }>; isError: true } {
-  return { content: [{ type: 'text', text: message }], isError: true };
 }
 
 function writesEnabled(): boolean {
   return Deno.env.get('LIFT_MCP_WRITES_ENABLED') === 'true';
+}
+
+/**
+ * Check if writes are enabled and return error response if not.
+ * Returns undefined if writes are enabled.
+ */
+function checkWritesEnabled(): ReturnType<typeof writesDisabledError> | undefined {
+  if (!writesEnabled()) {
+    return writesDisabledError();
+  }
+  return undefined;
 }
 
 function supabaseAdmin(): SupabaseClient {
@@ -231,10 +259,13 @@ function createMcpServer(db: SupabaseClient): McpServer {
       }
 
       const { data: sessions, error } = await query;
-      if (error) return errorText(`list_recent_sessions failed: ${error.message}`);
+      if (error) return dbError('list_recent_sessions query', error);
 
       const sessionRows = (sessions ?? []) as SessionRow[];
-      if (sessionRows.length === 0) return jsonText({ sessions: [] });
+      if (sessionRows.length === 0) {
+        const response: ListRecentSessionsResponse = { sessions: [] };
+        return jsonResponse(response);
+      }
 
       const ids = sessionRows.map((s) => s.id);
       const { data: sets, error: setsError } = await db
@@ -243,7 +274,7 @@ function createMcpServer(db: SupabaseClient): McpServer {
           'id,session_id,exercise_id,set_number,weight_lb,reps,rpe,is_warmup,is_pr,created_at,level,speed,duration_sec,calories',
         )
         .in('session_id', ids);
-      if (setsError) return errorText(`list_recent_sessions sets failed: ${setsError.message}`);
+      if (setsError) return dbError('list_recent_sessions sets query', setsError);
 
       const setRows = (sets ?? []) as SetRow[];
       const exerciseIds = [...new Set(setRows.map((s) => s.exercise_id))];
@@ -253,7 +284,7 @@ function createMcpServer(db: SupabaseClient): McpServer {
           .from('exercises')
           .select('id,slug,name,muscle_group,equipment,archived')
           .in('id', exerciseIds);
-        if (exError) return errorText(`list_recent_sessions exercises failed: ${exError.message}`);
+        if (exError) return dbError('list_recent_sessions exercises query', exError);
         for (const ex of (exercises ?? []) as ExerciseRow[]) exercisesById.set(ex.id, ex);
       }
 
@@ -264,7 +295,7 @@ function createMcpServer(db: SupabaseClient): McpServer {
         setsBySession.set(s.session_id, list);
       }
 
-      return jsonText({
+      const response: ListRecentSessionsResponse = {
         sessions: sessionRows
           .map((session) => {
             const summary = summarizeSets(setsBySession.get(session.id) ?? [], exercisesById);
@@ -281,7 +312,8 @@ function createMcpServer(db: SupabaseClient): McpServer {
           })
           .filter((s) => includeEmpty === true || s.setCount > 0)
           .slice(0, lim),
-      });
+      };
+      return jsonResponse(response);
     },
   );
 
@@ -701,11 +733,8 @@ function createMcpServer(db: SupabaseClient): McpServer {
       },
     },
     async ({ localDate, timezone, sets }) => {
-      if (!writesEnabled()) {
-        return errorText(
-          'Write tools are disabled (LIFT_MCP_WRITES_ENABLED!=true). Resolve names with resolve_exercise; log in the Lift app until writes are enabled.',
-        );
-      }
+      const writesError = checkWritesEnabled();
+      if (writesError) return writesError;
 
       const tz = timezone?.trim() || DEFAULT_OWNER_TIMEZONE;
       const day = localDate && DAY_KEY_RE.test(localDate) ? localDate : todayKeyInTimeZone(tz);
@@ -876,11 +905,8 @@ function createMcpServer(db: SupabaseClient): McpServer {
       },
     },
     async ({ weightLb, localDate, timezone }) => {
-      if (!writesEnabled()) {
-        return errorText(
-          'Write tools are disabled (LIFT_MCP_WRITES_ENABLED!=true). Enable writes to log body weight from Claude.',
-        );
-      }
+      const writesError = checkWritesEnabled();
+      if (writesError) return writesError;
 
       const normalized = normalizeBodyWeightLb(weightLb);
       if (normalized == null) {
