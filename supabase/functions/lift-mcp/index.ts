@@ -960,18 +960,48 @@ const mcpApp = new Hono();
 
 mcpApp.options('/*', (c) => c.body(null, 204, corsHeaders));
 
-mcpApp.get('/health', (c) =>
-  c.json(
+/**
+ * Health check endpoint with diagnostics.
+ * Returns server status, configuration, and connectivity checks.
+ */
+mcpApp.get('/health', async (c) => {
+  const checks: Record<string, boolean | string> = {
+    server: true,
+    writesEnabled: writesEnabled(),
+    auth: 'oauth+bearer',
+  };
+
+  // Check database connectivity
+  try {
+    const db = supabaseAdmin();
+    const { data, error } = await db.from('exercises').select('id').limit(1);
+    checks.database = error ? `error: ${error.message}` : 'connected';
+    checks.databaseRecords = data ? data.length : 0;
+  } catch (error) {
+    checks.database = `exception: ${error instanceof Error ? error.message : 'unknown'}`;
+  }
+
+  // Check environment variables
+  checks.supabaseUrl = Boolean(Deno.env.get('SUPABASE_URL'));
+  checks.supabaseServiceKey = Boolean(Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
+  checks.liftMcpToken = Boolean(Deno.env.get('LIFT_MCP_TOKEN'));
+
+  const allHealthy = 
+    checks.server === true &&
+    typeof checks.database === 'string' && checks.database === 'connected';
+
+  return c.json(
     {
-      ok: true,
+      ok: allHealthy,
       name: 'lift-mcp',
-      writesEnabled: writesEnabled(),
-      auth: 'oauth+bearer',
+      version: '0.2.0',
+      timestamp: new Date().toISOString(),
+      checks,
     },
-    200,
+    allHealthy ? 200 : 503,
     corsHeaders,
-  ),
-);
+  );
+});
 
 mountOauthRoutes(mcpApp);
 

@@ -20,7 +20,8 @@
     "supabase:secrets": "tsx scripts/push-supabase-secrets.ts",
     "supabase:deploy-functions": "tsx scripts/deploy-supabase-functions.ts",
     "test:lift-mcp": "tsx scripts/test-lift-mcp-e2e.ts",
-    "serve:lift-mcp": "bash scripts/serve-lift-mcp-local.sh"
+    "serve:lift-mcp": "bash scripts/serve-lift-mcp-local.sh",
+    "check:mcp-health": "tsx scripts/check-mcp-health.ts"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

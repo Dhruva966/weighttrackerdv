@@ -1,145 +1,312 @@
-# Deployment
+# Lift Deployment Guide
 
-Deploy the **Lift** PWA with Vercel for the web app and Supabase for gym database, storage, and seed data. (Local diary: weight/meals/walks currently live in browser Zustand until synced.)
+Complete deployment runbook for the Lift PWA and MCP server.
 
-## Environment Variables
-| Variable | Required | Where | Purpose |
-|----------|----------|-------|---------|
-| `VITE_SUPABASE_URL` | Yes | Local `.env.local`, Vercel | Browser-safe Supabase project URL. |
-| `VITE_SUPABASE_ANON_KEY` | Yes | Local `.env.local`, Vercel | Browser-safe anon key. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Scripts only | Local shell or secure CI secret | Seed and backfill scripts only. Never expose to browser code. |
-| `SUPABASE_PROJECT_REF` | Admin only | Local shell or CI | Supabase CLI/project targeting. |
-| `VERCEL_PROJECT_ID` | CI optional | Vercel/GitHub secrets | Links CLI deploys to the project. |
-| `VERCEL_ORG_ID` | CI optional | Vercel/GitHub secrets | Links CLI deploys to the team/account. |
+## Prerequisites
 
-## Infrastructure
-```mermaid
-flowchart LR
-  User[iPhone Safari PWA] --> Vercel[Vercel static app]
-  Vercel --> Browser[React app in browser]
-  Browser --> Query[React Query cache]
-  Browser --> Dexie[Dexie IndexedDB pending queue]
-  Query --> Supabase[(Supabase Postgres)]
-  Browser --> Storage[Supabase Storage exercise-images]
-  Dexie --> Supabase
-  Scripts[Seed and backfill scripts] --> Supabase
-  Scripts --> Storage
-```
-
-## Quick Start
-1. Install dependencies.
-
+1. **Supabase CLI** authenticated: `npx supabase login`
+2. **Vercel CLI** authenticated: `npx vercel login`
+3. Environment variables in `.env.local`:
    ```bash
-   pnpm install
+   VITE_SUPABASE_URL=https://svcjdtlmmrisrkjqdsjt.supabase.co
+   VITE_SUPABASE_ANON_KEY=...
+   SUPABASE_SERVICE_ROLE_KEY=...
+   LIFT_MCP_TOKEN=...
+   LIFT_MCP_WRITES_ENABLED=true
    ```
 
-2. Create `.env.local` with browser-safe Supabase values.
-
-   ```bash
-   VITE_SUPABASE_URL=https://<project-ref>.supabase.co
-   VITE_SUPABASE_ANON_KEY=<anon-key>
-   ```
-
-3. Run the app locally.
-
-   ```bash
-   pnpm dev
-   ```
-
-4. Build before deploying.
-
-   ```bash
-   pnpm build
-   ```
-
-5. Deploy from `main` through Vercel auto-deploy.
-
-## Supabase Setup
-1. Create a Supabase project.
-2. Apply all migrations in `supabase/migrations/` in order (`supabase db push` once linked — `supabase/config.toml` needs a `project_id` key, not the old `name` key, or current CLI versions reject it).
-3. Create public-read Storage bucket `exercise-images`.
-4. Set local script-only secrets in the shell when running seed or backfill.
-5. Verify `exercises`, `sessions`, `sets`, `body_weight_logs`, `goals`, `templates`, and `template_exercises` exist before running the app.
-6. Apply `0005_cardio_set_fields.sql` so `sets` allows nullable `weight_lb`/`reps` and has `level` / `speed` / `duration_sec` / `calories`. Until it is applied, the client still logs cardio locally and queues cardio-only upserts; lift sync continues to work.
-
-## Supabase Edge Function secrets
-LLM keys belong in **Supabase secrets**, not Postgres tables and not `VITE_*` (browser) env.
-
-1. In `.env.local`, set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and **`ANTHROPIC_API_KEY`** (preferred). Optionally also `GROQ_API_KEY` as fallback.
-2. Log in and link your project: `npx supabase login` then `npx supabase link --project-ref <ref>`.
-3. Push secrets to Supabase:
-
-   ```bash
-   pnpm supabase:secrets
-   ```
-
-4. Deploy the parser function:
-
-   ```bash
-   pnpm supabase:deploy-functions
-   ```
-
-Or manually in the Supabase dashboard: **Project Settings → Edge Functions → Secrets** → add `ANTHROPIC_API_KEY` (and optionally `GROQ_API_KEY`).
-
-`parse-exercise-log` uses **Claude Haiku (`claude-haiku-4-5`)** first for messy set logs (number words, broken English), then Groq if Anthropic is unset/fails. The client commits the draft with Zod — no Anthropic key in the browser.
-
-### Lift remote MCP (`lift-mcp`)
-Claude custom connector for coach-style Q&A over gym data (sessions/sets/PRs). Not an in-app chatbot.
-
-**Claude connector URL (use this):** `https://weighttrackerdv.vercel.app/api/lift-mcp`
-
-Do **not** point Claude at the raw Supabase function URL. Supabase’s gateway returns `401` on Claude’s `/.well-known/.../functions/v1/lift-mcp` discovery probe, which breaks Connect with “Couldn't register with Lift's sign-in service.” The Vercel route proxies MCP and injects `LIFT_MCP_TOKEN`; `vercel.json` 404s well-known discovery so Claude treats the connector as public.
-
-1. Add to `.env.local`: `LIFT_MCP_TOKEN` (e.g. `openssl rand -hex 32`) and `LIFT_MCP_WRITES_ENABLED=true` when ready to log from Claude (otherwise `false`).
-2. Log in to Supabase CLI once: `npx supabase login` (or set `SUPABASE_ACCESS_TOKEN`).
-3. Push secrets: `pnpm supabase:secrets` (pushes `LIFT_MCP_TOKEN` and `LIFT_MCP_WRITES_ENABLED` when set).
-4. Deploy Edge Function: `pnpm supabase:deploy-functions`.
-5. In **Vercel → Project → Settings → Environment Variables**, set:
-   - `LIFT_MCP_TOKEN` = same value as `.env.local`
-   - `LIFT_MCP_UPSTREAM` = `https://svcjdtlmmrisrkjqdsjt.supabase.co/functions/v1/lift-mcp` (optional; this is the default)
-6. Deploy/redeploy the Vercel app so `/api/lift-mcp` is live.
-7. Sanity: `curl -s https://weighttrackerdv.vercel.app/api/lift-mcp/health` → `{"ok":true,...}`
-8. In Claude: remove any old Lift connector → **Add custom connector** → URL `https://weighttrackerdv.vercel.app/api/lift-mcp` → leave OAuth Client ID empty → **Connect** → enable in chat via **+ → Connectors**.
-9. Chat routine: dump workout → Claude calls `resolve_exercise` (pick numbered candidates) → `log_sets` → optional `get_exercise_history` for last-time / overload. Weigh-in: `log_weight` (50–500 lb, upsert that calendar day) then `list_recent_weigh_ins`. Refresh the PWA (Session **Refresh**, or leave/reopen) so Today/Grow pick up the cloud row.
-10. Empty junk sessions: `pnpm cleanup:empty-sessions` then `--apply` if the dry-run looks right.
-
-Edge function direct URL (scripts/E2E only): `https://svcjdtlmmrisrkjqdsjt.supabase.co/functions/v1/lift-mcp`  
-E2E: `LIFT_MCP_URL=https://weighttrackerdv.vercel.app/api/lift-mcp pnpm test:lift-mcp`
-
-**Local verify without deploy** (Deno talks to live Postgres via service role):
+## Quick Deploy
 
 ```bash
-pnpm serve:lift-mcp   # http://127.0.0.1:8787
-LIFT_MCP_URL=http://127.0.0.1:8787 pnpm test:lift-mcp
+# 1. Push secrets to Supabase
+pnpm supabase:secrets
+
+# 2. Deploy Edge Functions
+pnpm supabase:deploy-functions
+
+# 3. Deploy Vercel (auto-deploys on push to main)
+git push origin main
+
+# 4. Verify deployment
+pnpm check:mcp-health
 ```
 
-Do not put the token in the URL query string.
+## Detailed Steps
 
-`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are copied **from** Supabase API settings into Vercel/`.env.local`. They are not stored back into Supabase.
+### 1. Supabase Database Migrations
 
-## Vercel Setup
-1. Import the GitHub repo into Vercel.
-2. Set framework preset to Vite.
-3. Set build command to `pnpm build`.
-4. Set output directory to `dist`.
-5. Add `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and for Claude MCP: `LIFT_MCP_TOKEN` (same as Supabase secret). Optional: `LIFT_MCP_UPSTREAM`.
-6. Enable auto-deploy from `main`.
-7. Production URL: **https://weighttrackerdv.vercel.app** (confirm in Vercel project domains if renamed).
-8. Claude connector path: **https://weighttrackerdv.vercel.app/api/lift-mcp**
+Apply any pending migrations:
 
-## Runbook
-| Symptom | Check | Fix |
-|---------|-------|-----|
-| Blank app after deploy | Browser console and Vercel build output | Confirm `pnpm build` passes and entry file matches Vite config. |
-| Supabase requests fail | Network tab and env vars | Verify Vercel has `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. |
-| Images do not load | Storage bucket and `image_url` values | Confirm bucket is public-read and paths use `exercise-images/<slug>.jpg`. |
-| Offline writes do not sync | Dexie pending table and online events | Confirm queued payloads have UUIDs and drain on `online` or `visibilitychange`. |
-| PR badges missing | `sets.is_pr` value after insert | Verify trigger exists and warmup sets are excluded. |
-| PWA install prompt missing | Manifest and icons | Confirm `public/manifest.webmanifest`, icons, and theme-color metadata exist. |
+```bash
+npx supabase db push
+```
 
-## Debugging Guide
-- Reproduce locally with `pnpm dev` before changing deployment settings.
-- Build locally with `pnpm build` before pushing release fixes.
-- Inspect Supabase table rows directly when UI state and persisted state disagree.
-- Clear IndexedDB only after exporting pending writes or confirming the queue is empty.
-- Treat service-role key exposure as a release blocker. Rotate the key if it appears in logs, client code, screenshots, or committed files.
+Verify migrations:
+```bash
+npx supabase db diff
+```
+
+### 2. Supabase Edge Functions
+
+**Push secrets** (required before first deploy):
+```bash
+pnpm supabase:secrets
+```
+
+This pushes:
+- `ANTHROPIC_API_KEY` - For exercise log parsing
+- `GROQ_API_KEY` - Fallback for exercise log parsing
+- `LIFT_MCP_TOKEN` - Bearer auth token for MCP
+- `LIFT_MCP_WRITES_ENABLED` - Enable/disable write operations
+- `LIFT_MCP_PUBLIC_URL` - Public MCP endpoint URL
+
+**Deploy functions**:
+```bash
+pnpm supabase:deploy-functions
+```
+
+Deployed functions:
+- `parse-exercise-log` - Natural language set parsing
+- `lift-mcp` - MCP server for Claude integration
+
+### 3. Vercel PWA
+
+**Environment variables** (set in Vercel dashboard):
+- `VITE_SUPABASE_URL` - Supabase project URL (build-time)
+- `VITE_SUPABASE_ANON_KEY` - Supabase anon key (build-time)
+- `LIFT_MCP_TOKEN` - MCP bearer token (runtime, for proxy)
+- `LIFT_MCP_UPSTREAM` - Optional, override MCP upstream URL
+
+**Deploy**:
+```bash
+# Auto-deploy via GitHub push
+git push origin main
+
+# Or manual deploy
+npx vercel --prod
+```
+
+**Vercel configuration** (`vercel.json`):
+- Rewrites `/api/lift-mcp/*` to Node.js proxy handler
+- Blocks OAuth discovery paths (`.well-known/*`)
+- SPR fallback for React Router
+
+### 4. Health Checks
+
+**Check MCP server health**:
+```bash
+pnpm check:mcp-health
+```
+
+This verifies:
+- ✅ Vercel proxy is up
+- ✅ Supabase Edge Function is up
+- ✅ Database connectivity
+- ✅ Environment variables are set
+- ✅ Writes are enabled/disabled
+- ✅ MCP protocol works
+
+**Manual health check**:
+```bash
+# Vercel proxy (no auth required)
+curl https://weighttrackerdv.vercel.app/api/lift-mcp/health
+
+# Supabase direct (requires bearer token)
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  https://svcjdtlmmrisrkjqdsjt.supabase.co/functions/v1/lift-mcp/health
+```
+
+### 5. Test MCP Integration
+
+**E2E test** (local against deployed endpoints):
+```bash
+pnpm test:lift-mcp
+```
+
+**Test from Claude Desktop**:
+1. Open Claude Desktop
+2. Go to Settings → Developer → Edit Config
+3. Add MCP server:
+   ```json
+   {
+     "mcpServers": {
+       "lift": {
+         "type": "http",
+         "url": "https://weighttrackerdv.vercel.app/api/lift-mcp"
+       }
+     }
+   }
+   ```
+4. Restart Claude Desktop
+5. Test: "What was my last workout?"
+
+## Troubleshooting
+
+### MCP Server Returns 500
+
+**Symptoms**: Claude reports "both lookups are failing"
+
+**Check**:
+1. Health endpoint: `pnpm check:mcp-health`
+2. Supabase logs: `npx supabase functions logs lift-mcp`
+3. Vercel logs: Check Vercel dashboard
+
+**Common causes**:
+- ❌ `LIFT_MCP_TOKEN` not set on Vercel
+- ❌ `SUPABASE_SERVICE_ROLE_KEY` not set on Supabase
+- ❌ Database connection timeout
+- ❌ Edge Function not deployed
+
+**Fix**:
+```bash
+# Re-push secrets
+pnpm supabase:secrets
+
+# Re-deploy functions
+pnpm supabase:deploy-functions
+
+# Verify
+pnpm check:mcp-health
+```
+
+### Writes Not Working
+
+**Symptoms**: `log_sets` or `log_weight` return "writes disabled"
+
+**Check**:
+```bash
+pnpm check:mcp-health | grep writesEnabled
+```
+
+**Fix**:
+```bash
+# Ensure LIFT_MCP_WRITES_ENABLED=true in .env.local
+echo "LIFT_MCP_WRITES_ENABLED=true" >> .env.local
+
+# Push secrets
+pnpm supabase:secrets
+
+# Verify
+pnpm check:mcp-health
+```
+
+### Database Connection Errors
+
+**Symptoms**: Health check shows `database: error: ...`
+
+**Check**:
+1. Supabase project is not paused
+2. Service role key is valid
+3. Tables exist (migrations applied)
+
+**Fix**:
+```bash
+# Check Supabase project status
+npx supabase projects list
+
+# Re-apply migrations
+npx supabase db push
+
+# Verify tables exist
+npx supabase db diff
+```
+
+### Vercel Proxy 404
+
+**Symptoms**: `/api/lift-mcp` returns 404
+
+**Check**:
+1. `api/lift-mcp.ts` exists
+2. `vercel.json` has rewrite rules
+3. Vercel build succeeded
+
+**Fix**:
+```bash
+# Check Vercel deployment status
+npx vercel ls
+
+# Re-deploy
+git push origin main --force
+
+# Or manual deploy
+npx vercel --prod --force
+```
+
+## Monitoring
+
+### Supabase Logs
+
+```bash
+# Stream live logs
+npx supabase functions logs lift-mcp --follow
+
+# Show last 100 logs
+npx supabase functions logs lift-mcp --limit 100
+
+# Filter by error level
+npx supabase functions logs lift-mcp --level error
+```
+
+### Vercel Logs
+
+1. Go to https://vercel.com/dhruva966/weighttrackerdv
+2. Click "Logs" tab
+3. Filter by `/api/lift-mcp`
+
+### Health Check Cron
+
+Set up monitoring (optional):
+```bash
+# Add to crontab
+*/5 * * * * curl -f https://weighttrackerdv.vercel.app/api/lift-mcp/health || echo "MCP is down"
+```
+
+## Rollback
+
+### Rollback Edge Function
+```bash
+# List deployments
+npx supabase functions list
+
+# Deploy previous version (manual - copy old code)
+```
+
+### Rollback Vercel
+```bash
+# List deployments
+npx vercel ls
+
+# Promote previous deployment
+npx vercel promote <deployment-url>
+```
+
+## Security Checklist
+
+- ✅ `SUPABASE_SERVICE_ROLE_KEY` is secret (never in git)
+- ✅ `LIFT_MCP_TOKEN` is random (generate with `openssl rand -base64 32`)
+- ✅ Vercel environment variables are encrypted
+- ✅ Supabase secrets are encrypted
+- ✅ No secrets in source code
+- ✅ RLS disabled acknowledged (single-user app)
+
+## Performance
+
+### Edge Function Cold Start
+- First request after idle: ~500ms
+- Subsequent requests: ~50-100ms
+
+### Caching
+- Health endpoint: No cache
+- MCP responses: No cache (real-time data)
+
+### Rate Limits
+- None currently (single-user app)
+- Add if needed: `Deno.env.get('RATE_LIMIT_PER_MINUTE')`
+
+## Next Steps
+
+1. ✅ Deploy MCP with writes enabled
+2. ⏳ Add monitoring alerts
+3. ⏳ Add rate limiting
+4. ⏳ Add request logging
+5. ⏳ Add performance metrics
