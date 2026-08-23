@@ -1,5 +1,6 @@
 import { Dumbbell, LayoutList, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ExerciseRecommendations } from '../components/ExerciseRecommendations';
 import { TemplateCard } from '../components/TemplateCard';
 import { isBoardBaselineSession } from '../data/catalog';
 import { exampleTemplates, resolveExampleTemplateExerciseIds } from '../data/example-templates';
@@ -97,6 +98,8 @@ export function Move() {
           </p>
         </Link>
       ) : null}
+
+      <ExerciseRecommendations />
 
       <section className="grid gap-3" aria-labelledby="move-templates-heading">
         <div className="flex items-start justify-between gap-3">

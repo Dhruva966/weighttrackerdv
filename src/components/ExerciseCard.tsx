@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Pencil } from 'lucide-react';
 import { ExerciseImage } from './ExerciseImage';
+import { ExerciseStalenessIndicator } from './ExerciseRecommendations';
 import type { Exercise } from '../types';
 
 export function ExerciseCard({
@@ -20,7 +21,10 @@ export function ExerciseCard({
       >
         <ExerciseImage exercise={exercise} />
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-fg">{exercise.name}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-fg">{exercise.name}</h3>
+            <ExerciseStalenessIndicator exerciseId={exercise.id} size="sm" />
+          </div>
           <p className="mt-0.5 text-xs capitalize text-fgMuted">
             {exercise.muscleGroup} / {exercise.equipment}
           </p>
