@@ -1,8 +1,9 @@
-import { AlertCircle, Calendar, ChevronRight, TrendingUp } from 'lucide-react';
+import { AlertCircle, Calendar, ChevronRight, TrendingUp, TrendingDown } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import type { DayType } from '../lib/exercise-scheduler';
 import { getPriorityExercises } from '../lib/exercise-scheduler';
+import { detectProgressionOpportunities } from '../lib/progressive-overload';
 import { useSchedulerStore } from '../stores/schedulerStore';
 import { useWorkoutStore } from '../stores/workoutStore';
 
@@ -22,7 +23,20 @@ export function ExerciseRecommendations({ dayType }: { dayType?: DayType }) {
     [exercises, sessions, sets, frequencies, effectiveDayType, config],
   );
 
-  const hasAnyRecommendations = overdue.length > 0 || carryover.length > 0 || suggested.length > 0;
+  const progressionAlerts = useMemo(
+    () => detectProgressionOpportunities(exercises, sessions, sets),
+    [exercises, sessions, sets],
+  );
+
+  const readyToProgress = progressionAlerts.filter((a) => a.status === 'ready');
+  const plateaus = progressionAlerts.filter((a) => a.status === 'plateau');
+
+  const hasAnyRecommendations =
+    overdue.length > 0 ||
+    carryover.length > 0 ||
+    suggested.length > 0 ||
+    readyToProgress.length > 0 ||
+    plateaus.length > 0;
 
   if (!hasAnyRecommendations) {
     return null;
@@ -57,6 +71,65 @@ export function ExerciseRecommendations({ dayType }: { dayType?: DayType }) {
           <option value="full-body">Full Body</option>
         </select>
       </div>
+
+      {/* Progressive Overload - Ready to Increase */}
+      {readyToProgress.length > 0 && (
+        <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+          <div className="mb-3 flex items-center gap-2 text-green-900">
+            <TrendingUp size={18} strokeWidth={2} />
+            <h3 className="text-sm font-medium">
+              Ready to Progress ({readyToProgress.length}) — Increase weight!
+            </h3>
+          </div>
+          <div className="grid gap-2">
+            {readyToProgress.slice(0, 3).map((alert) => (
+              <div
+                key={alert.exerciseId}
+                className="flex items-center justify-between gap-3 rounded-lg bg-white p-3"
+              >
+                <div className="grid gap-0.5">
+                  <p className="text-sm font-medium text-fg">{alert.exerciseName}</p>
+                  <p className="text-xs text-fgMuted">
+                    {alert.currentWeight} lb → {alert.suggestedWeight} lb
+                  </p>
+                  <p className="text-xs text-green-700">{alert.reason}</p>
+                </div>
+                <div className="shrink-0 rounded-md bg-green-100 px-2 py-1 text-xs font-bold text-green-700">
+                  +{alert.suggestedWeight - alert.currentWeight} lb
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Plateau Warnings */}
+      {plateaus.length > 0 && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+          <div className="mb-3 flex items-center gap-2 text-red-900">
+            <TrendingDown size={18} strokeWidth={2} />
+            <h3 className="text-sm font-medium">
+              Plateau Alert ({plateaus.length}) — Stuck for weeks
+            </h3>
+          </div>
+          <div className="grid gap-2">
+            {plateaus.slice(0, 2).map((alert) => (
+              <div
+                key={alert.exerciseId}
+                className="flex items-center justify-between gap-3 rounded-lg bg-white p-3"
+              >
+                <div className="grid gap-0.5">
+                  <p className="text-sm font-medium text-fg">{alert.exerciseName}</p>
+                  <p className="text-xs text-fgMuted">
+                    Stuck at {alert.currentWeight} lb for {alert.evidence.daysAtWeight} days
+                  </p>
+                  <p className="text-xs text-red-700">{alert.reason}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Overdue Exercises */}
       {overdue.length > 0 && (
